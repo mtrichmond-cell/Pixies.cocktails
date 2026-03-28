@@ -13,14 +13,20 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 h1{font-size:22px;font-weight:900;letter-spacing:2px;text-align:center;}
 h1 span{color:var(--pink);}
 p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
-.drop-zone{border:2px dashed rgba(255,45,143,.4);border-radius:14px;padding:32px 16px;text-align:center;cursor:pointer;transition:all .2s;}
+.fetch-btn{width:100%;padding:16px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;font-size:16px;font-weight:900;letter-spacing:2px;cursor:pointer;box-shadow:0 6px 28px rgba(255,45,143,.4);}
+.fetch-btn:active{opacity:.85;transform:scale(.98);}
+.fetch-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;font-weight:700;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.drop-zone{border:2px dashed rgba(255,45,143,.4);border-radius:14px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;}
 .drop-zone:hover,.drop-zone.over{background:rgba(255,45,143,.06);border-color:var(--pink);}
 .drop-zone input{display:none;}
-.drop-label{font-size:13px;font-weight:700;color:var(--muted);margin-top:8px;}
+.drop-label{font-size:12px;font-weight:700;color:var(--muted);margin-top:8px;}
 .status{font-size:12px;font-family:monospace;border-radius:10px;padding:12px;background:rgba(0,0,0,.3);border:1px solid var(--border);line-height:1.8;display:none;}
 .status.show{display:block;}
 .status .ok{color:var(--green);}
 .status .warn{color:var(--yellow);}
+.status .err{color:#ff6060;}
 .btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;font-size:15px;font-weight:900;letter-spacing:2px;cursor:pointer;display:none;}
 .btn.show{display:block;}
 .btn:active{opacity:.85;}
@@ -30,13 +36,19 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </head>
 <body>
 <div class="card">
-  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v2.1</span></h1>
-  <p>Sube tu <strong>index.html</strong> y este tool reemplaza automáticamente todos los íconos base64 con SimpleIcons CDN, y el logo con Cloudinary.</p>
+  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v3.0</span></h1>
+  <p>Reemplaza todos los íconos base64 con SimpleIcons CDN y el logo con Cloudinary.</p>
+
+  <button class="fetch-btn" id="fetchBtn" onclick="fetchFromGitHub()">
+    🐙 Fetch &amp; Clean desde GitHub
+  </button>
+
+  <div class="divider">O sube el archivo</div>
 
   <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-    <div style="font-size:36px">📂</div>
+    <div style="font-size:32px">📂</div>
     <div class="drop-label">Toca para seleccionar index.html</div>
-    <input type="file" id="fileInput" accept=".html"/>
+    <input type="file" id="fileInput" accept=".html,.htm,.txt"/>
   </div>
 
   <div class="status" id="status"></div>
@@ -45,120 +57,122 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </div>
 
 <script>
-var LOGO_URL = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/preview_gdumct.png';
+var LOGO_URL   = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/preview_gdumct.png';
+var GITHUB_URL = 'https://raw.githubusercontent.com/mtrichmond-cell/Pixies.cocktails/main/index.html';
 var cleanedContent = null;
 
-// Size thresholds (base64 char count ≈ binary bytes × 1.37)
-// Logo:    ~200KB PNG  →  ~274K base64 chars  →  threshold: 180000
-// WA:      ~60KB PNG   →  ~82K base64 chars   →  threshold: 60000
-// IG:      ~40KB PNG   →  ~55K base64 chars   →  threshold: 38000
-// Gmail:   ~14KB PNG   →  ~19K base64 chars   →  threshold: 14000
-// TikTok:  ~12KB PNG   →  ~16K base64 chars   →  smallest (catch-all)
-
-function classifyBlob(b64len) {
-  if (b64len > 180000) return 'logo';
-  if (b64len > 60000)  return 'whatsapp';
-  if (b64len > 38000)  return 'instagram';
-  if (b64len > 14000)  return 'gmail';
+function classifyBlob(len) {
+  if (len > 180000) return 'logo';
+  if (len > 60000)  return 'whatsapp';
+  if (len > 38000)  return 'instagram';
+  if (len > 14000)  return 'gmail';
   return 'tiktok';
+}
+
+function processContent(content) {
+  var originalSize = content.length;
+  var counts = {logo:0, whatsapp:0, instagram:0, gmail:0, tiktok:0};
+  var modified = content;
+
+  // Pass 1: replace base64 blobs by size
+  modified = modified.replace(/src="data:image\/[^;]+;base64,([A-Za-z0-9+\/]{500,}={0,2})"/g, function(match, b64) {
+    var kind = classifyBlob(b64.length);
+    counts[kind]++;
+    switch (kind) {
+      case 'logo':      return 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"';
+      case 'whatsapp':  return 'src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"';
+      case 'instagram': return 'src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"';
+      case 'gmail':     return 'src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"';
+      case 'tiktok':    return 'src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"';
+    }
+    return match;
+  });
+
+  // Pass 2: fix src="" icons left by a prior run, identified by anchor href
+  modified = modified.replace(/<a\s[^>]*href="([^"]*)"[^>]*>\s*<img\s[^>]*src=""[^>]*>/g, function(match, href) {
+    var cdnSrc = '';
+    if      (/wa\.me|whatsapp/i.test(href)) cdnSrc = 'https://cdn.simpleicons.org/whatsapp/25d366';
+    else if (/instagram/i.test(href))       cdnSrc = 'https://cdn.simpleicons.org/instagram/ff2d8f';
+    else if (/tiktok/i.test(href))          cdnSrc = 'https://cdn.simpleicons.org/tiktok/ffffff';
+    else if (/gmail|mailto/i.test(href))    cdnSrc = 'https://cdn.simpleicons.org/gmail/ea4335';
+    if (!cdnSrc) return match;
+    var key = cdnSrc.includes('whatsapp') ? 'whatsapp'
+            : cdnSrc.includes('instagram') ? 'instagram'
+            : cdnSrc.includes('tiktok')    ? 'tiktok' : 'gmail';
+    counts[key]++;
+    return match.replace(/src=""/, 'src="' + cdnSrc + '" style="width:32px;height:32px;border-radius:8px"');
+  });
+
+  var newSize = modified.length;
+  var savedKB = Math.round((originalSize - newSize) / 1024);
+  cleanedContent = modified;
+
+  var log = [];
+  log.push(counts.whatsapp  > 0 ? '<span class="ok">✓ WhatsApp — '  + counts.whatsapp  + ' reemplazado(s)</span>' : '<span class="warn">— WhatsApp — no encontrado</span>');
+  log.push(counts.instagram > 0 ? '<span class="ok">✓ Instagram — ' + counts.instagram + ' reemplazado(s)</span>' : '<span class="warn">— Instagram — no encontrado</span>');
+  log.push(counts.tiktok    > 0 ? '<span class="ok">✓ TikTok — '    + counts.tiktok    + ' reemplazado(s)</span>' : '<span class="warn">— TikTok — no encontrado</span>');
+  log.push(counts.gmail     > 0 ? '<span class="ok">✓ Gmail — '     + counts.gmail     + ' reemplazado(s)</span>' : '<span class="warn">— Gmail — no encontrado</span>');
+  log.push(counts.logo      > 0 ? '<span class="ok">✓ Logo — '      + counts.logo      + ' con Cloudinary</span>'  : '<span class="warn">— Logo — no encontrado</span>');
+
+  var statusEl = document.getElementById('status');
+  statusEl.innerHTML = log.join('<br/>');
+  statusEl.classList.add('show');
+
+  var savingsEl = document.getElementById('savings');
+  savingsEl.textContent = '✅ Reducido ~' + savedKB + ' KB (' + Math.round(originalSize/1024) + ' KB → ' + Math.round(newSize/1024) + ' KB)';
+  savingsEl.classList.add('show');
+
+  document.getElementById('downloadBtn').classList.add('show');
+}
+
+function fetchFromGitHub() {
+  var btn      = document.getElementById('fetchBtn');
+  var statusEl = document.getElementById('status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Descargando…';
+  statusEl.innerHTML = '<span class="ok">Conectando a GitHub…</span>';
+  statusEl.classList.add('show');
+
+  fetch(GITHUB_URL + '?t=' + Date.now())
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.text();
+    })
+    .then(function(text) {
+      btn.disabled = false;
+      btn.textContent = '🐙 Fetch & Clean desde GitHub';
+      processContent(text);
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.textContent = '🐙 Fetch & Clean desde GitHub';
+      statusEl.innerHTML = '<span class="err">❌ ' + err.message + ' — sube el archivo manualmente.</span>';
+    });
 }
 
 function processFile(file) {
   var reader = new FileReader();
-  reader.onload = function(e) {
-    var content = e.target.result;
-    var originalSize = content.length;
-    var counts = {logo:0, whatsapp:0, instagram:0, gmail:0, tiktok:0};
-    var modified = content;
-
-    // Pass 1: replace ALL base64 image blobs by size classification.
-    // Catches every page/section regardless of prefix variation.
-    modified = modified.replace(/src="data:image\/[^;]+;base64,([A-Za-z0-9+\/]{500,}={0,2})"/g, function(match, b64) {
-      var kind = classifyBlob(b64.length);
-      counts[kind]++;
-      switch (kind) {
-        case 'logo':
-          return 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"';
-        case 'whatsapp':
-          return 'src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"';
-        case 'instagram':
-          return 'src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"';
-        case 'gmail':
-          return 'src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"';
-        case 'tiktok':
-          return 'src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"';
-      }
-      return match;
-    });
-
-    // Pass 2: fix broken src="" icons left by a previous cleaner run.
-    // Identifies each icon by its anchor parent href.
-    modified = modified.replace(/<a\s[^>]*href="([^"]*)"[^>]*>\s*<img\s[^>]*src=""[^>]*>/g, function(match, href) {
-      var cdnSrc = '';
-      if (/wa\.me|whatsapp/i.test(href))  cdnSrc = 'https://cdn.simpleicons.org/whatsapp/25d366';
-      else if (/instagram/i.test(href))   cdnSrc = 'https://cdn.simpleicons.org/instagram/ff2d8f';
-      else if (/tiktok/i.test(href))      cdnSrc = 'https://cdn.simpleicons.org/tiktok/ffffff';
-      else if (/gmail|mailto/i.test(href))cdnSrc = 'https://cdn.simpleicons.org/gmail/ea4335';
-      if (!cdnSrc) return match;
-      var key = cdnSrc.includes('whatsapp') ? 'whatsapp' : cdnSrc.includes('instagram') ? 'instagram' : cdnSrc.includes('tiktok') ? 'tiktok' : 'gmail';
-      counts[key]++;
-      return match.replace(/src=""/, 'src="' + cdnSrc + '" style="width:32px;height:32px;border-radius:8px"');
-    });
-
-    var newSize = modified.length;
-    var savedKB = Math.round((originalSize - newSize) / 1024);
-    cleanedContent = modified;
-
-    var log = [];
-    log.push(counts.whatsapp > 0
-      ? '<span class="ok">✓ WhatsApp — ' + counts.whatsapp + ' reemplazado(s)</span>'
-      : '<span class="warn">— WhatsApp — no encontrado</span>');
-    log.push(counts.instagram > 0
-      ? '<span class="ok">✓ Instagram — ' + counts.instagram + ' reemplazado(s)</span>'
-      : '<span class="warn">— Instagram — no encontrado</span>');
-    log.push(counts.tiktok > 0
-      ? '<span class="ok">✓ TikTok — ' + counts.tiktok + ' reemplazado(s)</span>'
-      : '<span class="warn">— TikTok — no encontrado</span>');
-    log.push(counts.gmail > 0
-      ? '<span class="ok">✓ Gmail — ' + counts.gmail + ' reemplazado(s)</span>'
-      : '<span class="warn">— Gmail — no encontrado</span>');
-    log.push(counts.logo > 0
-      ? '<span class="ok">✓ Logo — ' + counts.logo + ' reemplazado(s) con Cloudinary</span>'
-      : '<span class="warn">— Logo — no encontrado</span>');
-
-    var statusEl = document.getElementById('status');
-    statusEl.innerHTML = log.join('<br/>');
-    statusEl.classList.add('show');
-
-    var savingsEl = document.getElementById('savings');
-    savingsEl.textContent = '✅ Tamaño reducido en ~' + savedKB + ' KB (' + Math.round(originalSize/1024) + ' KB → ' + Math.round(newSize/1024) + ' KB)';
-    savingsEl.classList.add('show');
-
-    document.getElementById('downloadBtn').classList.add('show');
-  };
+  reader.onload = function(e) { processContent(e.target.result); };
   reader.readAsText(file);
 }
 
 document.getElementById('fileInput').addEventListener('change', function(e) {
-  var file = e.target.files[0];
-  if (file) processFile(file);
+  if (e.target.files[0]) processFile(e.target.files[0]);
 });
 
-var dropZone = document.getElementById('dropZone');
-dropZone.addEventListener('dragover', function(e){ e.preventDefault(); dropZone.classList.add('over'); });
-dropZone.addEventListener('dragleave', function(){ dropZone.classList.remove('over'); });
-dropZone.addEventListener('drop', function(e){
-  e.preventDefault();
-  dropZone.classList.remove('over');
-  var file = e.dataTransfer.files[0];
-  if (file) processFile(file);
+var dz = document.getElementById('dropZone');
+dz.addEventListener('dragover',  function(e){ e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', function(){  dz.classList.remove('over'); });
+dz.addEventListener('drop',      function(e){
+  e.preventDefault(); dz.classList.remove('over');
+  if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
 });
 
 function downloadClean() {
   if (!cleanedContent) return;
-  var blob = new Blob([cleanedContent], {type: 'text/html'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  var blob = new Blob([cleanedContent], {type:'text/html'});
+  var a    = document.createElement('a');
+  a.href   = URL.createObjectURL(blob);
   a.download = 'index_clean.html';
   a.click();
 }
