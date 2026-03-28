@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pixies — File Cleaner</title>
+<style>
+:root{--bg:#0a0010;--purple:#6b00cc;--pink:#ff2d8f;--yellow:#d4ff00;--border:rgba(180,0,255,0.2);--text:#f5e6ff;--muted:#8855aa;--green:#00e676;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:24px;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 20% 20%,rgba(107,0,204,.25) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(255,45,143,.15) 0%,transparent 50%);pointer-events:none;}
+.card{position:relative;z-index:1;background:rgba(30,0,50,.85);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:18px;}
+h1{font-size:22px;font-weight:900;letter-spacing:2px;text-align:center;}
+h1 span{color:var(--pink);}
+p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
+.drop-zone{border:2px dashed rgba(255,45,143,.4);border-radius:14px;padding:32px 16px;text-align:center;cursor:pointer;transition:all .2s;}
+.drop-zone:hover,.drop-zone.over{background:rgba(255,45,143,.06);border-color:var(--pink);}
+.drop-zone input{display:none;}
+.drop-label{font-size:13px;font-weight:700;color:var(--muted);margin-top:8px;}
+.status{font-size:12px;font-family:monospace;border-radius:10px;padding:12px;background:rgba(0,0,0,.3);border:1px solid var(--border);line-height:1.8;display:none;}
+.status.show{display:block;}
+.status .ok{color:var(--green);}
+.status .warn{color:var(--yellow);}
+.status .err{color:#ff6060;}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;font-size:15px;font-weight:900;letter-spacing:2px;cursor:pointer;display:none;}
+.btn.show{display:block;}
+.btn:active{opacity:.85;}
+.savings{font-size:11px;color:var(--green);text-align:center;font-weight:700;display:none;}
+.savings.show{display:block;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>PIXIES <span>CLEANER</span></h1>
+  <p>Sube tu <strong>index.html</strong> y este tool reemplaza automáticamente todos los íconos base64 con los CDN de SimpleIcons, y el logo con un placeholder de Cloudinary.</p>
+
+  <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <div style="font-size:36px">📂</div>
+    <div class="drop-label">Toca para seleccionar index.html</div>
+    <input type="file" id="fileInput" accept=".html"/>
+  </div>
+
+  <div class="status" id="status"></div>
+  <div class="savings" id="savings"></div>
+  <button class="btn" id="downloadBtn" onclick="downloadClean()">⬇ Descargar index_clean.html</button>
+</div>
+
+<script>
+var cleanedContent = null;
+
+var REPLACEMENTS = [
+  {
+    // WhatsApp — starts with iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKt
+    pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAo[^"]*"/,
+    replacement: 'src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"',
+    label: 'WhatsApp icon'
+  },
+  {
+    // Instagram — starts with iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAk
+    pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAk[^"]*"/,
+    replacement: 'src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"',
+    label: 'Instagram icon'
+  },
+  {
+    // TikTok — starts with iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAM
+    pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAM[^"]*"/,
+    replacement: 'src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"',
+    label: 'TikTok icon'
+  },
+  {
+    // Gmail — starts with iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAO
+    pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAO[^"]*"/,
+    replacement: 'src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"',
+    label: 'Gmail icon'
+  },
+  {
+    // Logo — starts with iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAYAAAA+VemS
+    pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAYAAAA\+VemS[^"]*"/,
+    replacement: 'src="https://res.cloudinary.com/YOUR_CLOUD/image/upload/pixies/logo.png" style="width:100%;height:100%;object-fit:cover"',
+    label: 'Logo'
+  },
+  {
+    // OG preview image (preview.png — not base64, but catch any remaining large base64)
+    pattern: /src="data:image\/png;base64,[A-Za-z0-9+/]{5000,}={0,2}"/g,
+    replacement: 'src="data:image/png;base64,REMOVED"',
+    label: 'Remaining base64 blobs'
+  }
+];
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  processFile(file);
+});
+
+var dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', function(e){ e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', function(){ dropZone.classList.remove('over'); });
+dropZone.addEventListener('drop', function(e){
+  e.preventDefault();
+  dropZone.classList.remove('over');
+  var file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
+
+function processFile(file) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var content = e.target.result;
+    var originalSize = content.length;
+    var log = [];
+    var modified = content;
+
+    REPLACEMENTS.forEach(function(r) {
+      var before = modified.length;
+      var newContent;
+      if (r.pattern.global) {
+        var count = (modified.match(r.pattern) || []).length;
+        newContent = modified.replace(r.pattern, r.replacement);
+        if (count > 0) log.push('<span class="ok">✓ ' + r.label + ' — ' + count + ' reemplazado(s)</span>');
+        else log.push('<span class="warn">— ' + r.label + ' — no encontrado</span>');
+      } else {
+        var found = r.pattern.test(modified);
+        newContent = modified.replace(r.pattern, r.replacement);
+        if (found) log.push('<span class="ok">✓ ' + r.label + ' — reemplazado</span>');
+        else log.push('<span class="warn">— ' + r.label + ' — no encontrado</span>');
+      }
+      modified = newContent;
+    });
+
+    var newSize = modified.length;
+    var saved = originalSize - newSize;
+    var savedKB = Math.round(saved / 1024);
+
+    cleanedContent = modified;
+
+    var statusEl = document.getElementById('status');
+    statusEl.innerHTML = log.join('<br/>');
+    statusEl.classList.add('show');
+
+    var savingsEl = document.getElementById('savings');
+    savingsEl.textContent = '✅ Tamaño reducido en ~' + savedKB + ' KB (' + Math.round(originalSize/1024) + ' KB → ' + Math.round(newSize/1024) + ' KB)';
+    savingsEl.classList.add('show');
+
+    document.getElementById('downloadBtn').classList.add('show');
+  };
+  reader.readAsText(file);
+}
+
+function downloadClean() {
+  if (!cleanedContent) return;
+  var blob = new Blob([cleanedContent], {type: 'text/html'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index_clean.html';
+  a.click();
+}
+</script>
+</body>
+</html>
