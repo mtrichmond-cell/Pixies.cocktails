@@ -31,7 +31,7 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 <body>
 <div class="card">
   <h1>PIXIES <span>CLEANER</span></h1>
-  <p>Sube tu <strong>index.html</strong> y este tool reemplaza automáticamente todos los íconos base64 con los CDN de SimpleIcons, y el logo con Cloudinary.</p>
+  <p>Sube tu <strong>index.html</strong> y este tool reemplaza automáticamente todos los íconos base64 con SimpleIcons CDN, y el logo con Cloudinary.</p>
 
   <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
     <div style="font-size:36px">📂</div>
@@ -48,55 +48,6 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 var LOGO_URL = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/preview_gdumct.png';
 var cleanedContent = null;
 
-var REPLACEMENTS = [
-  {
-    pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAo[^"]*"/,
-    replacement: 'src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"',
-    label: 'WhatsApp icon'
-  },
-  {
-    pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAk[^"]*"/,
-    replacement: 'src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"',
-    label: 'Instagram icon'
-  },
-  {
-    pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAM[^"]*"/,
-    replacement: 'src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"',
-    label: 'TikTok icon'
-  },
-  {
-    pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAO[^"]*"/,
-    replacement: 'src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"',
-    label: 'Gmail icon'
-  },
-  {
-    pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAYAAAA\+VemS[^"]*"/,
-    replacement: 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"',
-    label: 'Logo'
-  },
-  {
-    pattern: /src="data:image\/png;base64,[A-Za-z0-9+\/]{5000,}={0,2}"/g,
-    replacement: 'src="data:image/png;base64,REMOVED"',
-    label: 'Remaining base64 blobs'
-  }
-];
-
-document.getElementById('fileInput').addEventListener('change', function(e) {
-  var file = e.target.files[0];
-  if (!file) return;
-  processFile(file);
-});
-
-var dropZone = document.getElementById('dropZone');
-dropZone.addEventListener('dragover', function(e){ e.preventDefault(); dropZone.classList.add('over'); });
-dropZone.addEventListener('dragleave', function(){ dropZone.classList.remove('over'); });
-dropZone.addEventListener('drop', function(e){
-  e.preventDefault();
-  dropZone.classList.remove('over');
-  var file = e.dataTransfer.files[0];
-  if (file) processFile(file);
-});
-
 function processFile(file) {
   var reader = new FileReader();
   reader.onload = function(e) {
@@ -105,21 +56,54 @@ function processFile(file) {
     var log = [];
     var modified = content;
 
-    REPLACEMENTS.forEach(function(r) {
-      var newContent;
-      if (r.pattern.global) {
-        var count = (modified.match(r.pattern) || []).length;
-        newContent = modified.replace(r.pattern, r.replacement);
-        if (count > 0) log.push('<span class="ok">✓ ' + r.label + ' — ' + count + ' reemplazado(s)</span>');
-        else log.push('<span class="warn">— ' + r.label + ' — no encontrado</span>');
-      } else {
-        var found = r.pattern.test(modified);
-        newContent = modified.replace(r.pattern, r.replacement);
-        if (found) log.push('<span class="ok">✓ ' + r.label + ' — reemplazado</span>');
-        else log.push('<span class="warn">— ' + r.label + ' — no encontrado</span>');
-      }
-      modified = newContent;
+    // Step 1: Replace WhatsApp icon (60KB PNG, starts with AAAo)
+    var waCount = 0;
+    modified = modified.replace(/src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAo[^"]*"/g, function() {
+      waCount++;
+      return 'src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"';
     });
+    log.push(waCount > 0 ? '<span class="ok">✓ WhatsApp icon — reemplazado</span>' : '<span class="warn">— WhatsApp icon — no encontrado</span>');
+
+    // Step 2: Replace Instagram icon (starts with AAAk)
+    var igCount = 0;
+    modified = modified.replace(/src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAk[^"]*"/g, function() {
+      igCount++;
+      return 'src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"';
+    });
+    log.push(igCount > 0 ? '<span class="ok">✓ Instagram icon — reemplazado</span>' : '<span class="warn">— Instagram icon — no encontrado</span>');
+
+    // Step 3: Replace TikTok icon (starts with AAAM)
+    var ttCount = 0;
+    modified = modified.replace(/src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAM[^"]*"/g, function() {
+      ttCount++;
+      return 'src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"';
+    });
+    log.push(ttCount > 0 ? '<span class="ok">✓ TikTok icon — reemplazado</span>' : '<span class="warn">— TikTok icon — no encontrado</span>');
+
+    // Step 4: Replace Gmail icon (starts with AAAO)
+    var gmailCount = 0;
+    modified = modified.replace(/src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAO[^"]*"/g, function() {
+      gmailCount++;
+      return 'src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"';
+    });
+    log.push(gmailCount > 0 ? '<span class="ok">✓ Gmail icon — reemplazado</span>' : '<span class="warn">— Gmail icon — no encontrado</span>');
+
+    // Step 5: Replace logo — any large base64 PNG over 50KB that remains (logo is ~200KB)
+    // We target it by its unique header iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAY
+    var logoCount = 0;
+    modified = modified.replace(/src="data:image\/[^;]+;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAY[^"]*"/g, function() {
+      logoCount++;
+      return 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"';
+    });
+    log.push(logoCount > 0 ? '<span class="ok">✓ Logo — reemplazado con Cloudinary</span>' : '<span class="warn">— Logo — no encontrado</span>');
+
+    // Step 6: Catch any remaining large base64 blobs
+    var remaining = 0;
+    modified = modified.replace(/src="data:image\/[^;]+;base64,[A-Za-z0-9+\/]{5000,}={0,2}"/g, function() {
+      remaining++;
+      return 'src=""';
+    });
+    if (remaining > 0) log.push('<span class="warn">⚠ ' + remaining + ' blob(s) adicionales eliminados</span>');
 
     var newSize = modified.length;
     var savedKB = Math.round((originalSize - newSize) / 1024);
@@ -137,6 +121,21 @@ function processFile(file) {
   };
   reader.readAsText(file);
 }
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (file) processFile(file);
+});
+
+var dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', function(e){ e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', function(){ dropZone.classList.remove('over'); });
+dropZone.addEventListener('drop', function(e){
+  e.preventDefault();
+  dropZone.classList.remove('over');
+  var file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
 
 function downloadClean() {
   if (!cleanedContent) return;
