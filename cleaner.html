@@ -30,7 +30,7 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </head>
 <body>
 <div class="card">
-  <h1>PIXIES <span>CLEANER</span></h1>
+  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v2.0</span></h1>
   <p>Sube tu <strong>index.html</strong> y este tool reemplaza automáticamente todos los íconos base64 con SimpleIcons CDN, y el logo con Cloudinary.</p>
 
   <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
@@ -48,66 +48,69 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 var LOGO_URL = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/preview_gdumct.png';
 var cleanedContent = null;
 
+// Size thresholds (base64 char count ≈ binary bytes × 1.37)
+// Logo:    ~200KB PNG  →  ~274K base64 chars  →  threshold: 180000
+// WA:      ~60KB PNG   →  ~82K base64 chars   →  threshold: 60000
+// IG:      ~40KB PNG   →  ~55K base64 chars   →  threshold: 38000
+// Gmail:   ~14KB PNG   →  ~19K base64 chars   →  threshold: 14000
+// TikTok:  ~12KB PNG   →  ~16K base64 chars   →  smallest (catch-all)
+
+function classifyBlob(b64len) {
+  if (b64len > 180000) return 'logo';
+  if (b64len > 60000)  return 'whatsapp';
+  if (b64len > 38000)  return 'instagram';
+  if (b64len > 14000)  return 'gmail';
+  return 'tiktok';
+}
+
 function processFile(file) {
   var reader = new FileReader();
   reader.onload = function(e) {
     var content = e.target.result;
     var originalSize = content.length;
-    var log = [];
+    var counts = {logo:0, whatsapp:0, instagram:0, gmail:0, tiktok:0};
     var modified = content;
 
-    // Step 1: Replace WhatsApp icon (60KB PNG, starts with AAAo)
-    var waCount = 0;
-    modified = modified.replace(/src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAo[^"]*"/g, function() {
-      waCount++;
-      return 'src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"';
+    // Single-pass: replace ALL base64 image blobs by size classification.
+    // This catches every page/section regardless of prefix variation.
+    modified = modified.replace(/src="data:image\/[^;]+;base64,([A-Za-z0-9+\/]{500,}={0,2})"/g, function(match, b64) {
+      var kind = classifyBlob(b64.length);
+      counts[kind]++;
+      switch (kind) {
+        case 'logo':
+          return 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"';
+        case 'whatsapp':
+          return 'src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"';
+        case 'instagram':
+          return 'src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"';
+        case 'gmail':
+          return 'src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"';
+        case 'tiktok':
+          return 'src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"';
+      }
+      return match;
     });
-    log.push(waCount > 0 ? '<span class="ok">✓ WhatsApp icon — reemplazado</span>' : '<span class="warn">— WhatsApp icon — no encontrado</span>');
-
-    // Step 2: Replace Instagram icon (starts with AAAk)
-    var igCount = 0;
-    modified = modified.replace(/src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAk[^"]*"/g, function() {
-      igCount++;
-      return 'src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"';
-    });
-    log.push(igCount > 0 ? '<span class="ok">✓ Instagram icon — reemplazado</span>' : '<span class="warn">— Instagram icon — no encontrado</span>');
-
-    // Step 3: Replace TikTok icon (starts with AAAM)
-    var ttCount = 0;
-    modified = modified.replace(/src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAM[^"]*"/g, function() {
-      ttCount++;
-      return 'src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"';
-    });
-    log.push(ttCount > 0 ? '<span class="ok">✓ TikTok icon — reemplazado</span>' : '<span class="warn">— TikTok icon — no encontrado</span>');
-
-    // Step 4: Replace Gmail icon (starts with AAAO)
-    var gmailCount = 0;
-    modified = modified.replace(/src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAO[^"]*"/g, function() {
-      gmailCount++;
-      return 'src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"';
-    });
-    log.push(gmailCount > 0 ? '<span class="ok">✓ Gmail icon — reemplazado</span>' : '<span class="warn">— Gmail icon — no encontrado</span>');
-
-    // Step 5: Replace logo — any large base64 PNG over 50KB that remains (logo is ~200KB)
-    // We target it by its unique header iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAY
-    var logoCount = 0;
-    modified = modified.replace(/src="data:image\/[^;]+;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAY[^"]*"/g, function() {
-      logoCount++;
-      return 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"';
-    });
-    log.push(logoCount > 0 ? '<span class="ok">✓ Logo — reemplazado con Cloudinary</span>' : '<span class="warn">— Logo — no encontrado</span>');
-
-    // Step 6: Catch any remaining large base64 blobs
-    var remaining = 0;
-    modified = modified.replace(/src="data:image\/[^;]+;base64,[A-Za-z0-9+\/]{5000,}={0,2}"/g, function() {
-      remaining++;
-      return 'src=""';
-    });
-    if (remaining > 0) log.push('<span class="warn">⚠ ' + remaining + ' blob(s) adicionales eliminados</span>');
 
     var newSize = modified.length;
     var savedKB = Math.round((originalSize - newSize) / 1024);
     cleanedContent = modified;
+
+    var log = [];
+    log.push(counts.whatsapp > 0
+      ? '<span class="ok">✓ WhatsApp — ' + counts.whatsapp + ' reemplazado(s)</span>'
+      : '<span class="warn">— WhatsApp — no encontrado</span>');
+    log.push(counts.instagram > 0
+      ? '<span class="ok">✓ Instagram — ' + counts.instagram + ' reemplazado(s)</span>'
+      : '<span class="warn">— Instagram — no encontrado</span>');
+    log.push(counts.tiktok > 0
+      ? '<span class="ok">✓ TikTok — ' + counts.tiktok + ' reemplazado(s)</span>'
+      : '<span class="warn">— TikTok — no encontrado</span>');
+    log.push(counts.gmail > 0
+      ? '<span class="ok">✓ Gmail — ' + counts.gmail + ' reemplazado(s)</span>'
+      : '<span class="warn">— Gmail — no encontrado</span>');
+    log.push(counts.logo > 0
+      ? '<span class="ok">✓ Logo — ' + counts.logo + ' reemplazado(s) con Cloudinary</span>'
+      : '<span class="warn">— Logo — no encontrado</span>');
 
     var statusEl = document.getElementById('status');
     statusEl.innerHTML = log.join('<br/>');
