@@ -21,7 +21,6 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 .status.show{display:block;}
 .status .ok{color:var(--green);}
 .status .warn{color:var(--yellow);}
-.status .err{color:#ff6060;}
 .btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;font-size:15px;font-weight:900;letter-spacing:2px;cursor:pointer;display:none;}
 .btn.show{display:block;}
 .btn:active{opacity:.85;}
@@ -32,7 +31,7 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 <body>
 <div class="card">
   <h1>PIXIES <span>CLEANER</span></h1>
-  <p>Sube tu <strong>index.html</strong> y este tool reemplaza automáticamente todos los íconos base64 con los CDN de SimpleIcons, y el logo con un placeholder de Cloudinary.</p>
+  <p>Sube tu <strong>index.html</strong> y este tool reemplaza automáticamente todos los íconos base64 con los CDN de SimpleIcons, y el logo con Cloudinary.</p>
 
   <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
     <div style="font-size:36px">📂</div>
@@ -46,42 +45,37 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </div>
 
 <script>
+var LOGO_URL = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/preview_gdumct.png';
 var cleanedContent = null;
 
 var REPLACEMENTS = [
   {
-    // WhatsApp — starts with iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKt
     pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAo[^"]*"/,
     replacement: 'src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"',
     label: 'WhatsApp icon'
   },
   {
-    // Instagram — starts with iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAk
     pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAk[^"]*"/,
     replacement: 'src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"',
     label: 'Instagram icon'
   },
   {
-    // TikTok — starts with iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAM
     pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAM[^"]*"/,
     replacement: 'src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"',
     label: 'TikTok icon'
   },
   {
-    // Gmail — starts with iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAO
     pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAO[^"]*"/,
     replacement: 'src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"',
     label: 'Gmail icon'
   },
   {
-    // Logo — starts with iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAYAAAA+VemS
     pattern: /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAYAAAA\+VemS[^"]*"/,
-    replacement: 'src="https://res.cloudinary.com/YOUR_CLOUD/image/upload/pixies/logo.png" style="width:100%;height:100%;object-fit:cover"',
+    replacement: 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"',
     label: 'Logo'
   },
   {
-    // OG preview image (preview.png — not base64, but catch any remaining large base64)
-    pattern: /src="data:image\/png;base64,[A-Za-z0-9+/]{5000,}={0,2}"/g,
+    pattern: /src="data:image\/png;base64,[A-Za-z0-9+\/]{5000,}={0,2}"/g,
     replacement: 'src="data:image/png;base64,REMOVED"',
     label: 'Remaining base64 blobs'
   }
@@ -112,7 +106,6 @@ function processFile(file) {
     var modified = content;
 
     REPLACEMENTS.forEach(function(r) {
-      var before = modified.length;
       var newContent;
       if (r.pattern.global) {
         var count = (modified.match(r.pattern) || []).length;
@@ -129,9 +122,7 @@ function processFile(file) {
     });
 
     var newSize = modified.length;
-    var saved = originalSize - newSize;
-    var savedKB = Math.round(saved / 1024);
-
+    var savedKB = Math.round((originalSize - newSize) / 1024);
     cleanedContent = modified;
 
     var statusEl = document.getElementById('status');
