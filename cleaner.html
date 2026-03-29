@@ -36,7 +36,7 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </head>
 <body>
 <div class="card">
-  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v3.0</span></h1>
+  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v3.1</span></h1>
   <p>Reemplaza todos los íconos base64 con SimpleIcons CDN y el logo con Cloudinary.</p>
 
   <button class="fetch-btn" id="fetchBtn" onclick="fetchFromGitHub()">
@@ -61,46 +61,43 @@ var LOGO_URL   = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/
 var GITHUB_URL = 'https://raw.githubusercontent.com/mtrichmond-cell/Pixies.cocktails/main/index.html';
 var cleanedContent = null;
 
-function classifyBlob(len) {
-  if (len > 180000) return 'logo';
-  if (len > 60000)  return 'whatsapp';
-  if (len > 38000)  return 'instagram';
-  if (len > 14000)  return 'gmail';
-  return 'tiktok';
-}
+// Map anchor href patterns → CDN icon URLs
+var ICON_MAP = [
+  { test: /wa\.me|whatsapp/i,  key: 'whatsapp',  src: 'https://cdn.simpleicons.org/whatsapp/25d366'  },
+  { test: /instagram/i,        key: 'instagram', src: 'https://cdn.simpleicons.org/instagram/ff2d8f' },
+  { test: /tiktok/i,           key: 'tiktok',    src: 'https://cdn.simpleicons.org/tiktok/ffffff'    },
+  { test: /gmail|mailto/i,     key: 'gmail',     src: 'https://cdn.simpleicons.org/gmail/ea4335'     },
+];
+var ICON_STYLE = 'width:32px;height:32px;border-radius:8px';
 
 function processContent(content) {
   var originalSize = content.length;
   var counts = {logo:0, whatsapp:0, instagram:0, gmail:0, tiktok:0};
   var modified = content;
 
-  // Pass 1: replace base64 blobs by size
-  modified = modified.replace(/src="data:image\/[^;]+;base64,([A-Za-z0-9+\/]{500,}={0,2})"/g, function(match, b64) {
-    var kind = classifyBlob(b64.length);
-    counts[kind]++;
-    switch (kind) {
-      case 'logo':      return 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"';
-      case 'whatsapp':  return 'src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"';
-      case 'instagram': return 'src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"';
-      case 'gmail':     return 'src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"';
-      case 'tiktok':    return 'src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"';
-    }
-    return match;
+  // Pass 1: replace large base64 logo blob by size
+  modified = modified.replace(/src="data:image\/[^;]+;base64,([A-Za-z0-9+\/]{180000,}={0,2})"/g, function() {
+    counts.logo++;
+    return 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"';
   });
 
-  // Pass 2: fix src="" icons left by a prior run, identified by anchor href
-  modified = modified.replace(/<a\s[^>]*href="([^"]*)"[^>]*>\s*<img\s[^>]*src=""[^>]*>/g, function(match, href) {
-    var cdnSrc = '';
-    if      (/wa\.me|whatsapp/i.test(href)) cdnSrc = 'https://cdn.simpleicons.org/whatsapp/25d366';
-    else if (/instagram/i.test(href))       cdnSrc = 'https://cdn.simpleicons.org/instagram/ff2d8f';
-    else if (/tiktok/i.test(href))          cdnSrc = 'https://cdn.simpleicons.org/tiktok/ffffff';
-    else if (/gmail|mailto/i.test(href))    cdnSrc = 'https://cdn.simpleicons.org/gmail/ea4335';
-    if (!cdnSrc) return match;
-    var key = cdnSrc.includes('whatsapp') ? 'whatsapp'
-            : cdnSrc.includes('instagram') ? 'instagram'
-            : cdnSrc.includes('tiktok')    ? 'tiktok' : 'gmail';
-    counts[key]++;
-    return match.replace(/src=""/, 'src="' + cdnSrc + '" style="width:32px;height:32px;border-radius:8px"');
+  // Pass 2 (UNCONDITIONAL): find every <a href="..."><img ...></a> whose href
+  // matches a social platform and fully rewrite the img src + style,
+  // no matter what the src currently is (base64, empty, wrong CDN, anything).
+  // Regex captures: anchor open tag, href value, rest of anchor, img tag.
+  modified = modified.replace(/(<a\b[^>]*href="([^"]*)"[^>]*>)([\s\S]*?)(<img\b[^>]*>)/g, function(match, aOpen, href, between, imgTag) {
+    var icon = null;
+    for (var i = 0; i < ICON_MAP.length; i++) {
+      if (ICON_MAP[i].test.test(href)) { icon = ICON_MAP[i]; break; }
+    }
+    if (!icon) return match;
+    counts[icon.key]++;
+    // Rebuild the img tag with correct src and style, preserving alt if present
+    var alt = '';
+    var altMatch = imgTag.match(/alt="([^"]*)"/);
+    if (altMatch) alt = ' alt="' + altMatch[1] + '"';
+    var newImg = '<img src="' + icon.src + '" style="' + ICON_STYLE + '"' + alt + '/>';
+    return aOpen + between + newImg;
   });
 
   var newSize = modified.length;
