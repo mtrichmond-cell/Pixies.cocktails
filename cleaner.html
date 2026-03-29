@@ -36,7 +36,7 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </head>
 <body>
 <div class="card">
-  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v3.1</span></h1>
+  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v3.2</span></h1>
   <p>Reemplaza todos los íconos base64 con SimpleIcons CDN y el logo con Cloudinary.</p>
 
   <button class="fetch-btn" id="fetchBtn" onclick="fetchFromGitHub()">
@@ -66,7 +66,7 @@ var ICON_MAP = [
   { test: /wa\.me|whatsapp/i,  key: 'whatsapp',  src: 'https://cdn.simpleicons.org/whatsapp/25d366'  },
   { test: /instagram/i,        key: 'instagram', src: 'https://cdn.simpleicons.org/instagram/ff2d8f' },
   { test: /tiktok/i,           key: 'tiktok',    src: 'https://cdn.simpleicons.org/tiktok/ffffff'    },
-  { test: /gmail|mailto/i,     key: 'gmail',     src: 'https://cdn.simpleicons.org/gmail/ea4335'     },
+  { test: /gmail|mailto/i,     key: 'gmail',     src: 'https://cdn.simpleicons.org/gmail/ea4335',    checkOnclick: true },
 ];
 var ICON_STYLE = 'width:32px;height:32px;border-radius:8px';
 
@@ -85,10 +85,10 @@ function processContent(content) {
   // matches a social platform and fully rewrite the img src + style,
   // no matter what the src currently is (base64, empty, wrong CDN, anything).
   // Regex captures: anchor open tag, href value, rest of anchor, img tag.
-  modified = modified.replace(/(<a\b[^>]*href="([^"]*)"[^>]*>)([\s\S]*?)(<img\b[^>]*>)/g, function(match, aOpen, href, between, imgTag) {
+  modified = modified.replace(/(<a\b[^>]*href="([^"]*)"([^>]*)>)([\s\S]*?)(<img\b[^>]*>)/g, function(match, aOpen, href, aRest, between, imgTag) {
     var icon = null;
     for (var i = 0; i < ICON_MAP.length; i++) {
-      if (ICON_MAP[i].test.test(href)) { icon = ICON_MAP[i]; break; }
+      if (ICON_MAP[i].test.test(href) || (ICON_MAP[i].checkOnclick && ICON_MAP[i].test.test(aRest))) { icon = ICON_MAP[i]; break; }
     }
     if (!icon) return match;
     counts[icon.key]++;
