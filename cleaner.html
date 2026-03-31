@@ -36,8 +36,8 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </head>
 <body>
 <div class="card">
-  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v3.2</span></h1>
-  <p>Reemplaza todos los íconos base64 con SimpleIcons CDN y el logo con Cloudinary.</p>
+  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v3.3</span></h1>
+  <p>Reemplaza íconos sociales y logos de pago base64 con CDN/Cloudinary.</p>
 
   <button class="fetch-btn" id="fetchBtn" onclick="fetchFromGitHub()">
     🐙 Fetch &amp; Clean desde GitHub
@@ -57,121 +57,150 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </div>
 
 <script>
+// ── URLs ──────────────────────────────────────────────────────────────────
 var LOGO_URL   = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/preview_gdumct.png';
+var NEQUI_URL  = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8477_xuh9oh.jpg';
+var BANCOL_URL = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8483_pk73rq.png';
+var VISA_URL   = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8491_ix6yng.jpg';
 var GITHUB_URL = 'https://raw.githubusercontent.com/mtrichmond-cell/Pixies.cocktails/main/index.html';
-var cleanedContent = null;
-
-// Map anchor href patterns → CDN icon URLs
-var ICON_MAP = [
-  { test: /wa\.me|whatsapp/i,  key: 'whatsapp',  src: 'https://cdn.simpleicons.org/whatsapp/25d366'  },
-  { test: /instagram/i,        key: 'instagram', src: 'https://cdn.simpleicons.org/instagram/ff2d8f' },
-  { test: /tiktok/i,           key: 'tiktok',    src: 'https://cdn.simpleicons.org/tiktok/ffffff'    },
-  { test: /gmail|mailto/i,     key: 'gmail',     src: 'https://cdn.simpleicons.org/gmail/ea4335',    checkOnclick: true },
-];
 var ICON_STYLE = 'width:32px;height:32px;border-radius:8px';
+
+// ── Size thresholds (base64 char ≈ binary × 1.37) ─────────────────────────
+// Logo  ~200KB → ~274K chars  → > 180000
+// WA    ~60KB  → ~82K chars   → > 60000
+// IG    ~40KB  → ~55K chars   → > 38000
+// Gmail ~14KB  → ~19K chars   → > 14000
+// TT    ~12KB  → ~16K chars   → catch-all smallest
+function classifyBlob(len) {
+  if (len > 180000) return 'logo';
+  if (len > 60000)  return 'whatsapp';
+  if (len > 38000)  return 'instagram';
+  if (len > 14000)  return 'gmail';
+  return 'tiktok';
+}
+
+var cleanedContent = null;
 
 function processContent(content) {
   var originalSize = content.length;
-  var counts = {logo:0, whatsapp:0, instagram:0, gmail:0, tiktok:0};
+  var counts = {logo:0, whatsapp:0, instagram:0, gmail:0, tiktok:0, nequi:0, bancolombia:0, visa:0};
   var modified = content;
 
-  // Pass 1: replace large base64 logo blob by size
-  modified = modified.replace(/src="data:image\/[^;]+;base64,([A-Za-z0-9+\/]{180000,}={0,2})"/g, function() {
-    counts.logo++;
-    return 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"';
-  });
-
-  // Pass 2 (UNCONDITIONAL): find every <a href="..."><img ...></a> whose href
-  // matches a social platform and fully rewrite the img src + style,
-  // no matter what the src currently is (base64, empty, wrong CDN, anything).
-  // Regex captures: anchor open tag, href value, rest of anchor, img tag.
-  modified = modified.replace(/(<a\b[^>]*href="([^"]*)"([^>]*)>)([\s\S]*?)(<img\b[^>]*>)/g, function(match, aOpen, href, aRest, between, imgTag) {
-    var icon = null;
-    for (var i = 0; i < ICON_MAP.length; i++) {
-      if (ICON_MAP[i].test.test(href) || (ICON_MAP[i].checkOnclick && ICON_MAP[i].test.test(aRest))) { icon = ICON_MAP[i]; break; }
+  // ── Pass 1: Payment icons ─────────────────────────────────────────────
+  // Match any base64 blob (in src= OR JS string) and check surrounding text
+  // to identify which payment method it belongs to.
+  modified = modified.replace(/(?:src=)?(['"`]?)data:image\/[^;]+;base64,([A-Za-z0-9+\/]{200,}={0,2})\1/g,
+    function(match, quote, b64, offset, original) {
+      var start   = Math.max(0, offset - 600);
+      var context = original.substring(start, offset + 80).toLowerCase();
+      if (/nequi/.test(context)) {
+        counts.nequi++;
+        // Preserve surrounding quote style; if it was an src= attr, rebuild it
+        if (match.startsWith('src=')) return 'src="' + NEQUI_URL + '"';
+        return quote + NEQUI_URL + quote;
+      }
+      if (/bancolombia/.test(context)) {
+        counts.bancolombia++;
+        if (match.startsWith('src=')) return 'src="' + BANCOL_URL + '"';
+        return quote + BANCOL_URL + quote;
+      }
+      if (/visa|mastercard|tarjeta/.test(context)) {
+        counts.visa++;
+        if (match.startsWith('src=')) return 'src="' + VISA_URL + '"';
+        return quote + VISA_URL + quote;
+      }
+      return match; // Not a payment icon — leave for Pass 2
     }
-    if (!icon) return match;
-    counts[icon.key]++;
-    // Rebuild the img tag with correct src and style, preserving alt if present
-    var alt = '';
-    var altMatch = imgTag.match(/alt="([^"]*)"/);
-    if (altMatch) alt = ' alt="' + altMatch[1] + '"';
-    var newImg = '<img src="' + icon.src + '" style="' + ICON_STYLE + '"' + alt + '/>';
-    return aOpen + between + newImg;
-  });
+  );
+
+  // ── Pass 2: Social icons by size (src= HTML attributes) ───────────────
+  modified = modified.replace(/src="data:image\/[^;]+;base64,([A-Za-z0-9+\/]{500,}={0,2})"/g,
+    function(match, b64) {
+      var kind = classifyBlob(b64.length);
+      counts[kind]++;
+      switch (kind) {
+        case 'logo':      return 'src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"';
+        case 'whatsapp':  return 'src="https://cdn.simpleicons.org/whatsapp/25d366" style="' + ICON_STYLE + '"';
+        case 'instagram': return 'src="https://cdn.simpleicons.org/instagram/ff2d8f" style="' + ICON_STYLE + '"';
+        case 'gmail':     return 'src="https://cdn.simpleicons.org/gmail/ea4335" style="' + ICON_STYLE + '"';
+        case 'tiktok':    return 'src="https://cdn.simpleicons.org/tiktok/ffffff" style="' + ICON_STYLE + '"';
+      }
+      return match;
+    }
+  );
+
+  // ── Pass 3: Anchor-based backup (catches src="" / wrong CDN on inner pages)
+  var ICON_MAP = [
+    {test: /wa\.me|whatsapp/i,   key:'whatsapp',  src:'https://cdn.simpleicons.org/whatsapp/25d366'},
+    {test: /instagram/i,         key:'instagram', src:'https://cdn.simpleicons.org/instagram/ff2d8f'},
+    {test: /tiktok/i,            key:'tiktok',    src:'https://cdn.simpleicons.org/tiktok/ffffff'},
+    {test: /gmail|mailto/i,      key:'gmail',     src:'https://cdn.simpleicons.org/gmail/ea4335', onclick:true},
+  ];
+  modified = modified.replace(/(<a\b[^>]*href="([^"]*)"([^>]*)>)([\s\S]*?)(<img\b[^>]*>)/g,
+    function(match, aOpen, href, aRest, between, imgTag) {
+      var icon = null;
+      for (var i = 0; i < ICON_MAP.length; i++) {
+        var m = ICON_MAP[i];
+        if (m.test.test(href) || (m.onclick && m.test.test(aRest))) { icon = m; break; }
+      }
+      if (!icon) return match;
+      counts[icon.key]++;
+      var alt = ''; var am = imgTag.match(/alt="([^"]*)"/);
+      if (am) alt = ' alt="' + am[1] + '"';
+      return aOpen + between + '<img src="' + icon.src + '" style="' + ICON_STYLE + '"' + alt + '/>';
+    }
+  );
 
   var newSize = modified.length;
   var savedKB = Math.round((originalSize - newSize) / 1024);
-  cleanedContent = modified;
+  cleanedContent  = modified;
 
   var log = [];
-  log.push(counts.whatsapp  > 0 ? '<span class="ok">✓ WhatsApp — '  + counts.whatsapp  + ' reemplazado(s)</span>' : '<span class="warn">— WhatsApp — no encontrado</span>');
-  log.push(counts.instagram > 0 ? '<span class="ok">✓ Instagram — ' + counts.instagram + ' reemplazado(s)</span>' : '<span class="warn">— Instagram — no encontrado</span>');
-  log.push(counts.tiktok    > 0 ? '<span class="ok">✓ TikTok — '    + counts.tiktok    + ' reemplazado(s)</span>' : '<span class="warn">— TikTok — no encontrado</span>');
-  log.push(counts.gmail     > 0 ? '<span class="ok">✓ Gmail — '     + counts.gmail     + ' reemplazado(s)</span>' : '<span class="warn">— Gmail — no encontrado</span>');
-  log.push(counts.logo      > 0 ? '<span class="ok">✓ Logo — '      + counts.logo      + ' con Cloudinary</span>'  : '<span class="warn">— Logo — no encontrado</span>');
+  log.push(counts.whatsapp   > 0 ? '<span class="ok">✓ WhatsApp — '    + counts.whatsapp   + ' reemplazado(s)</span>' : '<span class="warn">— WhatsApp — no encontrado</span>');
+  log.push(counts.instagram  > 0 ? '<span class="ok">✓ Instagram — '   + counts.instagram  + ' reemplazado(s)</span>' : '<span class="warn">— Instagram — no encontrado</span>');
+  log.push(counts.tiktok     > 0 ? '<span class="ok">✓ TikTok — '      + counts.tiktok     + ' reemplazado(s)</span>' : '<span class="warn">— TikTok — no encontrado</span>');
+  log.push(counts.gmail      > 0 ? '<span class="ok">✓ Gmail — '       + counts.gmail      + ' reemplazado(s)</span>' : '<span class="warn">— Gmail — no encontrado</span>');
+  log.push(counts.logo       > 0 ? '<span class="ok">✓ Logo — '        + counts.logo       + ' con Cloudinary</span>'  : '<span class="warn">— Logo — no encontrado</span>');
+  log.push(counts.nequi      > 0 ? '<span class="ok">✓ Nequi — '       + counts.nequi      + ' reemplazado(s)</span>' : '<span class="warn">— Nequi — no encontrado</span>');
+  log.push(counts.bancolombia> 0 ? '<span class="ok">✓ Bancolombia — ' + counts.bancolombia + ' reemplazado(s)</span>' : '<span class="warn">— Bancolombia — no encontrado</span>');
+  log.push(counts.visa       > 0 ? '<span class="ok">✓ Visa/MC — '     + counts.visa       + ' reemplazado(s)</span>' : '<span class="warn">— Visa/MC — no encontrado</span>');
 
-  var statusEl = document.getElementById('status');
-  statusEl.innerHTML = log.join('<br/>');
-  statusEl.classList.add('show');
-
-  var savingsEl = document.getElementById('savings');
-  savingsEl.textContent = '✅ Reducido ~' + savedKB + ' KB (' + Math.round(originalSize/1024) + ' KB → ' + Math.round(newSize/1024) + ' KB)';
-  savingsEl.classList.add('show');
-
+  document.getElementById('status').innerHTML = log.join('<br/>');
+  document.getElementById('status').classList.add('show');
+  document.getElementById('savings').textContent =
+    '✅ Reducido ~' + savedKB + ' KB (' + Math.round(originalSize/1024) + ' KB → ' + Math.round(newSize/1024) + ' KB)';
+  document.getElementById('savings').classList.add('show');
   document.getElementById('downloadBtn').classList.add('show');
 }
 
+// ── GitHub fetch ────────────────────────────────────────────────────────
 function fetchFromGitHub() {
-  var btn      = document.getElementById('fetchBtn');
+  var btn = document.getElementById('fetchBtn');
   var statusEl = document.getElementById('status');
-  btn.disabled = true;
-  btn.textContent = '⏳ Descargando…';
+  btn.disabled = true; btn.textContent = '⏳ Descargando…';
   statusEl.innerHTML = '<span class="ok">Conectando a GitHub…</span>';
   statusEl.classList.add('show');
-
   fetch(GITHUB_URL + '?t=' + Date.now())
-    .then(function(res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.text();
-    })
-    .then(function(text) {
-      btn.disabled = false;
-      btn.textContent = '🐙 Fetch & Clean desde GitHub';
-      processContent(text);
-    })
-    .catch(function(err) {
-      btn.disabled = false;
-      btn.textContent = '🐙 Fetch & Clean desde GitHub';
-      statusEl.innerHTML = '<span class="err">❌ ' + err.message + ' — sube el archivo manualmente.</span>';
-    });
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+    .then(function(t){ btn.disabled=false; btn.textContent='🐙 Fetch & Clean desde GitHub'; processContent(t); })
+    .catch(function(e){ btn.disabled=false; btn.textContent='🐙 Fetch & Clean desde GitHub';
+      statusEl.innerHTML='<span class="err">❌ '+e.message+' — sube el archivo manualmente.</span>'; });
 }
 
-function processFile(file) {
-  var reader = new FileReader();
-  reader.onload = function(e) { processContent(e.target.result); };
-  reader.readAsText(file);
-}
+// ── File upload ─────────────────────────────────────────────────────────
+function processFile(f){ var r=new FileReader(); r.onload=function(e){processContent(e.target.result);}; r.readAsText(f); }
+document.getElementById('fileInput').addEventListener('change',function(e){if(e.target.files[0])processFile(e.target.files[0]);});
+var dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',function(){dz.classList.remove('over');});
+dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files[0])processFile(e.dataTransfer.files[0]);});
 
-document.getElementById('fileInput').addEventListener('change', function(e) {
-  if (e.target.files[0]) processFile(e.target.files[0]);
-});
-
-var dz = document.getElementById('dropZone');
-dz.addEventListener('dragover',  function(e){ e.preventDefault(); dz.classList.add('over'); });
-dz.addEventListener('dragleave', function(){  dz.classList.remove('over'); });
-dz.addEventListener('drop',      function(e){
-  e.preventDefault(); dz.classList.remove('over');
-  if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
-});
-
-function downloadClean() {
-  if (!cleanedContent) return;
-  var blob = new Blob([cleanedContent], {type:'text/html'});
-  var a    = document.createElement('a');
-  a.href   = URL.createObjectURL(blob);
-  a.download = 'index_clean.html';
-  a.click();
+// ── Download ────────────────────────────────────────────────────────────
+function downloadClean(){
+  if(!cleanedContent)return;
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([cleanedContent],{type:'text/html'}));
+  a.download='index_clean.html'; a.click();
 }
 </script>
 </body>
