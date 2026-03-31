@@ -36,8 +36,8 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </head>
 <body>
 <div class="card">
-  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v4.0</span></h1>
-  <p>Corrige íconos, logos de pago y layout del carrito en index2.html.</p>
+  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v4.1</span></h1>
+  <p>Íconos · logos · layout carrito · siguiente paso · cámara dulces y tamaños</p>
 
   <button class="fetch-btn" id="fetchBtn" onclick="fetchFromGitHub()">
     🐙 Fetch &amp; Clean desde GitHub
@@ -57,7 +57,6 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </div>
 
 <script>
-// ── URLs ──────────────────────────────────────────────────────────────────
 var LOGO_URL   = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/preview_gdumct.png';
 var NEQUI_URL  = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8477_xuh9oh.jpg';
 var BANCOL_URL = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8483_pk73rq.png';
@@ -75,17 +74,136 @@ function classifyBlob(len) {
 
 var cleanedContent = null;
 
+// ── The injected camera + modal script block ──────────────────────────────
+var INJECT_SCRIPT = `
+<script id="px-inject">
+(function(){
+  // ── Photo Modal ────────────────────────────────────────────────────────
+  var ov = document.createElement('div');
+  ov.id = 'pxModal';
+  ov.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML = '<div style="position:relative;width:100%;max-width:320px;background:rgba(30,0,50,.97);border:1px solid rgba(180,0,255,.3);border-radius:20px;overflow:hidden;box-shadow:0 0 40px rgba(255,45,143,.3);">'
+    + '<button id="pxModalClose" style="position:absolute;top:10px;right:10px;background:rgba(255,45,143,.25);border:1px solid rgba(255,45,143,.5);color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;z-index:1;line-height:1;">✕</button>'
+    + '<div id="pxModalEmoji" style="display:none;font-size:90px;text-align:center;padding:30px 0 10px;"></div>'
+    + '<img id="pxModalImg" src="" style="width:100%;display:block;max-height:260px;object-fit:cover;"/>'
+    + '<div style="padding:14px 16px 18px;text-align:center;">'
+    + '<div id="pxModalName" style="font-family:Bebas Neue,sans-serif;font-size:24px;letter-spacing:3px;color:#f5e6ff;"></div>'
+    + '<div id="pxModalSub" style="font-size:11px;color:#8855aa;font-weight:700;margin-top:4px;"></div>'
+    + '</div></div>';
+  document.body.appendChild(ov);
+  document.getElementById('pxModalClose').onclick = function(){ ov.style.display='none'; };
+  ov.addEventListener('click', function(e){ if(e.target===ov) ov.style.display='none'; });
+
+  window.showPxModal = function(imgSrc, emoji, name, sub) {
+    var imgEl   = document.getElementById('pxModalImg');
+    var emojiEl = document.getElementById('pxModalEmoji');
+    if (imgSrc) {
+      imgEl.src = imgSrc; imgEl.style.display = 'block'; emojiEl.style.display = 'none';
+    } else {
+      imgEl.src = ''; imgEl.style.display = 'none';
+      emojiEl.textContent = emoji || '📷';
+      emojiEl.style.display = 'block';
+    }
+    document.getElementById('pxModalName').textContent = name || '';
+    document.getElementById('pxModalSub').textContent  = imgSrc ? (sub||'') : (sub||'') + ' — Foto próximamente 📸';
+    ov.style.display = 'flex';
+  };
+
+  // ── Camera button factory ──────────────────────────────────────────────
+  function makeCamBtn(onClick) {
+    var btn = document.createElement('button');
+    btn.className = 'px-cam';
+    btn.style.cssText = 'background:rgba(255,45,143,.18);border:1px solid rgba(255,45,143,.4);border-radius:8px;padding:3px 8px;font-size:15px;cursor:pointer;margin-left:6px;flex-shrink:0;line-height:1;';
+    btn.textContent = '📷';
+    btn.addEventListener('click', function(e){ e.stopPropagation(); onClick(); });
+    return btn;
+  }
+
+  // ── Patch toggleCandy ─────────────────────────────────────────────────
+  var _patchAttempts = 0;
+  var _patchTimer = setInterval(function(){
+    _patchAttempts++;
+    if (_patchAttempts > 30) { clearInterval(_patchTimer); return; }
+    if (typeof window.toggleCandy !== 'function') return;
+    clearInterval(_patchTimer);
+
+    var _origToggle = window.toggleCandy;
+    window.toggleCandy = function(id) {
+      _origToggle.call(this, id);
+      if (!window.CFG || !window.CFG.candies) return;
+      var candy = window.CFG.candies.find(function(c){ return c.id === id; });
+      if (!candy) return;
+      // Find all candy items, match by name
+      var items = document.querySelectorAll('#candyGrid .candy-item');
+      items.forEach(function(el){
+        var nameEl = el.querySelector('.ci-name');
+        if (!nameEl || nameEl.textContent.trim() !== candy.n) return;
+        var existing = el.querySelector('.px-cam');
+        if (el.classList.contains('sel')) {
+          if (!existing) {
+            var stepper = el.querySelector('.ci-stepper');
+            if (stepper) {
+              stepper.appendChild(makeCamBtn(function(){
+                showPxModal(candy.img||'', candy.e||'🍬', candy.n, '');
+              }));
+            }
+          }
+        } else {
+          if (existing) existing.remove();
+        }
+      });
+    };
+  }, 200);
+
+  // ── Size card camera ──────────────────────────────────────────────────
+  document.addEventListener('click', function(e){
+    var card = e.target.closest ? e.target.closest('.size-card') : null;
+    if (!card) return;
+    // Debounce — remove all size cam buttons first
+    setTimeout(function(){
+      document.querySelectorAll('.px-size-cam').forEach(function(b){ b.remove(); });
+      if (!card.classList.contains('selected')) return;
+      if (!window.CFG || !window.CFG.sizes) return;
+      var nameEl = card.querySelector('.sc-name');
+      if (!nameEl) return;
+      var size = window.CFG.sizes.find(function(s){ return s.n === nameEl.textContent.trim(); });
+      if (!size) return;
+      var btn = document.createElement('button');
+      btn.className = 'px-size-cam';
+      btn.style.cssText = 'background:rgba(255,45,143,.18);border:1px solid rgba(255,45,143,.4);border-radius:8px;padding:5px 12px;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;display:flex;align-items:center;gap:6px;color:#f5e6ff;font-family:Nunito,sans-serif;';
+      btn.innerHTML = '📷 <span>Ver foto</span>';
+      btn.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        showPxModal(size.img||'', size.e||'🥤', size.n, size.oz + ' — ' + size.d);
+      });
+      card.appendChild(btn);
+    }, 50);
+  }, true);
+})();
+<\/script>`;
+
 function processContent(content) {
   var originalSize = content.length;
   var counts = {
-    whatsapp:0, instagram:0, tiktok:0, gmail:0,
+    waFix:0, whatsapp:0, instagram:0, tiktok:0, gmail:0,
     logo:0, nequi:0, bancolombia:0, visa:0,
     heroLogo:0, bancoCard:0, visaCard:0,
-    nequiLogo:0, bancoLogo:0, cartLayout:0
+    nequiLogo:0, bancoLogo:0, cartLayout:0,
+    flavorCta:0, modalInject:0
   };
   var modified = content;
 
-  // ── Pass 1: Base64 payment icons (context-based) ──────────────────────
+  // ── Pass 1: WhatsApp direct fix (wa.me href → force WA icon) ─────────
+  var waFixed = modified.replace(
+    /(<a[^>]*href="https:\/\/wa\.me[^"]*"[^>]*>)<img[^>]*\/>/g,
+    function(match, aOpen) {
+      counts.waFix++;
+      return aOpen + '<img src="https://cdn.simpleicons.org/whatsapp/25d366" style="' + ICON_STYLE + '"/>';
+    }
+  );
+  if (waFixed !== modified) modified = waFixed;
+
+  // ── Pass 2: Base64 payment icons (context-based) ──────────────────────
   modified = modified.replace(/(?:src=)?(['"`]?)data:image\/[^;]+;base64,([A-Za-z0-9+\/]{200,}={0,2})\1/g,
     function(match, quote, b64, offset, original) {
       var start   = Math.max(0, offset - 600);
@@ -109,7 +227,7 @@ function processContent(content) {
     }
   );
 
-  // ── Pass 2: Base64 social icons by size ───────────────────────────────
+  // ── Pass 3: Base64 social icons by size ───────────────────────────────
   modified = modified.replace(/src="data:image\/[^;]+;base64,([A-Za-z0-9+\/]{500,}={0,2})"/g,
     function(match, b64) {
       var kind = classifyBlob(b64.length);
@@ -125,7 +243,7 @@ function processContent(content) {
     }
   );
 
-  // ── Pass 3: Anchor-based social icon fix (works on CDN URLs too) ──────
+  // ── Pass 4: Anchor-based remaining social icons ───────────────────────
   var ICON_MAP = [
     {test: /wa\.me|whatsapp/i,  key:'whatsapp',  src:'https://cdn.simpleicons.org/whatsapp/25d366'},
     {test: /instagram/i,        key:'instagram', src:'https://cdn.simpleicons.org/instagram/ff2d8f'},
@@ -147,7 +265,7 @@ function processContent(content) {
     }
   );
 
-  // ── Pass 4: Hero logo circle → Cloudinary ────────────────────────────
+  // ── Pass 5: Hero logo circle → Cloudinary ────────────────────────────
   var heroLogoRx = /(<div class="logo-wrap"><img\s)[^>]+(\/><\/div>)/;
   if (heroLogoRx.test(modified)) {
     modified = modified.replace(heroLogoRx,
@@ -156,16 +274,13 @@ function processContent(content) {
     counts.heroLogo++;
   }
 
-  // ── Pass 5: Bancolombia pay card (border-radius:50% is the tell) ──────
+  // ── Pass 6: Bancolombia pay card (border-radius:50% is the tell) ──────
   modified = modified.replace(
     /(<img class="pay-icon" src=")[^"]+(" style="border-radius:50%"\/>)/g,
-    function(match, pre, post) {
-      counts.bancoCard++;
-      return pre + BANCOL_URL + post;
-    }
+    function(match, pre, post) { counts.bancoCard++; return pre + BANCOL_URL + post; }
   );
 
-  // ── Pass 6: Credit/debit card pay icon (any pay-icon pointing to gmail CDN) ─
+  // ── Pass 7: Credit/debit card pay icon (any pay-icon → gmail CDN) ────
   modified = modified.replace(
     /<img class="pay-icon" src="https:\/\/cdn\.simpleicons\.org\/gmail\/ea4335"[^>]*\/>/g,
     function() {
@@ -174,7 +289,7 @@ function processContent(content) {
     }
   );
 
-  // ── Pass 7: Nequi payment page ps-logo (first tiktok ps-logo = Nequi) ─
+  // ── Pass 8: Nequi payment page ps-logo (first tiktok ps-logo) ────────
   var nequiLogoRx = /<img class="ps-logo" src="https:\/\/cdn\.simpleicons\.org\/tiktok\/ffffff" style="width:32px;height:32px;border-radius:8px"\/>/;
   if (nequiLogoRx.test(modified)) {
     modified = modified.replace(nequiLogoRx,
@@ -183,7 +298,7 @@ function processContent(content) {
     counts.nequiLogo++;
   }
 
-  // ── Pass 8: Bancolombia payment page ps-logo (has extra style attr) ───
+  // ── Pass 9: Bancolombia ps-logo (any remaining tiktok ps-logo) ────────
   modified = modified.replace(
     /<img class="ps-logo" src="https:\/\/cdn\.simpleicons\.org\/tiktok\/ffffff"[^>]*\/>/g,
     function() {
@@ -192,7 +307,7 @@ function processContent(content) {
     }
   );
 
-  // ── Pass 9: Cart layout — solid AGREGAR bar + floating bubble ─────────
+  // ── Pass 10: Cart layout — solid bar + floating bubble ────────────────
   var ctaFixed = modified.replace(
     /\.cta-float\{[^}]+\}/,
     '.cta-float{position:fixed;bottom:0;left:0;right:0;padding:14px 16px 28px;background:linear-gradient(135deg,#6b00cc,#ff2d8f);z-index:60;transform:translateY(120px);transition:transform .3s;box-shadow:0 -4px 20px rgba(255,45,143,.4)}'
@@ -205,21 +320,37 @@ function processContent(content) {
   );
   if (bubbleFixed !== modified) { modified = bubbleFixed; counts.cartLayout++; }
 
+  // ── Pass 11: Flavor CTA → full-width SIGUIENTE PASO bar ──────────────
+  var flavorCtaRx = /<div id="flavorCta"[^>]*>[\s\S]*?<\/div>/;
+  var newFlavorCta = '<div id="flavorCta" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;padding:14px 16px 28px;background:linear-gradient(135deg,#6b00cc,#ff2d8f);box-shadow:0 -4px 20px rgba(255,45,143,.4);"><button onclick="confirmFlavors()" style="width:100%;max-width:480px;display:block;margin:0 auto;padding:16px;border:none;border-radius:14px;background:transparent;color:white;font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;font-family:\'Bebas Neue\',sans-serif;">SIGUIENTE PASO →</button></div>';
+  if (flavorCtaRx.test(modified)) {
+    modified = modified.replace(flavorCtaRx, newFlavorCta);
+    counts.flavorCta++;
+  }
+
+  // ── Pass 12: Inject camera + modal script before </body> ──────────────
+  if (modified.indexOf('px-inject') === -1) {
+    modified = modified.replace('</body>', INJECT_SCRIPT + '</body>');
+    counts.modalInject++;
+  }
+
   var newSize = modified.length;
-  var savedKB = Math.round((originalSize - newSize) / 1024);
   cleanedContent = modified;
 
   var log = [];
-  log.push(counts.whatsapp   > 0 ? '<span class="ok">✓ WhatsApp social — '        + counts.whatsapp   + ' fix(es)</span>' : '<span class="warn">— WhatsApp social — sin cambios</span>');
-  log.push(counts.instagram  > 0 ? '<span class="ok">✓ Instagram social — '       + counts.instagram  + ' fix(es)</span>' : '<span class="warn">— Instagram social — sin cambios</span>');
-  log.push(counts.tiktok     > 0 ? '<span class="ok">✓ TikTok social — '          + counts.tiktok     + ' fix(es)</span>' : '<span class="warn">— TikTok social — sin cambios</span>');
-  log.push(counts.gmail      > 0 ? '<span class="ok">✓ Gmail social — '           + counts.gmail      + ' fix(es)</span>' : '<span class="warn">— Gmail social — sin cambios</span>');
-  log.push(counts.heroLogo   > 0 ? '<span class="ok">✓ Logo círculo hero — Cloudinary</span>'              : '<span class="warn">— Logo círculo — sin cambios</span>');
-  log.push(counts.nequiLogo  > 0 ? '<span class="ok">✓ Logo pantalla Nequi — Cloudinary</span>'           : '<span class="warn">— Logo Nequi — sin cambios</span>');
-  log.push(counts.bancoLogo  > 0 ? '<span class="ok">✓ Logo pantalla Bancolombia — Cloudinary</span>'     : '<span class="warn">— Logo Bancolombia — sin cambios</span>');
-  log.push(counts.bancoCard  > 0 ? '<span class="ok">✓ Tarjeta pago Bancolombia — imagen correcta</span>' : '<span class="warn">— Tarjeta Bancolombia — sin cambios</span>');
-  log.push(counts.visaCard   > 0 ? '<span class="ok">✓ Tarjeta Crédito/Débito — imagen correcta</span>'  : '<span class="warn">— Tarjeta Crédito — sin cambios</span>');
-  log.push(counts.cartLayout > 0 ? '<span class="ok">✓ Layout carrito — barra sólida + burbuja flotante</span>' : '<span class="warn">— Layout carrito — sin cambios</span>');
+  log.push(counts.waFix      > 0 ? '<span class="ok">✓ WhatsApp (wa.me directo) — '   + counts.waFix     + ' fix(es)</span>' : '<span class="warn">— WhatsApp wa.me — sin cambios</span>');
+  log.push(counts.whatsapp   > 0 ? '<span class="ok">✓ WhatsApp (anchor) — '          + counts.whatsapp  + ' fix(es)</span>' : '<span class="warn">— WhatsApp anchor — sin cambios</span>');
+  log.push(counts.instagram  > 0 ? '<span class="ok">✓ Instagram — '                  + counts.instagram + ' fix(es)</span>' : '<span class="warn">— Instagram — sin cambios</span>');
+  log.push(counts.tiktok     > 0 ? '<span class="ok">✓ TikTok — '                     + counts.tiktok    + ' fix(es)</span>' : '<span class="warn">— TikTok — sin cambios</span>');
+  log.push(counts.gmail      > 0 ? '<span class="ok">✓ Gmail — '                      + counts.gmail     + ' fix(es)</span>' : '<span class="warn">— Gmail — sin cambios</span>');
+  log.push(counts.heroLogo   > 0 ? '<span class="ok">✓ Logo círculo hero — Cloudinary</span>'                : '<span class="warn">— Logo círculo — sin cambios</span>');
+  log.push(counts.nequiLogo  > 0 ? '<span class="ok">✓ Logo pantalla Nequi — Cloudinary</span>'             : '<span class="warn">— Logo Nequi — sin cambios</span>');
+  log.push(counts.bancoLogo  > 0 ? '<span class="ok">✓ Logo pantalla Bancolombia — Cloudinary</span>'       : '<span class="warn">— Logo Bancolombia — sin cambios</span>');
+  log.push(counts.bancoCard  > 0 ? '<span class="ok">✓ Tarjeta Bancolombia — imagen correcta</span>'        : '<span class="warn">— Tarjeta Bancolombia — sin cambios</span>');
+  log.push(counts.visaCard   > 0 ? '<span class="ok">✓ Tarjeta Crédito/Débito — imagen correcta</span>'    : '<span class="warn">— Tarjeta Crédito — sin cambios</span>');
+  log.push(counts.cartLayout > 0 ? '<span class="ok">✓ Layout carrito — barra + burbuja flotante</span>'   : '<span class="warn">— Layout carrito — sin cambios</span>');
+  log.push(counts.flavorCta  > 0 ? '<span class="ok">✓ Sabores — SIGUIENTE PASO barra completa</span>'     : '<span class="warn">— Sabores CTA — sin cambios</span>');
+  log.push(counts.modalInject> 0 ? '<span class="ok">✓ Modal foto + botón 📷 dulces y tamaños — inyectado</span>' : '<span class="warn">— Modal/cámara — ya existía</span>');
 
   document.getElementById('status').innerHTML = log.join('<br/>');
   document.getElementById('status').classList.add('show');
@@ -229,7 +360,6 @@ function processContent(content) {
   document.getElementById('downloadBtn').classList.add('show');
 }
 
-// ── GitHub fetch ────────────────────────────────────────────────────────
 function fetchFromGitHub() {
   var btn = document.getElementById('fetchBtn');
   var statusEl = document.getElementById('status');
@@ -243,7 +373,6 @@ function fetchFromGitHub() {
       statusEl.innerHTML='<span class="err">❌ '+e.message+' — sube el archivo manualmente.</span>'; });
 }
 
-// ── File upload ─────────────────────────────────────────────────────────
 function processFile(f){ var r=new FileReader(); r.onload=function(e){processContent(e.target.result);}; r.readAsText(f); }
 document.getElementById('fileInput').addEventListener('change',function(e){if(e.target.files[0])processFile(e.target.files[0]);});
 var dz=document.getElementById('dropZone');
@@ -251,7 +380,6 @@ dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('
 dz.addEventListener('dragleave',function(){dz.classList.remove('over');});
 dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files[0])processFile(e.dataTransfer.files[0]);});
 
-// ── Download ────────────────────────────────────────────────────────────
 function downloadClean(){
   if(!cleanedContent)return;
   var a=document.createElement('a');
