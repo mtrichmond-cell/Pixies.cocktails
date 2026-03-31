@@ -36,8 +36,8 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </head>
 <body>
 <div class="card">
-  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v3.6</span></h1>
-  <p>Reemplaza íconos sociales y logos de pago base64 con CDN/Cloudinary.</p>
+  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v4.0</span></h1>
+  <p>Corrige íconos, logos de pago y layout del carrito en index2.html.</p>
 
   <button class="fetch-btn" id="fetchBtn" onclick="fetchFromGitHub()">
     🐙 Fetch &amp; Clean desde GitHub
@@ -47,7 +47,7 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 
   <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
     <div style="font-size:32px">📂</div>
-    <div class="drop-label">Toca para seleccionar index.html</div>
+    <div class="drop-label">Toca para seleccionar index2.html</div>
     <input type="file" id="fileInput" accept=".html,.htm,.txt"/>
   </div>
 
@@ -65,12 +65,6 @@ var VISA_URL   = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/
 var GITHUB_URL = 'https://raw.githubusercontent.com/mtrichmond-cell/Pixies.cocktails/main/index2.html';
 var ICON_STYLE = 'width:32px;height:32px;border-radius:8px';
 
-// ── Size thresholds (base64 char ≈ binary × 1.37) ─────────────────────────
-// Logo  ~200KB → ~274K chars  → > 180000
-// WA    ~60KB  → ~82K chars   → > 60000
-// IG    ~40KB  → ~55K chars   → > 38000
-// Gmail ~14KB  → ~19K chars   → > 14000
-// TT    ~12KB  → ~16K chars   → catch-all smallest
 function classifyBlob(len) {
   if (len > 180000) return 'logo';
   if (len > 60000)  return 'whatsapp';
@@ -83,10 +77,15 @@ var cleanedContent = null;
 
 function processContent(content) {
   var originalSize = content.length;
-  var counts = {logo:0, whatsapp:0, instagram:0, gmail:0, tiktok:0, nequi:0, bancolombia:0, visa:0};
+  var counts = {
+    whatsapp:0, instagram:0, tiktok:0, gmail:0,
+    logo:0, nequi:0, bancolombia:0, visa:0,
+    heroLogo:0, bancoCard:0, visaCard:0,
+    nequiLogo:0, bancoLogo:0, cartLayout:0
+  };
   var modified = content;
 
-  // ── Pass 1: Payment icons ─────────────────────────────────────────────
+  // ── Pass 1: Base64 payment icons (context-based) ──────────────────────
   modified = modified.replace(/(?:src=)?(['"`]?)data:image\/[^;]+;base64,([A-Za-z0-9+\/]{200,}={0,2})\1/g,
     function(match, quote, b64, offset, original) {
       var start   = Math.max(0, offset - 600);
@@ -110,7 +109,7 @@ function processContent(content) {
     }
   );
 
-  // ── Pass 2: Social icons by size (src= HTML attributes) ───────────────
+  // ── Pass 2: Base64 social icons by size ───────────────────────────────
   modified = modified.replace(/src="data:image\/[^;]+;base64,([A-Za-z0-9+\/]{500,}={0,2})"/g,
     function(match, b64) {
       var kind = classifyBlob(b64.length);
@@ -126,12 +125,12 @@ function processContent(content) {
     }
   );
 
-  // ── Pass 3: Anchor-based backup ────────────────────────────────────────
+  // ── Pass 3: Anchor-based social icon fix (works on CDN URLs too) ──────
   var ICON_MAP = [
-    {test: /wa\.me|whatsapp/i,   key:'whatsapp',  src:'https://cdn.simpleicons.org/whatsapp/25d366'},
-    {test: /instagram/i,         key:'instagram', src:'https://cdn.simpleicons.org/instagram/ff2d8f'},
-    {test: /tiktok/i,            key:'tiktok',    src:'https://cdn.simpleicons.org/tiktok/ffffff'},
-    {test: /gmail|mailto/i,      key:'gmail',     src:'https://cdn.simpleicons.org/gmail/ea4335', onclick:true},
+    {test: /wa\.me|whatsapp/i,  key:'whatsapp',  src:'https://cdn.simpleicons.org/whatsapp/25d366'},
+    {test: /instagram/i,        key:'instagram', src:'https://cdn.simpleicons.org/instagram/ff2d8f'},
+    {test: /tiktok/i,           key:'tiktok',    src:'https://cdn.simpleicons.org/tiktok/ffffff'},
+    {test: /gmail|mailto/i,     key:'gmail',     src:'https://cdn.simpleicons.org/gmail/ea4335', onclick:true},
   ];
   modified = modified.replace(/(<a\b[^>]*href="([^"]*)"([^>]*)>)([\s\S]*?)(<img\b[^>]*>)/g,
     function(match, aOpen, href, aRest, between, imgTag) {
@@ -148,30 +147,84 @@ function processContent(content) {
     }
   );
 
-  // ── Pass 4: Cart bubble → full-width bar ──────────────────────────────
+  // ── Pass 4: Hero logo circle → Cloudinary ────────────────────────────
+  var heroLogoRx = /(<div class="logo-wrap"><img\s)[^>]+(\/><\/div>)/;
+  if (heroLogoRx.test(modified)) {
+    modified = modified.replace(heroLogoRx,
+      '$1src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"$2'
+    );
+    counts.heroLogo++;
+  }
+
+  // ── Pass 5: Bancolombia pay card (border-radius:50% is the tell) ──────
   modified = modified.replace(
-    /\.cart-bubble\{[^}]+\}/,
-    '.cart-bubble{position:fixed;bottom:0;left:0;right:0;z-index:200;background:linear-gradient(135deg,var(--purple),var(--pink));padding:12px 20px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -4px 20px rgba(255,45,143,.3);cursor:pointer}'
+    /(<img class="pay-icon" src=")[^"]+(" style="border-radius:50%"\/>)/g,
+    function(match, pre, post) {
+      counts.bancoCard++;
+      return pre + BANCOL_URL + post;
+    }
   );
+
+  // ── Pass 6: Credit/debit card pay icon (any pay-icon pointing to gmail CDN) ─
+  modified = modified.replace(
+    /<img class="pay-icon" src="https:\/\/cdn\.simpleicons\.org\/gmail\/ea4335"[^>]*\/>/g,
+    function() {
+      counts.visaCard++;
+      return '<img class="pay-icon" src="' + VISA_URL + '" style="width:40px;height:40px;border-radius:10px;object-fit:contain"/>';
+    }
+  );
+
+  // ── Pass 7: Nequi payment page ps-logo (first tiktok ps-logo = Nequi) ─
+  var nequiLogoRx = /<img class="ps-logo" src="https:\/\/cdn\.simpleicons\.org\/tiktok\/ffffff" style="width:32px;height:32px;border-radius:8px"\/>/;
+  if (nequiLogoRx.test(modified)) {
+    modified = modified.replace(nequiLogoRx,
+      '<img class="ps-logo" src="' + NEQUI_URL + '" style="width:70px;height:70px;border-radius:16px;object-fit:cover"/>'
+    );
+    counts.nequiLogo++;
+  }
+
+  // ── Pass 8: Bancolombia payment page ps-logo (has extra style attr) ───
+  modified = modified.replace(
+    /<img class="ps-logo" src="https:\/\/cdn\.simpleicons\.org\/tiktok\/ffffff"[^>]*\/>/g,
+    function() {
+      counts.bancoLogo++;
+      return '<img class="ps-logo" src="' + BANCOL_URL + '" style="width:70px;height:70px;border-radius:50%;object-fit:cover"/>';
+    }
+  );
+
+  // ── Pass 9: Cart layout — solid AGREGAR bar + floating bubble ─────────
+  var ctaFixed = modified.replace(
+    /\.cta-float\{[^}]+\}/,
+    '.cta-float{position:fixed;bottom:0;left:0;right:0;padding:14px 16px 28px;background:linear-gradient(135deg,#6b00cc,#ff2d8f);z-index:60;transform:translateY(120px);transition:transform .3s;box-shadow:0 -4px 20px rgba(255,45,143,.4)}'
+  );
+  if (ctaFixed !== modified) { modified = ctaFixed; counts.cartLayout++; }
+
+  var bubbleFixed = modified.replace(
+    /\.cart-bubble\{[^}]+\}/,
+    '.cart-bubble{position:fixed;bottom:14px;right:12px;z-index:201;background:rgba(15,0,30,0.92);border:2px solid rgba(255,45,143,0.6);border-radius:50px;padding:8px 14px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(255,45,143,.5);cursor:pointer;backdrop-filter:blur(8px)}'
+  );
+  if (bubbleFixed !== modified) { modified = bubbleFixed; counts.cartLayout++; }
 
   var newSize = modified.length;
   var savedKB = Math.round((originalSize - newSize) / 1024);
-  cleanedContent  = modified;
+  cleanedContent = modified;
 
   var log = [];
-  log.push(counts.whatsapp   > 0 ? '<span class="ok">✓ WhatsApp — '    + counts.whatsapp   + ' reemplazado(s)</span>' : '<span class="warn">— WhatsApp — no encontrado</span>');
-  log.push(counts.instagram  > 0 ? '<span class="ok">✓ Instagram — '   + counts.instagram  + ' reemplazado(s)</span>' : '<span class="warn">— Instagram — no encontrado</span>');
-  log.push(counts.tiktok     > 0 ? '<span class="ok">✓ TikTok — '      + counts.tiktok     + ' reemplazado(s)</span>' : '<span class="warn">— TikTok — no encontrado</span>');
-  log.push(counts.gmail      > 0 ? '<span class="ok">✓ Gmail — '       + counts.gmail      + ' reemplazado(s)</span>' : '<span class="warn">— Gmail — no encontrado</span>');
-  log.push(counts.logo       > 0 ? '<span class="ok">✓ Logo — '        + counts.logo       + ' con Cloudinary</span>'  : '<span class="warn">— Logo — no encontrado</span>');
-  log.push(counts.nequi      > 0 ? '<span class="ok">✓ Nequi — '       + counts.nequi      + ' reemplazado(s)</span>' : '<span class="warn">— Nequi — no encontrado</span>');
-  log.push(counts.bancolombia> 0 ? '<span class="ok">✓ Bancolombia — ' + counts.bancolombia + ' reemplazado(s)</span>' : '<span class="warn">— Bancolombia — no encontrado</span>');
-  log.push(counts.visa       > 0 ? '<span class="ok">✓ Visa/MC — '     + counts.visa       + ' reemplazado(s)</span>' : '<span class="warn">— Visa/MC — no encontrado</span>');
+  log.push(counts.whatsapp   > 0 ? '<span class="ok">✓ WhatsApp social — '        + counts.whatsapp   + ' fix(es)</span>' : '<span class="warn">— WhatsApp social — sin cambios</span>');
+  log.push(counts.instagram  > 0 ? '<span class="ok">✓ Instagram social — '       + counts.instagram  + ' fix(es)</span>' : '<span class="warn">— Instagram social — sin cambios</span>');
+  log.push(counts.tiktok     > 0 ? '<span class="ok">✓ TikTok social — '          + counts.tiktok     + ' fix(es)</span>' : '<span class="warn">— TikTok social — sin cambios</span>');
+  log.push(counts.gmail      > 0 ? '<span class="ok">✓ Gmail social — '           + counts.gmail      + ' fix(es)</span>' : '<span class="warn">— Gmail social — sin cambios</span>');
+  log.push(counts.heroLogo   > 0 ? '<span class="ok">✓ Logo círculo hero — Cloudinary</span>'              : '<span class="warn">— Logo círculo — sin cambios</span>');
+  log.push(counts.nequiLogo  > 0 ? '<span class="ok">✓ Logo pantalla Nequi — Cloudinary</span>'           : '<span class="warn">— Logo Nequi — sin cambios</span>');
+  log.push(counts.bancoLogo  > 0 ? '<span class="ok">✓ Logo pantalla Bancolombia — Cloudinary</span>'     : '<span class="warn">— Logo Bancolombia — sin cambios</span>');
+  log.push(counts.bancoCard  > 0 ? '<span class="ok">✓ Tarjeta pago Bancolombia — imagen correcta</span>' : '<span class="warn">— Tarjeta Bancolombia — sin cambios</span>');
+  log.push(counts.visaCard   > 0 ? '<span class="ok">✓ Tarjeta Crédito/Débito — imagen correcta</span>'  : '<span class="warn">— Tarjeta Crédito — sin cambios</span>');
+  log.push(counts.cartLayout > 0 ? '<span class="ok">✓ Layout carrito — barra sólida + burbuja flotante</span>' : '<span class="warn">— Layout carrito — sin cambios</span>');
 
   document.getElementById('status').innerHTML = log.join('<br/>');
   document.getElementById('status').classList.add('show');
   document.getElementById('savings').textContent =
-    '✅ Reducido ~' + savedKB + ' KB (' + Math.round(originalSize/1024) + ' KB → ' + Math.round(newSize/1024) + ' KB)';
+    '✅ Procesado: ' + Math.round(originalSize/1024) + ' KB → ' + Math.round(newSize/1024) + ' KB';
   document.getElementById('savings').classList.add('show');
   document.getElementById('downloadBtn').classList.add('show');
 }
