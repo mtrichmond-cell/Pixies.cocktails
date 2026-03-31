@@ -36,7 +36,7 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </head>
 <body>
 <div class="card">
-  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v3.4</span></h1>
+  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v3.6</span></h1>
   <p>Reemplaza íconos sociales y logos de pago base64 con CDN/Cloudinary.</p>
 
   <button class="fetch-btn" id="fetchBtn" onclick="fetchFromGitHub()">
@@ -62,7 +62,7 @@ var LOGO_URL   = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/
 var NEQUI_URL  = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8477_xuh9oh.jpg';
 var BANCOL_URL = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8483_pk73rq.png';
 var VISA_URL   = 'https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8491_ix6yng.jpg';
-var GITHUB_URL = 'https://raw.githubusercontent.com/mtrichmond-cell/Pixies.cocktails/main/test.html';
+var GITHUB_URL = 'https://raw.githubusercontent.com/mtrichmond-cell/Pixies.cocktails/main/index2.html';
 var ICON_STYLE = 'width:32px;height:32px;border-radius:8px';
 
 // ── Size thresholds (base64 char ≈ binary × 1.37) ─────────────────────────
@@ -146,6 +146,12 @@ function processContent(content) {
       if (am) alt = ' alt="' + am[1] + '"';
       return aOpen + between + '<img src="' + icon.src + '" style="' + ICON_STYLE + '"' + alt + '/>';
     }
+  );
+
+  // ── Pass 4: Cart bubble → full-width bar ──────────────────────────────
+  modified = modified.replace(
+    /\.cart-bubble\{[^}]+\}/,
+    '.cart-bubble{position:fixed;bottom:0;left:0;right:0;z-index:200;background:linear-gradient(135deg,var(--purple),var(--pink));padding:12px 20px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -4px 20px rgba(255,45,143,.3);cursor:pointer}'
   );
 
   var newSize = modified.length;
