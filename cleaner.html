@@ -36,8 +36,8 @@ p{font-size:12px;color:var(--muted);line-height:1.6;text-align:center;}
 </head>
 <body>
 <div class="card">
-  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v4.1</span></h1>
-  <p>Íconos · logos · layout carrito · siguiente paso · cámara dulces y tamaños</p>
+  <h1>PIXIES <span>CLEANER</span> <span style="font-size:11px;font-weight:400;color:var(--muted);letter-spacing:1px;">v4.2</span></h1>
+  <p>Íconos · logos · carrito · siguiente paso · 📷 dulces y tamaños</p>
 
   <button class="fetch-btn" id="fetchBtn" onclick="fetchFromGitHub()">
     🐙 Fetch &amp; Clean desde GitHub
@@ -74,113 +74,116 @@ function classifyBlob(len) {
 
 var cleanedContent = null;
 
-// ── The injected camera + modal script block ──────────────────────────────
-var INJECT_SCRIPT = `
-<script id="px-inject">
-(function(){
-  // ── Photo Modal ────────────────────────────────────────────────────────
-  var ov = document.createElement('div');
-  ov.id = 'pxModal';
-  ov.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;';
-  ov.innerHTML = '<div style="position:relative;width:100%;max-width:320px;background:rgba(30,0,50,.97);border:1px solid rgba(180,0,255,.3);border-radius:20px;overflow:hidden;box-shadow:0 0 40px rgba(255,45,143,.3);">'
-    + '<button id="pxModalClose" style="position:absolute;top:10px;right:10px;background:rgba(255,45,143,.25);border:1px solid rgba(255,45,143,.5);color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;z-index:1;line-height:1;">✕</button>'
-    + '<div id="pxModalEmoji" style="display:none;font-size:90px;text-align:center;padding:30px 0 10px;"></div>'
-    + '<img id="pxModalImg" src="" style="width:100%;display:block;max-height:260px;object-fit:cover;"/>'
-    + '<div style="padding:14px 16px 18px;text-align:center;">'
-    + '<div id="pxModalName" style="font-family:Bebas Neue,sans-serif;font-size:24px;letter-spacing:3px;color:#f5e6ff;"></div>'
-    + '<div id="pxModalSub" style="font-size:11px;color:#8855aa;font-weight:700;margin-top:4px;"></div>'
-    + '</div></div>';
-  document.body.appendChild(ov);
-  document.getElementById('pxModalClose').onclick = function(){ ov.style.display='none'; };
-  ov.addEventListener('click', function(e){ if(e.target===ov) ov.style.display='none'; });
+// ── Injected script — event delegation, no function patching ─────────────
+var INJECT_SCRIPT = [
+'<script id="px-inject">',
+'(function(){',
 
-  window.showPxModal = function(imgSrc, emoji, name, sub) {
-    var imgEl   = document.getElementById('pxModalImg');
-    var emojiEl = document.getElementById('pxModalEmoji');
-    if (imgSrc) {
-      imgEl.src = imgSrc; imgEl.style.display = 'block'; emojiEl.style.display = 'none';
-    } else {
-      imgEl.src = ''; imgEl.style.display = 'none';
-      emojiEl.textContent = emoji || '📷';
-      emojiEl.style.display = 'block';
-    }
-    document.getElementById('pxModalName').textContent = name || '';
-    document.getElementById('pxModalSub').textContent  = imgSrc ? (sub||'') : (sub||'') + ' — Foto próximamente 📸';
-    ov.style.display = 'flex';
-  };
+// ── Modal ──
+'var ov=document.createElement("div");',
+'ov.id="pxModal";',
+'ov.style.cssText="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;";',
+'ov.innerHTML=\'<div style="position:relative;width:100%;max-width:320px;background:rgba(30,0,50,.97);border:1px solid rgba(180,0,255,.3);border-radius:20px;overflow:hidden;box-shadow:0 0 40px rgba(255,45,143,.3);">\'',
+'  +\'<button id="pxClose" style="position:absolute;top:10px;right:10px;background:rgba(255,45,143,.25);border:1px solid rgba(255,45,143,.5);color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;z-index:1;line-height:1;">&#x2715;</button>\'',
+'  +\'<div id="pxEmoji" style="display:none;font-size:90px;text-align:center;padding:28px 0 8px;"></div>\'',
+'  +\'<img id="pxImg" src="" style="width:100%;display:none;max-height:260px;object-fit:cover;"/>\'',
+'  +\'<div style="padding:14px 16px 18px;text-align:center;">\'',
+'  +\'<div id="pxName" style="font-family:Bebas Neue,sans-serif;font-size:24px;letter-spacing:3px;color:#f5e6ff;"></div>\'',
+'  +\'<div id="pxSub" style="font-size:11px;color:#8855aa;font-weight:700;margin-top:4px;"></div>\'',
+'  +\'</div></div>\';',
+'document.body.appendChild(ov);',
+'document.getElementById("pxClose").onclick=function(){ov.style.display="none";};',
+'ov.addEventListener("click",function(e){if(e.target===ov)ov.style.display="none";});',
 
-  // ── Camera button factory ──────────────────────────────────────────────
-  function makeCamBtn(onClick) {
-    var btn = document.createElement('button');
-    btn.className = 'px-cam';
-    btn.style.cssText = 'background:rgba(255,45,143,.18);border:1px solid rgba(255,45,143,.4);border-radius:8px;padding:3px 8px;font-size:15px;cursor:pointer;margin-left:6px;flex-shrink:0;line-height:1;';
-    btn.textContent = '📷';
-    btn.addEventListener('click', function(e){ e.stopPropagation(); onClick(); });
-    return btn;
-  }
+'window.showPxModal=function(src,emoji,name,sub){',
+'  var imgEl=document.getElementById("pxImg"),emEl=document.getElementById("pxEmoji");',
+'  if(src){imgEl.src=src;imgEl.style.display="block";emEl.style.display="none";}',
+'  else{imgEl.src="";imgEl.style.display="none";emEl.textContent=emoji||"📷";emEl.style.display="block";}',
+'  document.getElementById("pxName").textContent=name||"";',
+'  document.getElementById("pxSub").textContent=(sub||"")+(src?"":"\u00a0— Foto pr\u00f3ximamente \uD83D\uDCF8");',
+'  ov.style.display="flex";',
+'};',
 
-  // ── Patch toggleCandy ─────────────────────────────────────────────────
-  var _patchAttempts = 0;
-  var _patchTimer = setInterval(function(){
-    _patchAttempts++;
-    if (_patchAttempts > 30) { clearInterval(_patchTimer); return; }
-    if (typeof window.toggleCandy !== 'function') return;
-    clearInterval(_patchTimer);
+// ── Camera button factory ──
+'function makeCam(onClick){',
+'  var b=document.createElement("button");',
+'  b.className="px-cam";',
+'  b.style.cssText="background:rgba(255,45,143,.18);border:1px solid rgba(255,45,143,.4);border-radius:8px;padding:3px 8px;font-size:15px;cursor:pointer;margin-left:6px;flex-shrink:0;line-height:1;";',
+'  b.textContent="\uD83D\uDCF7";',
+'  b.addEventListener("click",function(e){e.stopPropagation();onClick();});',
+'  return b;',
+'}',
 
-    var _origToggle = window.toggleCandy;
-    window.toggleCandy = function(id) {
-      _origToggle.call(this, id);
-      if (!window.CFG || !window.CFG.candies) return;
-      var candy = window.CFG.candies.find(function(c){ return c.id === id; });
-      if (!candy) return;
-      // Find all candy items, match by name
-      var items = document.querySelectorAll('#candyGrid .candy-item');
-      items.forEach(function(el){
-        var nameEl = el.querySelector('.ci-name');
-        if (!nameEl || nameEl.textContent.trim() !== candy.n) return;
-        var existing = el.querySelector('.px-cam');
-        if (el.classList.contains('sel')) {
-          if (!existing) {
-            var stepper = el.querySelector('.ci-stepper');
-            if (stepper) {
-              stepper.appendChild(makeCamBtn(function(){
-                showPxModal(candy.img||'', candy.e||'🍬', candy.n, '');
-              }));
-            }
-          }
-        } else {
-          if (existing) existing.remove();
-        }
-      });
-    };
-  }, 200);
+// ── Candy grid — event delegation ──
+'document.addEventListener("click",function(e){',
+'  var grid=document.getElementById("candyGrid");',
+'  if(!grid)return;',
+// Find the clicked candy-item
+'  var item=e.target;',
+'  while(item&&item!==grid){if(item.classList&&item.classList.contains("candy-item"))break;item=item.parentNode;}',
+'  if(!item||!item.classList||!item.classList.contains("candy-item"))return;',
+// Ignore clicks on the camera button itself
+'  if(e.target.classList&&e.target.classList.contains("px-cam"))return;',
+// Wait a tick for the toggle to finish
+'  setTimeout(function(){',
+'    var cam=item.querySelector(".px-cam");',
+'    if(item.classList.contains("sel")){',
+'      if(cam)return;', // already has button
+// Get candy id from onclick attr
+'      var oc=item.getAttribute("onclick")||"";',
+'      var m=oc.match(/toggleCandy\((\d+)\)/);',
+'      if(!m)return;',
+'      var id=parseInt(m[1]);',
+'      var candy=window.CFG&&window.CFG.candies&&window.CFG.candies.find(function(c){return c.id===id;});',
+'      if(!candy)return;',
+// Append to stepper if it exists, otherwise to the item directly
+'      var target=item.querySelector(".ci-stepper")||item;',
+'      target.appendChild(makeCam(function(){showPxModal(candy.img||"",candy.e||"\uD83C\uDF6C",candy.n,"");}));',
+'    }else{',
+'      if(cam)cam.remove();',
+'    }',
+'  },60);',
+'},true);',
 
-  // ── Size card camera ──────────────────────────────────────────────────
-  document.addEventListener('click', function(e){
-    var card = e.target.closest ? e.target.closest('.size-card') : null;
-    if (!card) return;
-    // Debounce — remove all size cam buttons first
-    setTimeout(function(){
-      document.querySelectorAll('.px-size-cam').forEach(function(b){ b.remove(); });
-      if (!card.classList.contains('selected')) return;
-      if (!window.CFG || !window.CFG.sizes) return;
-      var nameEl = card.querySelector('.sc-name');
-      if (!nameEl) return;
-      var size = window.CFG.sizes.find(function(s){ return s.n === nameEl.textContent.trim(); });
-      if (!size) return;
-      var btn = document.createElement('button');
-      btn.className = 'px-size-cam';
-      btn.style.cssText = 'background:rgba(255,45,143,.18);border:1px solid rgba(255,45,143,.4);border-radius:8px;padding:5px 12px;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;display:flex;align-items:center;gap:6px;color:#f5e6ff;font-family:Nunito,sans-serif;';
-      btn.innerHTML = '📷 <span>Ver foto</span>';
-      btn.addEventListener('click', function(ev){
-        ev.stopPropagation();
-        showPxModal(size.img||'', size.e||'🥤', size.n, size.oz + ' — ' + size.d);
-      });
-      card.appendChild(btn);
-    }, 50);
-  }, true);
-})();
-<\/script>`;
+// ── Size grid — event delegation ──
+'document.addEventListener("click",function(e){',
+'  var grid=document.getElementById("sizeGrid");',
+'  if(!grid)return;',
+'  var item=e.target;',
+'  while(item&&item!==grid){if(item.classList&&item.classList.contains("size-card"))break;item=item.parentNode;}',
+'  if(!item||!item.classList||!item.classList.contains("size-card"))return;',
+'  if(e.target.classList&&e.target.classList.contains("px-size-cam"))return;',
+'  setTimeout(function(){',
+// Remove all size cam buttons first
+'    document.querySelectorAll(".px-size-cam").forEach(function(b){b.remove();});',
+'    if(!item.classList.contains("selected"))return;',
+'    var oc=item.getAttribute("onclick")||"";',
+'    var m=oc.match(/selectSize\(["\']([^"\']+)["\']\)/);',
+'    var sizeId=m?m[1]:null;',
+'    var size=window.CFG&&window.CFG.sizes&&(sizeId',
+'      ?window.CFG.sizes.find(function(s){return s.id===sizeId;})',
+'      :null);',
+// Fallback: match by name text
+'    if(!size){',
+'      var nameEl=item.querySelector(".sc-name");',
+'      if(nameEl)size=window.CFG&&window.CFG.sizes&&window.CFG.sizes.find(function(s){return s.n===nameEl.textContent.trim();});',
+'    }',
+'    if(!size)return;',
+'    var btn=document.createElement("button");',
+'    btn.className="px-size-cam";',
+'    btn.style.cssText="background:rgba(255,45,143,.18);border:1px solid rgba(255,45,143,.4);border-radius:8px;padding:5px 12px;font-size:13px;font-weight:800;cursor:pointer;margin-top:10px;display:flex;align-items:center;gap:6px;color:#f5e6ff;font-family:Nunito,sans-serif;";',
+'    btn.innerHTML="\uD83D\uDCF7 <span>Ver foto</span>";',
+'    btn.addEventListener("click",function(ev){',
+'      ev.stopPropagation();',
+'      showPxModal(size.img||"",size.e||"\uD83E\uDD64",size.n,size.oz+" \u2014 "+size.d);',
+'    });',
+'    item.appendChild(btn);',
+'  },60);',
+'},true);',
+
+'})();',
+'<\/script>'
+].join('\n');
 
 function processContent(content) {
   var originalSize = content.length;
@@ -193,20 +196,19 @@ function processContent(content) {
   };
   var modified = content;
 
-  // ── Pass 1: WhatsApp direct fix (wa.me href → force WA icon) ─────────
-  var waFixed = modified.replace(
+  // ── Pass 1: WhatsApp direct — wa.me href → force WA icon ─────────────
+  modified = modified.replace(
     /(<a[^>]*href="https:\/\/wa\.me[^"]*"[^>]*>)<img[^>]*\/>/g,
     function(match, aOpen) {
       counts.waFix++;
       return aOpen + '<img src="https://cdn.simpleicons.org/whatsapp/25d366" style="' + ICON_STYLE + '"/>';
     }
   );
-  if (waFixed !== modified) modified = waFixed;
 
-  // ── Pass 2: Base64 payment icons (context-based) ──────────────────────
+  // ── Pass 2: Base64 payment icons ──────────────────────────────────────
   modified = modified.replace(/(?:src=)?(['"`]?)data:image\/[^;]+;base64,([A-Za-z0-9+\/]{200,}={0,2})\1/g,
     function(match, quote, b64, offset, original) {
-      var start   = Math.max(0, offset - 600);
+      var start = Math.max(0, offset - 600);
       var context = original.substring(start, offset + 80).toLowerCase();
       if (/nequi/.test(context)) {
         counts.nequi++;
@@ -243,94 +245,85 @@ function processContent(content) {
     }
   );
 
-  // ── Pass 4: Anchor-based remaining social icons ───────────────────────
+  // ── Pass 4: Anchor-based social icons ─────────────────────────────────
   var ICON_MAP = [
-    {test: /wa\.me|whatsapp/i,  key:'whatsapp',  src:'https://cdn.simpleicons.org/whatsapp/25d366'},
-    {test: /instagram/i,        key:'instagram', src:'https://cdn.simpleicons.org/instagram/ff2d8f'},
-    {test: /tiktok/i,           key:'tiktok',    src:'https://cdn.simpleicons.org/tiktok/ffffff'},
-    {test: /gmail|mailto/i,     key:'gmail',     src:'https://cdn.simpleicons.org/gmail/ea4335', onclick:true},
+    {test:/wa\.me|whatsapp/i, key:'whatsapp', src:'https://cdn.simpleicons.org/whatsapp/25d366'},
+    {test:/instagram/i,       key:'instagram',src:'https://cdn.simpleicons.org/instagram/ff2d8f'},
+    {test:/tiktok/i,          key:'tiktok',   src:'https://cdn.simpleicons.org/tiktok/ffffff'},
+    {test:/gmail|mailto/i,    key:'gmail',    src:'https://cdn.simpleicons.org/gmail/ea4335', onclick:true},
   ];
   modified = modified.replace(/(<a\b[^>]*href="([^"]*)"([^>]*)>)([\s\S]*?)(<img\b[^>]*>)/g,
     function(match, aOpen, href, aRest, between, imgTag) {
       var icon = null;
       for (var i = 0; i < ICON_MAP.length; i++) {
         var m = ICON_MAP[i];
-        if (m.test.test(href) || (m.onclick && m.test.test(aRest))) { icon = m; break; }
+        if (m.test.test(href)||(m.onclick&&m.test.test(aRest))){icon=m;break;}
       }
       if (!icon) return match;
       counts[icon.key]++;
-      var alt = ''; var am = imgTag.match(/alt="([^"]*)"/);
-      if (am) alt = ' alt="' + am[1] + '"';
-      return aOpen + between + '<img src="' + icon.src + '" style="' + ICON_STYLE + '"' + alt + '/>';
+      var alt=''; var am=imgTag.match(/alt="([^"]*)"/);
+      if (am) alt=' alt="'+am[1]+'"';
+      return aOpen+between+'<img src="'+icon.src+'" style="'+ICON_STYLE+'"'+alt+'/>';
     }
   );
 
-  // ── Pass 5: Hero logo circle → Cloudinary ────────────────────────────
+  // ── Pass 5: Hero logo circle ──────────────────────────────────────────
   var heroLogoRx = /(<div class="logo-wrap"><img\s)[^>]+(\/><\/div>)/;
   if (heroLogoRx.test(modified)) {
     modified = modified.replace(heroLogoRx,
-      '$1src="' + LOGO_URL + '" style="width:100%;height:100%;object-fit:cover"$2'
-    );
+      '$1src="'+LOGO_URL+'" style="width:100%;height:100%;object-fit:cover"$2');
     counts.heroLogo++;
   }
 
-  // ── Pass 6: Bancolombia pay card (border-radius:50% is the tell) ──────
+  // ── Pass 6: Bancolombia pay card ──────────────────────────────────────
   modified = modified.replace(
     /(<img class="pay-icon" src=")[^"]+(" style="border-radius:50%"\/>)/g,
-    function(match, pre, post) { counts.bancoCard++; return pre + BANCOL_URL + post; }
+    function(m,pre,post){counts.bancoCard++;return pre+BANCOL_URL+post;}
   );
 
-  // ── Pass 7: Credit/debit card pay icon (any pay-icon → gmail CDN) ────
+  // ── Pass 7: Credit/debit pay icon ─────────────────────────────────────
   modified = modified.replace(
     /<img class="pay-icon" src="https:\/\/cdn\.simpleicons\.org\/gmail\/ea4335"[^>]*\/>/g,
-    function() {
+    function(){
       counts.visaCard++;
-      return '<img class="pay-icon" src="' + VISA_URL + '" style="width:40px;height:40px;border-radius:10px;object-fit:contain"/>';
+      return '<img class="pay-icon" src="'+VISA_URL+'" style="width:40px;height:40px;border-radius:10px;object-fit:contain"/>';
     }
   );
 
-  // ── Pass 8: Nequi payment page ps-logo (first tiktok ps-logo) ────────
-  var nequiLogoRx = /<img class="ps-logo" src="https:\/\/cdn\.simpleicons\.org\/tiktok\/ffffff" style="width:32px;height:32px;border-radius:8px"\/>/;
-  if (nequiLogoRx.test(modified)) {
-    modified = modified.replace(nequiLogoRx,
-      '<img class="ps-logo" src="' + NEQUI_URL + '" style="width:70px;height:70px;border-radius:16px;object-fit:cover"/>'
-    );
+  // ── Pass 8: Nequi ps-logo ─────────────────────────────────────────────
+  var nRx = /<img class="ps-logo" src="https:\/\/cdn\.simpleicons\.org\/tiktok\/ffffff" style="width:32px;height:32px;border-radius:8px"\/>/;
+  if (nRx.test(modified)) {
+    modified = modified.replace(nRx,
+      '<img class="ps-logo" src="'+NEQUI_URL+'" style="width:70px;height:70px;border-radius:16px;object-fit:cover"/>');
     counts.nequiLogo++;
   }
 
-  // ── Pass 9: Bancolombia ps-logo (any remaining tiktok ps-logo) ────────
+  // ── Pass 9: Bancolombia ps-logo ───────────────────────────────────────
   modified = modified.replace(
     /<img class="ps-logo" src="https:\/\/cdn\.simpleicons\.org\/tiktok\/ffffff"[^>]*\/>/g,
-    function() {
+    function(){
       counts.bancoLogo++;
-      return '<img class="ps-logo" src="' + BANCOL_URL + '" style="width:70px;height:70px;border-radius:50%;object-fit:cover"/>';
+      return '<img class="ps-logo" src="'+BANCOL_URL+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover"/>';
     }
   );
 
-  // ── Pass 10: Cart layout — solid bar + floating bubble ────────────────
-  var ctaFixed = modified.replace(
-    /\.cta-float\{[^}]+\}/,
-    '.cta-float{position:fixed;bottom:0;left:0;right:0;padding:14px 16px 28px;background:linear-gradient(135deg,#6b00cc,#ff2d8f);z-index:60;transform:translateY(120px);transition:transform .3s;box-shadow:0 -4px 20px rgba(255,45,143,.4)}'
-  );
-  if (ctaFixed !== modified) { modified = ctaFixed; counts.cartLayout++; }
+  // ── Pass 10: Cart layout ──────────────────────────────────────────────
+  var c1 = modified.replace(/\.cta-float\{[^}]+\}/,
+    '.cta-float{position:fixed;bottom:0;left:0;right:0;padding:14px 16px 28px;background:linear-gradient(135deg,#6b00cc,#ff2d8f);z-index:60;transform:translateY(120px);transition:transform .3s;box-shadow:0 -4px 20px rgba(255,45,143,.4)}');
+  if(c1!==modified){modified=c1;counts.cartLayout++;}
 
-  var bubbleFixed = modified.replace(
-    /\.cart-bubble\{[^}]+\}/,
-    '.cart-bubble{position:fixed;bottom:14px;right:12px;z-index:201;background:rgba(15,0,30,0.92);border:2px solid rgba(255,45,143,0.6);border-radius:50px;padding:8px 14px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(255,45,143,.5);cursor:pointer;backdrop-filter:blur(8px)}'
-  );
-  if (bubbleFixed !== modified) { modified = bubbleFixed; counts.cartLayout++; }
+  var c2 = modified.replace(/\.cart-bubble\{[^}]+\}/,
+    '.cart-bubble{position:fixed;bottom:14px;right:12px;z-index:201;background:rgba(15,0,30,0.92);border:2px solid rgba(255,45,143,0.6);border-radius:50px;padding:8px 14px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(255,45,143,.5);cursor:pointer;backdrop-filter:blur(8px)}');
+  if(c2!==modified){modified=c2;counts.cartLayout++;}
 
   // ── Pass 11: Flavor CTA → full-width SIGUIENTE PASO bar ──────────────
-  var flavorCtaRx = /<div id="flavorCta"[^>]*>[\s\S]*?<\/div>/;
-  var newFlavorCta = '<div id="flavorCta" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;padding:14px 16px 28px;background:linear-gradient(135deg,#6b00cc,#ff2d8f);box-shadow:0 -4px 20px rgba(255,45,143,.4);"><button onclick="confirmFlavors()" style="width:100%;max-width:480px;display:block;margin:0 auto;padding:16px;border:none;border-radius:14px;background:transparent;color:white;font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;font-family:\'Bebas Neue\',sans-serif;">SIGUIENTE PASO →</button></div>';
-  if (flavorCtaRx.test(modified)) {
-    modified = modified.replace(flavorCtaRx, newFlavorCta);
-    counts.flavorCta++;
-  }
+  var fRx = /<div id="flavorCta"[^>]*>[\s\S]*?<\/div>/;
+  var fNew = '<div id="flavorCta" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;padding:14px 16px 28px;background:linear-gradient(135deg,#6b00cc,#ff2d8f);box-shadow:0 -4px 20px rgba(255,45,143,.4);"><button onclick="confirmFlavors()" style="width:100%;max-width:480px;display:block;margin:0 auto;padding:16px;border:none;border-radius:14px;background:transparent;color:white;font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;font-family:\'Bebas Neue\',sans-serif;">SIGUIENTE PASO \u2192</button></div>';
+  if (fRx.test(modified)) { modified = modified.replace(fRx, fNew); counts.flavorCta++; }
 
-  // ── Pass 12: Inject camera + modal script before </body> ──────────────
+  // ── Pass 12: Inject camera + modal before </body> ─────────────────────
   if (modified.indexOf('px-inject') === -1) {
-    modified = modified.replace('</body>', INJECT_SCRIPT + '</body>');
+    modified = modified.replace('</body>', INJECT_SCRIPT + '\n</body>');
     counts.modalInject++;
   }
 
@@ -338,42 +331,41 @@ function processContent(content) {
   cleanedContent = modified;
 
   var log = [];
-  log.push(counts.waFix      > 0 ? '<span class="ok">✓ WhatsApp (wa.me directo) — '   + counts.waFix     + ' fix(es)</span>' : '<span class="warn">— WhatsApp wa.me — sin cambios</span>');
-  log.push(counts.whatsapp   > 0 ? '<span class="ok">✓ WhatsApp (anchor) — '          + counts.whatsapp  + ' fix(es)</span>' : '<span class="warn">— WhatsApp anchor — sin cambios</span>');
-  log.push(counts.instagram  > 0 ? '<span class="ok">✓ Instagram — '                  + counts.instagram + ' fix(es)</span>' : '<span class="warn">— Instagram — sin cambios</span>');
-  log.push(counts.tiktok     > 0 ? '<span class="ok">✓ TikTok — '                     + counts.tiktok    + ' fix(es)</span>' : '<span class="warn">— TikTok — sin cambios</span>');
-  log.push(counts.gmail      > 0 ? '<span class="ok">✓ Gmail — '                      + counts.gmail     + ' fix(es)</span>' : '<span class="warn">— Gmail — sin cambios</span>');
-  log.push(counts.heroLogo   > 0 ? '<span class="ok">✓ Logo círculo hero — Cloudinary</span>'                : '<span class="warn">— Logo círculo — sin cambios</span>');
-  log.push(counts.nequiLogo  > 0 ? '<span class="ok">✓ Logo pantalla Nequi — Cloudinary</span>'             : '<span class="warn">— Logo Nequi — sin cambios</span>');
-  log.push(counts.bancoLogo  > 0 ? '<span class="ok">✓ Logo pantalla Bancolombia — Cloudinary</span>'       : '<span class="warn">— Logo Bancolombia — sin cambios</span>');
-  log.push(counts.bancoCard  > 0 ? '<span class="ok">✓ Tarjeta Bancolombia — imagen correcta</span>'        : '<span class="warn">— Tarjeta Bancolombia — sin cambios</span>');
-  log.push(counts.visaCard   > 0 ? '<span class="ok">✓ Tarjeta Crédito/Débito — imagen correcta</span>'    : '<span class="warn">— Tarjeta Crédito — sin cambios</span>');
-  log.push(counts.cartLayout > 0 ? '<span class="ok">✓ Layout carrito — barra + burbuja flotante</span>'   : '<span class="warn">— Layout carrito — sin cambios</span>');
-  log.push(counts.flavorCta  > 0 ? '<span class="ok">✓ Sabores — SIGUIENTE PASO barra completa</span>'     : '<span class="warn">— Sabores CTA — sin cambios</span>');
-  log.push(counts.modalInject> 0 ? '<span class="ok">✓ Modal foto + botón 📷 dulces y tamaños — inyectado</span>' : '<span class="warn">— Modal/cámara — ya existía</span>');
+  log.push(counts.waFix      >0?'<span class="ok">✓ WhatsApp (wa.me) — '     +counts.waFix     +' fix(es)</span>':'<span class="warn">— WhatsApp — sin cambios</span>');
+  log.push(counts.whatsapp   >0?'<span class="ok">✓ WhatsApp (anchor) — '    +counts.whatsapp  +' fix(es)</span>':'<span class="warn">— WhatsApp anchor — sin cambios</span>');
+  log.push(counts.instagram  >0?'<span class="ok">✓ Instagram — '             +counts.instagram +' fix(es)</span>':'<span class="warn">— Instagram — sin cambios</span>');
+  log.push(counts.tiktok     >0?'<span class="ok">✓ TikTok — '                +counts.tiktok    +' fix(es)</span>':'<span class="warn">— TikTok — sin cambios</span>');
+  log.push(counts.gmail      >0?'<span class="ok">✓ Gmail — '                 +counts.gmail     +' fix(es)</span>':'<span class="warn">— Gmail — sin cambios</span>');
+  log.push(counts.heroLogo   >0?'<span class="ok">✓ Logo círculo — Cloudinary</span>':'<span class="warn">— Logo círculo — sin cambios</span>');
+  log.push(counts.nequiLogo  >0?'<span class="ok">✓ Logo Nequi — Cloudinary</span>':'<span class="warn">— Logo Nequi — sin cambios</span>');
+  log.push(counts.bancoLogo  >0?'<span class="ok">✓ Logo Bancolombia — Cloudinary</span>':'<span class="warn">— Logo Bancolombia — sin cambios</span>');
+  log.push(counts.bancoCard  >0?'<span class="ok">✓ Tarjeta Bancolombia — correcta</span>':'<span class="warn">— Tarjeta Bancolombia — sin cambios</span>');
+  log.push(counts.visaCard   >0?'<span class="ok">✓ Tarjeta Crédito/Débito — correcta</span>':'<span class="warn">— Tarjeta Crédito — sin cambios</span>');
+  log.push(counts.cartLayout >0?'<span class="ok">✓ Layout carrito — barra + burbuja</span>':'<span class="warn">— Layout carrito — sin cambios</span>');
+  log.push(counts.flavorCta  >0?'<span class="ok">✓ Sabores — SIGUIENTE PASO barra</span>':'<span class="warn">— Sabores CTA — sin cambios</span>');
+  log.push(counts.modalInject>0?'<span class="ok">✓ Modal 📷 + cámara dulces/tamaños — inyectado</span>':'<span class="warn">— Modal/cámara — ya presente</span>');
 
   document.getElementById('status').innerHTML = log.join('<br/>');
   document.getElementById('status').classList.add('show');
   document.getElementById('savings').textContent =
-    '✅ Procesado: ' + Math.round(originalSize/1024) + ' KB → ' + Math.round(newSize/1024) + ' KB';
+    '✅ Procesado: '+Math.round(originalSize/1024)+' KB → '+Math.round(newSize/1024)+' KB';
   document.getElementById('savings').classList.add('show');
   document.getElementById('downloadBtn').classList.add('show');
 }
 
 function fetchFromGitHub() {
-  var btn = document.getElementById('fetchBtn');
-  var statusEl = document.getElementById('status');
-  btn.disabled = true; btn.textContent = '⏳ Descargando…';
-  statusEl.innerHTML = '<span class="ok">Conectando a GitHub…</span>';
+  var btn=document.getElementById('fetchBtn'),statusEl=document.getElementById('status');
+  btn.disabled=true; btn.textContent='⏳ Descargando…';
+  statusEl.innerHTML='<span class="ok">Conectando a GitHub…</span>';
   statusEl.classList.add('show');
-  fetch(GITHUB_URL + '?t=' + Date.now())
-    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
-    .then(function(t){ btn.disabled=false; btn.textContent='🐙 Fetch & Clean desde GitHub'; processContent(t); })
-    .catch(function(e){ btn.disabled=false; btn.textContent='🐙 Fetch & Clean desde GitHub';
-      statusEl.innerHTML='<span class="err">❌ '+e.message+' — sube el archivo manualmente.</span>'; });
+  fetch(GITHUB_URL+'?t='+Date.now())
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+    .then(function(t){btn.disabled=false;btn.textContent='🐙 Fetch & Clean desde GitHub';processContent(t);})
+    .catch(function(e){btn.disabled=false;btn.textContent='🐙 Fetch & Clean desde GitHub';
+      statusEl.innerHTML='<span class="err">❌ '+e.message+' — sube el archivo manualmente.</span>';});
 }
 
-function processFile(f){ var r=new FileReader(); r.onload=function(e){processContent(e.target.result);}; r.readAsText(f); }
+function processFile(f){var r=new FileReader();r.onload=function(e){processContent(e.target.result);};r.readAsText(f);}
 document.getElementById('fileInput').addEventListener('change',function(e){if(e.target.files[0])processFile(e.target.files[0]);});
 var dz=document.getElementById('dropZone');
 dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('over');});
@@ -384,7 +376,7 @@ function downloadClean(){
   if(!cleanedContent)return;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([cleanedContent],{type:'text/html'}));
-  a.download='index_clean.html'; a.click();
+  a.download='index_clean.html';a.click();
 }
 </script>
 </body>
