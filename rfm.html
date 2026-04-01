@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>Pixies RFM</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+
+:root{
+  --bg:#0d0a14;
+  --surface:#16101f;
+  --surface2:#1e1530;
+  --border:rgba(255,255,255,0.07);
+  --pink:#ff2d8f;
+  --purple:#bf00ff;
+  --green:#00e676;
+  --yellow:#d4ff00;
+  --red:#ff3b5c;
+  --text:#f0e8ff;
+  --muted:#7a6b8a;
+  --font-head:'Syne',sans-serif;
+  --font-mono:'Space Mono',monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-head);overflow:hidden;}
+
+/* ── PIN SCREEN ── */
+#pinScreen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;
+}
+.pin-logo{font-size:13px;font-family:var(--font-mono);color:var(--muted);letter-spacing:3px;text-transform:uppercase;}
+.pin-logo span{color:var(--pink);}
+.pin-title{font-size:28px;font-weight:800;text-align:center;line-height:1.1;}
+.pin-title small{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:6px;font-family:var(--font-mono);}
+.pin-dots{display:flex;gap:14px;}
+.pin-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);transition:all .2s;}
+.pin-dot.filled{background:var(--pink);border-color:var(--pink);box-shadow:0 0 12px rgba(255,45,143,0.6);}
+.pin-dot.error{background:var(--red);border-color:var(--red);}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,72px);gap:10px;}
+.pin-key{
+  height:64px;border-radius:14px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);
+  font-size:22px;font-family:var(--font-head);font-weight:700;
+  cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;
+}
+.pin-key:active{background:var(--surface2);transform:scale(0.93);}
+.pin-key.del{font-size:16px;color:var(--muted);}
+.pin-key.empty{pointer-events:none;opacity:0;}
+.pin-error{font-size:12px;font-family:var(--font-mono);color:var(--red);letter-spacing:1px;min-height:16px;}
+
+/* ── MAIN APP ── */
+#app{display:none;height:100%;flex-direction:column;}
+#app.visible{display:flex;}
+
+.rfm-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  flex-shrink:0;
+}
+.rfm-brand{font-size:11px;font-family:var(--font-mono);color:var(--muted);letter-spacing:2px;}
+.rfm-brand span{color:var(--pink);}
+.rfm-actions{display:flex;gap:8px;}
+.btn-save{
+  padding:8px 16px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:white;font-family:var(--font-head);font-size:12px;font-weight:700;
+  cursor:pointer;letter-spacing:.5px;
+}
+.btn-push{
+  padding:8px 16px;border-radius:10px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);
+  font-family:var(--font-head);font-size:12px;font-weight:700;
+  cursor:pointer;letter-spacing:.5px;
+}
+
+.rfm-tabs{
+  display:flex;border-bottom:1px solid var(--border);
+  background:var(--surface);flex-shrink:0;
+  overflow-x:auto;
+}
+.rfm-tabs::-webkit-scrollbar{display:none;}
+.tab{
+  padding:12px 16px;font-size:12px;font-weight:700;letter-spacing:.5px;
+  color:var(--muted);cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:all .2s;flex-shrink:0;
+}
+.tab.active{color:var(--text);border-bottom-color:var(--pink);}
+
+.rfm-content{flex:1;overflow-y:auto;padding:16px;}
+.rfm-content::-webkit-scrollbar{width:4px;}
+.rfm-content::-webkit-scrollbar-track{background:transparent;}
+.rfm-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.section-title{font-size:11px;font-family:var(--font-mono);color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+.item-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:14px;margin-bottom:8px;transition:border-color .2s;
+}
+.item-card.inactive{opacity:.45;}
+.item-card-row{display:flex;align-items:center;gap:12px;}
+.item-emoji{font-size:24px;width:36px;text-align:center;flex-shrink:0;}
+.item-info{flex:1;min-width:0;}
+.item-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-meta{font-size:11px;color:var(--muted);font-family:var(--font-mono);margin-top:2px;}
+.item-controls{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+/* image thumb in card row */
+.item-thumb{
+  width:36px;height:36px;border-radius:8px;
+  object-fit:cover;border:1px solid var(--border);
+  flex-shrink:0;
+}
+.item-thumb-placeholder{
+  width:36px;height:36px;border-radius:8px;
+  border:1px dashed var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--muted);flex-shrink:0;
+  font-family:var(--font-mono);
+}
+
+.toggle{position:relative;width:42px;height:24px;cursor:pointer;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{position:absolute;inset:0;border-radius:12px;background:rgba(255,255,255,0.1);transition:background .2s;}
+.toggle input:checked~.toggle-track{background:var(--green);}
+.toggle-thumb{
+  position:absolute;top:3px;left:3px;
+  width:18px;height:18px;border-radius:9px;
+  background:white;transition:transform .2s;
+  box-shadow:0 1px 4px rgba(0,0,0,0.3);
+}
+.toggle input:checked~.toggle-thumb{transform:translateX(18px);}
+
+.btn-edit{
+  width:32px;height:32px;border-radius:8px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:14px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.btn-edit:active{background:var(--surface2);}
+
+.tag-liq{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10px;font-family:var(--font-mono);font-weight:700;letter-spacing:.5px;}
+.tag-liq.yes{background:rgba(255,45,143,0.15);color:var(--pink);}
+.tag-liq.no{background:rgba(0,230,118,0.12);color:var(--green);}
+.tag-cell{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10px;font-family:var(--font-mono);background:rgba(212,255,0,0.1);color:var(--yellow);}
+.item-price{font-size:13px;font-family:var(--font-mono);color:var(--yellow);font-weight:700;}
+
+/* ── EDIT FORM ── */
+.item-form{
+  margin-top:14px;padding-top:14px;
+  border-top:1px solid var(--border);
+  display:none;flex-direction:column;gap:10px;
+}
+.item-form.open{display:flex;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.form-row.single{grid-template-columns:1fr;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-label{font-size:10px;font-family:var(--font-mono);color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.form-input{
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--font-mono);font-size:13px;
+  padding:8px 10px;outline:none;width:100%;
+}
+.form-input:focus{border-color:rgba(255,45,143,0.4);}
+.form-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;}
+.form-toggle-label{font-size:13px;font-weight:600;}
+.form-toggle-desc{font-size:11px;color:var(--muted);margin-top:1px;font-family:var(--font-mono);}
+
+/* ── IMAGE UPLOAD AREA ── */
+.upload-area{
+  border:1px dashed rgba(255,45,143,0.3);
+  border-radius:10px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:rgba(255,45,143,0.04);
+}
+.upload-preview{
+  width:52px;height:52px;border-radius:8px;
+  object-fit:cover;border:1px solid var(--border);
+  flex-shrink:0;display:none;
+}
+.upload-preview.show{display:block;}
+.upload-placeholder{
+  width:52px;height:52px;border-radius:8px;
+  border:1px dashed var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+  background:var(--bg);
+}
+.upload-placeholder.hide{display:none;}
+.upload-info{flex:1;min-width:0;}
+.upload-filename{
+  font-size:11px;font-family:var(--font-mono);color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:6px;
+}
+.btn-upload{
+  padding:7px 14px;border-radius:8px;
+  border:1px solid rgba(255,45,143,0.4);
+  background:transparent;color:var(--pink);
+  font-size:11px;font-weight:700;font-family:var(--font-head);
+  cursor:pointer;white-space:nowrap;
+  transition:background .15s;
+}
+.btn-upload:active{background:rgba(255,45,143,0.1);}
+.btn-upload:disabled{opacity:.4;cursor:not-allowed;}
+.upload-progress{
+  width:100%;height:3px;border-radius:2px;
+  background:var(--border);margin-top:6px;overflow:hidden;display:none;
+}
+.upload-progress.show{display:block;}
+.upload-progress-bar{
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,var(--pink),var(--purple));
+  width:0%;transition:width .3s;
+}
+.upload-status{font-size:10px;font-family:var(--font-mono);color:var(--muted);margin-top:4px;}
+.upload-status.ok{color:var(--green);}
+.upload-status.err{color:var(--red);}
+
+/* ── SETTINGS ── */
+.settings-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:8px;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-key{font-size:13px;font-weight:600;}
+.settings-desc{font-size:11px;color:var(--muted);font-family:var(--font-mono);margin-top:2px;}
+.settings-val{
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--font-mono);font-size:13px;
+  padding:6px 10px;outline:none;text-align:right;width:100px;
+}
+.settings-val:focus{border-color:rgba(255,45,143,0.4);}
+
+/* ── PUSH MODAL ── */
+#pushModal{
+  display:none;position:fixed;inset:0;z-index:2000;
+  background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;padding:24px;
+}
+#pushModal.open{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:360px;}
+.modal-title{font-size:20px;font-weight:800;margin-bottom:6px;}
+.modal-desc{font-size:13px;color:var(--muted);font-family:var(--font-mono);margin-bottom:20px;line-height:1.5;}
+.modal-pin-dots{display:flex;gap:10px;margin-bottom:20px;}
+.modal-pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--muted);transition:all .2s;}
+.modal-pin-dot.filled{background:var(--purple);border-color:var(--purple);box-shadow:0 0 10px rgba(191,0,255,0.5);}
+.modal-pin-dot.error{background:var(--red);border-color:var(--red);}
+.modal-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.modal-key{
+  height:52px;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--text);
+  font-size:18px;font-family:var(--font-head);font-weight:700;
+  cursor:pointer;transition:all .12s;
+}
+.modal-key:active{background:var(--surface2);transform:scale(0.94);}
+.modal-key.del{font-size:13px;color:var(--muted);}
+.modal-key.empty{pointer-events:none;opacity:0;}
+.btn-cancel{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-head);font-size:13px;font-weight:700;cursor:pointer;}
+.modal-error{font-size:11px;font-family:var(--font-mono);color:var(--red);text-align:center;min-height:16px;margin-bottom:8px;}
+.modal-success{text-align:center;padding:20px 0;}
+.modal-success-icon{font-size:48px;margin-bottom:12px;}
+.modal-success-text{font-size:14px;color:var(--muted);font-family:var(--font-mono);line-height:1.6;}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  padding:12px 20px;font-size:13px;font-family:var(--font-mono);
+  z-index:3000;transition:transform .3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space:nowrap;
+}
+#toast.show{transform:translateX(-50%) translateY(0);}
+#toast.success{border-color:rgba(0,230,118,0.4);color:var(--green);}
+#toast.error{border-color:rgba(255,59,92,0.4);color:var(--red);}
+
+.unsaved-dot{width:7px;height:7px;border-radius:50%;background:var(--pink);display:inline-block;margin-left:6px;box-shadow:0 0 6px var(--pink);opacity:0;transition:opacity .3s;}
+.unsaved-dot.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div id="pinScreen">
+  <div class="pin-logo"><span>PIXIES</span> RFM</div>
+  <div class="pin-title">Acceso Restringido<small>Ingresa tu PIN de administrador</small></div>
+  <div class="pin-dots" id="pinDots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-error" id="pinError"></div>
+  <div class="pin-keypad">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key empty"></button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">&#9003;</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="rfm-header">
+    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v1.1</div>
+    <div class="rfm-actions">
+      <button class="btn-push" onclick="openPushModal()">&#9650; Push to Live</button>
+      <button class="btn-save" onclick="saveChanges()">&#10003; Guardar <span class="unsaved-dot" id="unsavedDot"></span></button>
+    </div>
+  </div>
+  <div class="rfm-tabs" id="rfmTabs">
+    <div class="tab active" onclick="switchTab('candies')" id="tab-candies">&#127852; Dulces</div>
+    <div class="tab" onclick="switchTab('flavors')" id="tab-flavors">&#127827; Sabores</div>
+    <div class="tab" onclick="switchTab('sizes')" id="tab-sizes">&#10024; Tama&#241;os</div>
+    <div class="tab" onclick="switchTab('payment')" id="tab-payment">&#128179; Pagos</div>
+    <div class="tab" onclick="switchTab('settings')" id="tab-settings">&#9881; Config</div>
+  </div>
+  <div class="rfm-content" id="rfmContent"></div>
+</div>
+
+<!-- PUSH MODAL -->
+<div id="pushModal">
+  <div class="modal-box">
+    <div id="pushPinView">
+      <div class="modal-title">&#9650; Push to Live</div>
+      <div class="modal-desc">Esta acci&#243;n publica los cambios al sitio p&#250;blico.<br>Ingresa el PIN de despliegue para continuar.</div>
+      <div class="modal-pin-dots" id="pushDots">
+        <div class="modal-pin-dot" id="mpd0"></div>
+        <div class="modal-pin-dot" id="mpd1"></div>
+        <div class="modal-pin-dot" id="mpd2"></div>
+        <div class="modal-pin-dot" id="mpd3"></div>
+      </div>
+      <div class="modal-error" id="pushError"></div>
+      <div class="modal-keypad">
+        <button class="modal-key" onclick="pushKey('1')">1</button>
+        <button class="modal-key" onclick="pushKey('2')">2</button>
+        <button class="modal-key" onclick="pushKey('3')">3</button>
+        <button class="modal-key" onclick="pushKey('4')">4</button>
+        <button class="modal-key" onclick="pushKey('5')">5</button>
+        <button class="modal-key" onclick="pushKey('6')">6</button>
+        <button class="modal-key" onclick="pushKey('7')">7</button>
+        <button class="modal-key" onclick="pushKey('8')">8</button>
+        <button class="modal-key" onclick="pushKey('9')">9</button>
+        <button class="modal-key empty"></button>
+        <button class="modal-key" onclick="pushKey('0')">0</button>
+        <button class="modal-key del" onclick="pushDel()">&#9003;</button>
+      </div>
+      <button class="btn-cancel" onclick="closePushModal()">Cancelar</button>
+    </div>
+    <div id="pushSuccessView" style="display:none">
+      <div class="modal-success">
+        <div class="modal-success-icon">&#128274;</div>
+        <div class="modal-title" style="margin-bottom:12px">No configurado</div>
+        <div class="modal-success-text">El servidor de despliegue a&#250;n no est&#225; configurado.<br><br>Cuando el VPS est&#233; listo, este bot&#243;n publicar&#225; los cambios autom&#225;ticamente en ~60 segundos.</div>
+        <br>
+        <button class="btn-cancel" onclick="closePushModal()">Entendido</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- HIDDEN FILE INPUT — shared, reused for all uploads -->
+<input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileSelected(this)"/>
+
+<script>
+// ── CLOUDINARY CONFIG ─────────────────────────────────────
+// Replace these two values once your Cloudinary account is ready
+var CLOUD_NAME   = 'YOUR_CLOUD_NAME';    // e.g. 'pixiescocktails'
+var UPLOAD_PRESET = 'YOUR_UPLOAD_PRESET'; // unsigned preset name
+
+// ── APP CONFIG ───────────────────────────────────────────
+var ADMIN_PIN   = '0000';
+var DEPLOY_PIN  = '9999';
+
+// ── STATE ────────────────────────────────────────────────
+var CFG = {"store":{"name":"Pixies Cocktails","slogan":"Somos Pixies \u00bfy t\u00fa?","address":"Cra 4 #44A, Ibagu\u00e9","hours":"16:00 \u2013 23:59","phone":"+57 324 201 0008","instagram":"pixies_cocktails"},"payment":{"nequi":{"active":true,"number":"+57 324 201 0008","account":"","qr":""},"bancolombia":{"active":true,"account":"XXX-XXXXXXX","qr":""},"cash":{"active":true},"card":{"active":true}},"flavors":[{"id":1,"n":"Fresa","e":"\ud83c\udf53","c":"#ff2d8f","bg":"rgba(255,45,143,0.08)","br":"rgba(255,45,143,0.3)","d":"Dulce y refrescante","liq":true,"active":true,"img":""},{"id":2,"n":"Mango","e":"\ud83e\udd6d","c":"#ff9500","bg":"rgba(255,149,0,0.08)","br":"rgba(255,149,0,0.3)","d":"Tropical y jugoso","liq":true,"active":true,"img":""},{"id":3,"n":"Uva","e":"\ud83c\udf47","c":"#bf00ff","bg":"rgba(191,0,255,0.08)","br":"rgba(191,0,255,0.3)","d":"Intenso y frutal","liq":true,"active":true,"img":""},{"id":4,"n":"Lim\u00f3n","e":"\ud83c\udf4b","c":"#d4ff00","bg":"rgba(212,255,0,0.06)","br":"rgba(212,255,0,0.25)","d":"\u00c1cido y refrescante","liq":true,"active":true,"img":""},{"id":5,"n":"Tamarindo","e":"\ud83e\udef9","c":"#ff6b35","bg":"rgba(255,107,53,0.08)","br":"rgba(255,107,53,0.3)","d":"Dulce con toque agrio","liq":true,"active":true,"img":""},{"id":6,"n":"Mora","e":"\ud83e\uded0","c":"#a855f7","bg":"rgba(168,85,247,0.08)","br":"rgba(168,85,247,0.3)","d":"Silvestre y arom\u00e1tico","liq":false,"active":true,"img":""}],"sizes":[{"id":"deseo","n":"Deseo","e":"\u2728","oz":"16 oz","d":"Una chispita de magia","p":12000,"active":true},{"id":"varita","n":"Varita","e":"\ud83e\ude84","oz":"20 oz","d":"La varita est\u00e1 en tu mano","p":15000,"active":true},{"id":"hada","n":"Hada","e":"\ud83c\udf1f","oz":"1 litro","d":"Toda el hada para ti","p":22000,"active":true},{"id":"nube","n":"Nube","e":"\ud83d\udc20","oz":"2 litros","d":"La Pecera \u2014 para compartir","p":54000,"active":true},{"id":"mundo","n":"Mundo M\u00e1gico","e":"\ud83e\uddca","oz":"3 litros","d":"La Nevera \u2014 para la familia","p":74000,"active":true}],"candies":[{"id":1,"n":"Gomitas Ositos","e":"\ud83d\udc3b","cell":"A1","active":true,"img":"","allowMultiple":true},{"id":2,"n":"Skittles","e":"\ud83c\udf08","cell":"A2","active":true,"img":"","allowMultiple":true},{"id":3,"n":"Man\u00ed Japon\u00e9s","e":"\ud83e\udd5c","cell":"A3","active":true,"img":"","allowMultiple":true},{"id":4,"n":"Paleta Chamoy","e":"\ud83c\udf6d","cell":"A4","active":true,"img":"","allowMultiple":true},{"id":5,"n":"Chicles Globo","e":"\ud83c\udf0f","cell":"A5","active":true,"img":"","allowMultiple":true},{"id":6,"n":"Toffee","e":"\ud83c\udf6c","cell":"A6","active":true,"img":"","allowMultiple":true},{"id":7,"n":"Pulparindo","e":"\ud83c\udf36\ufe0f","cell":"A7","active":true,"img":"","allowMultiple":true},{"id":8,"n":"Trolli Gusanos","e":"\ud83d\udc0c","cell":"A8","active":true,"img":"","allowMultiple":true},{"id":9,"n":"Jelly Beans","e":"\ud83d\ude2e","cell":"A9","active":true,"img":"","allowMultiple":true},{"id":10,"n":"Conejitos","e":"\ud83d\udc07","cell":"A10","active":true,"img":"","allowMultiple":true},{"id":11,"n":"Mazap\u00e1n","e":"\ud83c\udf38","cell":"B1","active":true,"img":"","allowMultiple":true},{"id":12,"n":"Sour Patch","e":"\ud83d\ude1d","cell":"B2","active":true,"img":"","allowMultiple":true},{"id":13,"n":"M&Ms","e":"\ud83d\udfe4","cell":"B3","active":true,"img":"","allowMultiple":true},{"id":14,"n":"Regaliz Rojo","e":"\u2764\ufe0f","cell":"B4","active":true,"img":"","allowMultiple":true},{"id":15,"n":"Coco Rallado","e":"\ud83e\udd65","cell":"B5","active":true,"img":"","allowMultiple":true},{"id":16,"n":"Chupeta Pica","e":"\ud83c\udf6d","cell":"B6","active":true,"img":"","allowMultiple":true},{"id":17,"n":"Nucita","e":"\ud83c\udf6b","cell":"B7","active":true,"img":"","allowMultiple":true},{"id":18,"n":"Bon Bon Bum","e":"\ud83c\udf6d","cell":"B8","active":true,"img":"","allowMultiple":true},{"id":19,"n":"Frunas","e":"\ud83c\udf4a","cell":"B9","active":true,"img":"","allowMultiple":true},{"id":20,"n":"Mentitas","e":"\ud83d\udfe2","cell":"B10","active":true,"img":"","allowMultiple":true},{"id":21,"n":"Gomitas Pica","e":"\ud83d\udc1b","cell":"C1","active":true,"img":"","allowMultiple":true},{"id":22,"n":"Masmelos","e":"\u2601\ufe0f","cell":"C2","active":true,"img":"","allowMultiple":true},{"id":23,"n":"Chocolisto","e":"\ud83c\udf6b","cell":"C3","active":true,"img":"","allowMultiple":true},{"id":24,"n":"Palomitas","e":"\ud83c\udf7f","cell":"C4","active":true,"img":"","allowMultiple":true},{"id":25,"n":"Miguelito","e":"\ud83c\udf36\ufe0f","cell":"C5","active":true,"img":"","allowMultiple":true},{"id":26,"n":"Sal\u00f3n de Leche","e":"\ud83e\uddc8","cell":"C6","active":true,"img":"","allowMultiple":true},{"id":27,"n":"Bubulubu","e":"\ud83c\udf53","cell":"C7","active":true,"img":"","allowMultiple":true},{"id":28,"n":"Glorias","e":"\ud83e\udd5c","cell":"C8","active":true,"img":"","allowMultiple":true},{"id":29,"n":"Duval\u00edn","e":"\ud83c\udf6e","cell":"C9","active":true,"img":"","allowMultiple":true},{"id":30,"n":"Panditas","e":"\ud83d\udc3c","cell":"C10","active":true,"img":"","allowMultiple":true},{"id":31,"n":"Gomas Agrias","e":"\ud83d\udc0d","cell":"D1","active":true,"img":"","allowMultiple":true},{"id":32,"n":"Cocosette","e":"\ud83c\udf70","cell":"D2","active":true,"img":"","allowMultiple":true},{"id":33,"n":"Explosivos","e":"\ud83d\udca5","cell":"D3","active":true,"img":"","allowMultiple":true},{"id":34,"n":"Lunetas","e":"\ud83d\udd35","cell":"D4","active":true,"img":"","allowMultiple":true},{"id":35,"n":"Acirema","e":"\ud83c\udf6f","cell":"D5","active":true,"img":"","allowMultiple":true},{"id":36,"n":"Ositos de Canela","e":"\ud83e\udd89","cell":"D6","active":true,"img":"","allowMultiple":true},{"id":37,"n":"Chicharrones","e":"\ud83d\udc37","cell":"D7","active":true,"img":"","allowMultiple":true},{"id":38,"n":"Peach Rings","e":"\ud83c\udf51","cell":"D8","active":true,"img":"","allowMultiple":true},{"id":39,"n":"Gomas Cola","e":"\ud83e\udd4a","cell":"D9","active":true,"img":"","allowMultiple":true},{"id":40,"n":"Tiras \u00c1cidas","e":"\ud83d\udc9a","cell":"D10","active":true,"img":"","allowMultiple":true}],"extras":{"candyExtraPrice":3000,"freeCandiesSmall":3,"freeCandiesLarge":12,"largeSizes":["nube","mundo"]},"tables":["\ud83d\udecb\ufe0f Sof\u00e1","Mesa 1","Mesa 2","Mesa 3","Mesa 4","Mesa 5","Mesa 6","Mesa 7","\ud83e\udd61 Para Llevar"]};
+
+var currentTab = 'candies';
+var unsaved = false;
+var openForms = {};
+
+// pending upload target: {type, id}
+var pendingUpload = null;
+
+// ── HELPERS ──────────────────────────────────────────────
+function fmt(n){return '$'+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+function markUnsaved(){unsaved=true;document.getElementById('unsavedDot').classList.add('show');}
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.className='show '+(type||'success');
+  setTimeout(function(){t.className='';},2800);
+}
+
+// ── PIN ──────────────────────────────────────────────────
+var pinBuffer='';
+function pinKey(d){if(pinBuffer.length>=4)return;pinBuffer+=d;updatePinDots('pd',pinBuffer);if(pinBuffer.length===4)setTimeout(checkPin,120);}
+function pinDel(){if(!pinBuffer.length)return;pinBuffer=pinBuffer.slice(0,-1);updatePinDots('pd',pinBuffer);document.getElementById('pinError').textContent='';}
+function updatePinDots(prefix,buf,cls){for(var i=0;i<4;i++){var d=document.getElementById(prefix+i);d.className='pin-dot'+(i<buf.length?' filled':'');if(cls&&i<buf.length)d.className='pin-dot '+cls;}}
+function checkPin(){
+  if(pinBuffer===ADMIN_PIN){
+    document.getElementById('pinScreen').style.display='none';
+    document.getElementById('app').classList.add('visible');
+    switchTab('candies');
+  } else {
+    updatePinDots('pd',pinBuffer,'error');
+    document.getElementById('pinError').textContent='PIN incorrecto';
+    setTimeout(function(){pinBuffer='';updatePinDots('pd','');document.getElementById('pinError').textContent='';},900);
+  }
+}
+
+// ── PUSH MODAL ───────────────────────────────────────────
+var pushBuffer='';
+function openPushModal(){pushBuffer='';updatePushDots('');document.getElementById('pushError').textContent='';document.getElementById('pushPinView').style.display='block';document.getElementById('pushSuccessView').style.display='none';document.getElementById('pushModal').classList.add('open');}
+function closePushModal(){document.getElementById('pushModal').classList.remove('open');}
+function updatePushDots(buf,cls){for(var i=0;i<4;i++){var d=document.getElementById('mpd'+i);d.className='modal-pin-dot'+(i<buf.length?' filled':'');if(cls&&i<buf.length)d.className='modal-pin-dot '+cls;}}
+function pushKey(d){if(pushBuffer.length>=4)return;pushBuffer+=d;updatePushDots(pushBuffer);if(pushBuffer.length===4)setTimeout(checkPushPin,120);}
+function pushDel(){if(!pushBuffer.length)return;pushBuffer=pushBuffer.slice(0,-1);updatePushDots(pushBuffer);document.getElementById('pushError').textContent='';}
+function checkPushPin(){
+  if(pushBuffer===DEPLOY_PIN){document.getElementById('pushPinView').style.display='none';document.getElementById('pushSuccessView').style.display='block';}
+  else{updatePushDots(pushBuffer,'error');document.getElementById('pushError').textContent='PIN de despliegue incorrecto';setTimeout(function(){pushBuffer='';updatePushDots('');document.getElementById('pushError').textContent='';},900);}
+}
+
+// ── TABS ─────────────────────────────────────────────────
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('tab-'+tab).classList.add('active');
+  renderTab(tab);
+}
+function renderTab(tab){
+  var el=document.getElementById('rfmContent');
+  if(tab==='candies') el.innerHTML=renderCandies();
+  else if(tab==='flavors') el.innerHTML=renderFlavors();
+  else if(tab==='sizes') el.innerHTML=renderSizes();
+  else if(tab==='payment') el.innerHTML=renderPayment();
+  else if(tab==='settings') el.innerHTML=renderSettings();
+}
+
+// ── IMAGE UPLOAD ─────────────────────────────────────────
+function triggerUpload(type, id){
+  pendingUpload = {type: type, id: id};
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileInput').click();
+}
+
+function handleFileSelected(input){
+  if(!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var p = pendingUpload;
+  if(!p) return;
+
+  var areaId  = 'upload-area-'  + p.type + '-' + p.id;
+  var prevId  = 'upload-prev-'  + p.type + '-' + p.id;
+  var holdId  = 'upload-hold-'  + p.type + '-' + p.id;
+  var nameId  = 'upload-name-'  + p.type + '-' + p.id;
+  var barId   = 'upload-bar-'   + p.type + '-' + p.id;
+  var progId  = 'upload-prog-'  + p.type + '-' + p.id;
+  var statId  = 'upload-stat-'  + p.type + '-' + p.id;
+  var btnId   = 'upload-btn-'   + p.type + '-' + p.id;
+
+  var nameEl  = document.getElementById(nameId);
+  var barEl   = document.getElementById(barId);
+  var progEl  = document.getElementById(progId);
+  var statEl  = document.getElementById(statId);
+  var btnEl   = document.getElementById(btnId);
+  var prevEl  = document.getElementById(prevId);
+  var holdEl  = document.getElementById(holdId);
+
+  // Show filename, start progress
+  if(nameEl) nameEl.textContent = file.name;
+  if(progEl) progEl.classList.add('show');
+  if(statEl){ statEl.textContent = 'Subiendo...'; statEl.className = 'upload-status'; }
+  if(btnEl)  btnEl.disabled = true;
+
+  // Animate bar to 60% while uploading
+  setTimeout(function(){ if(barEl) barEl.style.width = '60%'; }, 100);
+
+  var fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  fd.append('folder', 'pixies');
+
+  fetch('https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/image/upload', {
+    method: 'POST',
+    body: fd
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.secure_url){
+      var url = data.secure_url;
+
+      // Save to config
+      if(p.type === 'candy'){
+        var c = getCandyById(p.id);
+        if(c) c.img = url;
+      } else if(p.type === 'flavor'){
+        var f = getFlavorById(p.id);
+        if(f) f.img = url;
+      }
+      markUnsaved();
+
+      // Update UI
+      if(barEl) barEl.style.width = '100%';
+      if(statEl){ statEl.textContent = 'Listo'; statEl.className = 'upload-status ok'; }
+      if(prevEl){ prevEl.src = url; prevEl.classList.add('show'); }
+      if(holdEl) holdEl.classList.add('hide');
+
+      // Also update card row thumbnail
+      var thumbId = 'thumb-' + p.type + '-' + p.id;
+      var thumbEl = document.getElementById(thumbId);
+      if(thumbEl){
+        thumbEl.outerHTML = '<img class="item-thumb" id="thumb-'+p.type+'-'+p.id+'" src="'+url+'" alt=""/>';
+      }
+
+      showToast('Foto subida', 'success');
+    } else {
+      throw new Error('No URL returned');
+    }
+  })
+  .catch(function(){
+    if(barEl) barEl.style.width = '0%';
+    if(statEl){ statEl.textContent = 'Error al subir'; statEl.className = 'upload-status err'; }
+    showToast('Error al subir foto', 'error');
+  })
+  .finally(function(){
+    if(btnEl) btnEl.disabled = false;
+    setTimeout(function(){ if(progEl) progEl.classList.remove('show'); }, 1500);
+  });
+}
+
+function buildUploadArea(type, id, currentImg){
+  var uid = type + '-' + id;
+  var h = '<div class="upload-area" id="upload-area-'+uid+'">';
+  if(currentImg){
+    h += '<img class="upload-preview show" id="upload-prev-'+uid+'" src="'+currentImg+'" alt=""/>';
+    h += '<div class="upload-placeholder hide" id="upload-hold-'+uid+'">&#128247;</div>';
+  } else {
+    h += '<img class="upload-preview" id="upload-prev-'+uid+'" src="" alt=""/>';
+    h += '<div class="upload-placeholder" id="upload-hold-'+uid+'">&#128247;</div>';
+  }
+  h += '<div class="upload-info">';
+  h += '<div class="upload-filename" id="upload-name-'+uid+'">'+(currentImg ? 'Imagen actual' : 'Sin imagen')+'</div>';
+  h += '<button class="btn-upload" id="upload-btn-'+uid+'" onclick="triggerUpload(\''+type+'\','+id+')">Subir foto</button>';
+  h += '<div class="upload-progress" id="upload-prog-'+uid+'"><div class="upload-progress-bar" id="upload-bar-'+uid+'"></div></div>';
+  h += '<div class="upload-status" id="upload-stat-'+uid+'"></div>';
+  h += '</div></div>';
+  return h;
+}
+
+// ── CANDIES TAB ──────────────────────────────────────────
+function renderCandies(){
+  var h='<div class="section-header"><div class="section-title">'+CFG.candies.length+' dulces</div></div>';
+  for(var i=0;i<CFG.candies.length;i++){
+    var c=CFG.candies[i];
+    var isOpen=openForms['candy_'+c.id];
+    h+='<div class="item-card'+(c.active?'':' inactive')+'" id="card-candy-'+c.id+'">';
+    h+='<div class="item-card-row">';
+    h+='<div class="item-emoji">'+c.e+'</div>';
+    h+='<div class="item-info"><div class="item-name">'+c.n+'</div>';
+    h+='<div class="item-meta"><span class="tag-cell">'+c.cell+'</span> '+(c.allowMultiple?'<span style="color:var(--green);font-size:10px">x2+ OK</span>':'<span style="color:var(--muted);font-size:10px">solo x1</span>')+'</div>';
+    h+='</div>';
+    // thumbnail
+    if(c.img){
+      h+='<img class="item-thumb" id="thumb-candy-'+c.id+'" src="'+c.img+'" alt=""/>';
+    } else {
+      h+='<div class="item-thumb-placeholder" id="thumb-candy-'+c.id+'">&#128247;</div>';
+    }
+    h+='<div class="item-controls">';
+    h+='<label class="toggle"><input type="checkbox"'+(c.active?' checked':'')+' onchange="toggleCandy('+c.id+',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
+    h+='<button class="btn-edit" onclick="toggleForm(\'candy_\'+'+c.id+')">&#9998;</button>';
+    h+='</div></div>';
+    // Edit form
+    h+='<div class="item-form'+(isOpen?' open':'')+'" id="form-candy-'+c.id+'">';
+    h+='<div class="form-row">';
+    h+='<div class="form-group"><div class="form-label">Nombre</div><input class="form-input" value="'+c.n+'" onchange="updateCandy('+c.id+',\'n\',this.value)"/></div>';
+    h+='<div class="form-group"><div class="form-label">Emoji</div><input class="form-input" value="'+c.e+'" onchange="updateCandy('+c.id+',\'e\',this.value)"/></div>';
+    h+='</div>';
+    h+='<div class="form-row">';
+    h+='<div class="form-group"><div class="form-label">Celda (A1-D10)</div><input class="form-input" value="'+c.cell+'" onchange="updateCandy('+c.id+',\'cell\',this.value.toUpperCase())"/></div>';
+    h+='<div class="form-group"><div class="form-label">Permitir m\u00faltiples</div><div style="padding-top:8px"><label class="toggle"><input type="checkbox"'+(c.allowMultiple?' checked':'')+' onchange="updateCandy('+c.id+',\'allowMultiple\',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div></div>';
+    h+='</div>';
+    // Upload area
+    h += buildUploadArea('candy', c.id, c.img);
+    h+='</div></div>';
+  }
+  return h;
+}
+
+function toggleCandy(id,val){var c=getCandyById(id);if(c)c.active=val;markUnsaved();updateCardClass('card-candy-'+id,val);}
+function updateCandy(id,key,val){
+  var c=getCandyById(id);if(!c)return;
+  c[key]=val;markUnsaved();
+  if(key==='n'){var el=document.querySelector('#card-candy-'+id+' .item-name');if(el)el.textContent=val;}
+  if(key==='e'){var el=document.querySelector('#card-candy-'+id+' .item-emoji');if(el)el.textContent=val;}
+  if(key==='cell'){var el=document.querySelector('#card-candy-'+id+' .tag-cell');if(el)el.textContent=val;}
+}
+function getCandyById(id){for(var i=0;i<CFG.candies.length;i++)if(CFG.candies[i].id===id)return CFG.candies[i];return null;}
+
+// ── FLAVORS TAB ──────────────────────────────────────────
+function renderFlavors(){
+  var h='<div class="section-header"><div class="section-title">'+CFG.flavors.length+' sabores</div></div>';
+  for(var i=0;i<CFG.flavors.length;i++){
+    var f=CFG.flavors[i];
+    var isOpen=openForms['flavor_'+f.id];
+    h+='<div class="item-card'+(f.active?'':' inactive')+'" id="card-flavor-'+f.id+'">';
+    h+='<div class="item-card-row">';
+    h+='<div class="item-emoji">'+f.e+'</div>';
+    h+='<div class="item-info"><div class="item-name">'+f.n+'</div>';
+    h+='<div class="item-meta"><span class="tag-liq '+(f.liq?'yes':'no')+'">'+(f.liq?'Con licor':'Sin licor')+'</span> <span style="color:var(--muted);font-size:11px">'+f.d+'</span></div>';
+    h+='</div>';
+    // thumbnail
+    if(f.img){
+      h+='<img class="item-thumb" id="thumb-flavor-'+f.id+'" src="'+f.img+'" alt=""/>';
+    } else {
+      h+='<div class="item-thumb-placeholder" id="thumb-flavor-'+f.id+'">&#128247;</div>';
+    }
+    h+='<div class="item-controls">';
+    h+='<label class="toggle"><input type="checkbox"'+(f.active?' checked':'')+' onchange="toggleFlavor('+f.id+',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
+    h+='<button class="btn-edit" onclick="toggleForm(\'flavor_\'+'+f.id+')">&#9998;</button>';
+    h+='</div></div>';
+    h+='<div class="item-form'+(isOpen?' open':'')+'" id="form-flavor-'+f.id+'">';
+    h+='<div class="form-row">';
+    h+='<div class="form-group"><div class="form-label">Nombre</div><input class="form-input" value="'+f.n+'" onchange="updateFlavor('+f.id+',\'n\',this.value)"/></div>';
+    h+='<div class="form-group"><div class="form-label">Emoji</div><input class="form-input" value="'+f.e+'" onchange="updateFlavor('+f.id+',\'e\',this.value)"/></div>';
+    h+='</div>';
+    h+='<div class="form-row">';
+    h+='<div class="form-group"><div class="form-label">Descripci\u00f3n</div><input class="form-input" value="'+f.d+'" onchange="updateFlavor('+f.id+',\'d\',this.value)"/></div>';
+    h+='<div class="form-group"><div class="form-label">Color hex</div><input class="form-input" value="'+f.c+'" onchange="updateFlavor('+f.id+',\'c\',this.value)"/></div>';
+    h+='</div>';
+    h+='<div class="form-toggle-row"><div><div class="form-toggle-label">Contiene licor</div><div class="form-toggle-desc">Marca el pedido como "con licor"</div></div><label class="toggle"><input type="checkbox"'+(f.liq?' checked':'')+' onchange="updateFlavor('+f.id+',\'liq\',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>';
+    // Upload area
+    h += buildUploadArea('flavor', f.id, f.img);
+    h+='</div></div>';
+  }
+  return h;
+}
+
+function toggleFlavor(id,val){var f=getFlavorById(id);if(f)f.active=val;markUnsaved();updateCardClass('card-flavor-'+id,val);}
+function updateFlavor(id,key,val){
+  var f=getFlavorById(id);if(!f)return;
+  f[key]=val;markUnsaved();
+  if(key==='n'){var el=document.querySelector('#card-flavor-'+id+' .item-name');if(el)el.textContent=val;}
+  if(key==='e'){var el=document.querySelector('#card-flavor-'+id+' .item-emoji');if(el)el.textContent=val;}
+  if(key==='liq'){var el=document.querySelector('#card-flavor-'+id+' .tag-liq');if(el){el.textContent=val?'Con licor':'Sin licor';el.className='tag-liq '+(val?'yes':'no');}}
+}
+function getFlavorById(id){for(var i=0;i<CFG.flavors.length;i++)if(CFG.flavors[i].id===id)return CFG.flavors[i];return null;}
+
+// ── SIZES TAB ────────────────────────────────────────────
+function renderSizes(){
+  var h='<div class="section-header"><div class="section-title">'+CFG.sizes.length+' tama\u00f1os</div></div>';
+  for(var i=0;i<CFG.sizes.length;i++){
+    var s=CFG.sizes[i];
+    var isOpen=openForms['size_'+s.id];
+    var isLarge=CFG.extras.largeSizes.indexOf(s.id)>=0;
+    h+='<div class="item-card'+(s.active?'':' inactive')+'" id="card-size-'+s.id+'">';
+    h+='<div class="item-card-row">';
+    h+='<div class="item-emoji">'+s.e+'</div>';
+    h+='<div class="item-info"><div class="item-name">'+s.n+'</div>';
+    h+='<div class="item-meta">'+s.oz+' &middot; <span class="item-price">'+fmt(s.p)+'</span>'+(isLarge?' &middot; <span style="color:var(--purple);font-size:10px">12 dulces</span>':' &middot; <span style="color:var(--muted);font-size:10px">3 dulces</span>')+'</div>';
+    h+='</div>';
+    h+='<div class="item-controls">';
+    h+='<label class="toggle"><input type="checkbox"'+(s.active?' checked':'')+' onchange="toggleSize(\''+s.id+'\',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
+    h+='<button class="btn-edit" onclick="toggleForm(\'size_\'+\''+s.id+'\')">&#9998;</button>';
+    h+='</div></div>';
+    h+='<div class="item-form'+(isOpen?' open':'')+'" id="form-size-'+s.id+'">';
+    h+='<div class="form-row">';
+    h+='<div class="form-group"><div class="form-label">Nombre</div><input class="form-input" value="'+s.n+'" onchange="updateSize(\''+s.id+'\',\'n\',this.value)"/></div>';
+    h+='<div class="form-group"><div class="form-label">Emoji</div><input class="form-input" value="'+s.e+'" onchange="updateSize(\''+s.id+'\',\'e\',this.value)"/></div>';
+    h+='</div>';
+    h+='<div class="form-row">';
+    h+='<div class="form-group"><div class="form-label">Precio (COP)</div><input class="form-input" type="number" value="'+s.p+'" onchange="updateSize(\''+s.id+'\',\'p\',parseInt(this.value))"/></div>';
+    h+='<div class="form-group"><div class="form-label">Descripci\u00f3n oz</div><input class="form-input" value="'+s.oz+'" onchange="updateSize(\''+s.id+'\',\'oz\',this.value)"/></div>';
+    h+='</div>';
+    h+='<div class="form-toggle-row"><div><div class="form-toggle-label">Tama\u00f1o grande (12 dulces)</div><div class="form-toggle-desc">Pecera / Nevera</div></div><label class="toggle"><input type="checkbox"'+(isLarge?' checked':'')+' onchange="toggleLargeSize(\''+s.id+'\',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>';
+    h+='</div></div>';
+  }
+  return h;
+}
+
+function toggleSize(id,val){var s=getSizeById(id);if(s)s.active=val;markUnsaved();updateCardClass('card-size-'+id,val);}
+function updateSize(id,key,val){
+  var s=getSizeById(id);if(!s)return;
+  s[key]=val;markUnsaved();
+  if(key==='n'){var el=document.querySelector('#card-size-'+id+' .item-name');if(el)el.textContent=val;}
+  if(key==='p'){var el=document.querySelector('#card-size-'+id+' .item-price');if(el)el.textContent=fmt(val);}
+}
+function toggleLargeSize(id,val){var arr=CFG.extras.largeSizes;var idx=arr.indexOf(id);if(val&&idx<0)arr.push(id);else if(!val&&idx>=0)arr.splice(idx,1);markUnsaved();}
+function getSizeById(id){for(var i=0;i<CFG.sizes.length;i++)if(CFG.sizes[i].id===id)return CFG.sizes[i];return null;}
+
+// ── PAYMENT TAB ──────────────────────────────────────────
+function renderPayment(){
+  var p=CFG.payment;
+  var h='<div class="section-title" style="margin-bottom:12px">M\u00e9todos de pago</div>';
+  h+='<div class="settings-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-size:15px;font-weight:800">Nequi</div><label class="toggle"><input type="checkbox"'+(p.nequi.active?' checked':'')+' onchange="CFG.payment.nequi.active=this.checked;markUnsaved()"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div><div class="form-group" style="margin-bottom:10px"><div class="form-label">N\u00famero Nequi</div><input class="form-input" value="'+(p.nequi.number||'')+'" placeholder="+57 300 000 0000" onchange="CFG.payment.nequi.number=this.value;markUnsaved()"/></div></div>';
+  h+='<div class="settings-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-size:15px;font-weight:800">Bancolombia</div><label class="toggle"><input type="checkbox"'+(p.bancolombia.active?' checked':'')+' onchange="CFG.payment.bancolombia.active=this.checked;markUnsaved()"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div><div class="form-group" style="margin-bottom:10px"><div class="form-label">N\u00famero de cuenta</div><input class="form-input" value="'+(p.bancolombia.account||'')+'" placeholder="XXX-XXXXXXX" onchange="CFG.payment.bancolombia.account=this.value;markUnsaved()"/></div></div>';
+  h+='<div class="settings-card"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:15px;font-weight:800">Efectivo</div><label class="toggle"><input type="checkbox"'+(p.cash.active?' checked':'')+' onchange="CFG.payment.cash.active=this.checked;markUnsaved()"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div></div>';
+  h+='<div class="settings-card"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:15px;font-weight:800">Cr\u00e9dito / D\u00e9bito</div><label class="toggle"><input type="checkbox"'+(p.card.active?' checked':'')+' onchange="CFG.payment.card.active=this.checked;markUnsaved()"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div></div>';
+  return h;
+}
+
+// ── SETTINGS TAB ─────────────────────────────────────────
+function renderSettings(){
+  var e=CFG.extras;var s=CFG.store;
+  var h='<div class="section-title" style="margin-bottom:12px">Tienda</div>';
+  h+='<div class="settings-card">';
+  h+='<div class="settings-row"><div><div class="settings-key">Nombre</div></div><input class="settings-val" style="width:160px" value="'+s.name+'" onchange="CFG.store.name=this.value;markUnsaved()"/></div>';
+  h+='<div class="settings-row"><div><div class="settings-key">Direcci\u00f3n</div></div><input class="settings-val" style="width:160px" value="'+s.address+'" onchange="CFG.store.address=this.value;markUnsaved()"/></div>';
+  h+='<div class="settings-row"><div><div class="settings-key">Horario</div></div><input class="settings-val" value="'+s.hours+'" onchange="CFG.store.hours=this.value;markUnsaved()"/></div>';
+  h+='<div class="settings-row"><div><div class="settings-key">WhatsApp</div></div><input class="settings-val" value="'+s.phone+'" onchange="CFG.store.phone=this.value;markUnsaved()"/></div>';
+  h+='</div>';
+  h+='<div class="section-title" style="margin:20px 0 12px">Dulces &amp; Precios</div>';
+  h+='<div class="settings-card">';
+  h+='<div class="settings-row"><div><div class="settings-key">Precio dulce extra</div><div class="settings-desc">Cobro por dulce adicional</div></div><input class="settings-val" type="number" value="'+e.candyExtraPrice+'" onchange="CFG.extras.candyExtraPrice=parseInt(this.value);markUnsaved()"/></div>';
+  h+='<div class="settings-row"><div><div class="settings-key">Dulces gratis (peque\u00f1o)</div></div><input class="settings-val" type="number" value="'+e.freeCandiesSmall+'" onchange="CFG.extras.freeCandiesSmall=parseInt(this.value);markUnsaved()"/></div>';
+  h+='<div class="settings-row"><div><div class="settings-key">Dulces gratis (grande)</div></div><input class="settings-val" type="number" value="'+e.freeCandiesLarge+'" onchange="CFG.extras.freeCandiesLarge=parseInt(this.value);markUnsaved()"/></div>';
+  h+='</div>';
+  h+='<div style="margin-top:20px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;">';
+  h+='<div style="font-size:13px;font-weight:800;margin-bottom:6px">Cloudinary</div>';
+  h+='<div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);line-height:1.6">Edita CLOUD_NAME y UPLOAD_PRESET en el c\u00f3digo fuente de rfm.html una vez tengas tu cuenta lista.</div>';
+  h+='</div>';
+  return h;
+}
+
+// ── SHARED ───────────────────────────────────────────────
+function toggleForm(key){
+  openForms[key]=!openForms[key];
+  var parts=key.split('_');var type=parts[0];var id=parts[1];
+  var formEl=document.getElementById('form-'+type+'-'+id);
+  if(formEl)formEl.classList.toggle('open',openForms[key]);
+}
+function updateCardClass(cardId,active){
+  var el=document.getElementById(cardId);
+  if(el){if(active)el.classList.remove('inactive');else el.classList.add('inactive');}
+}
+
+// ── SAVE ─────────────────────────────────────────────────
+function saveChanges(){
+  var payload=JSON.stringify(CFG,null,2);
+  var blob=new Blob([payload],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='pixies_config.json';
+  a.click();
+  unsaved=false;
+  document.getElementById('unsavedDot').classList.remove('show');
+  showToast('Guardado — descarga lista','success');
+}
+</script>
+</body>
+</html>
