@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>Pixies RFM Fixer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Syne:wght@400;700;800&display=swap');
+:root{
+  --bg:#0d0a14;--surface:#16101f;--surface2:#1e1530;
+  --border:rgba(255,255,255,0.07);--pink:#ff2d8f;--purple:#bf00ff;
+  --green:#00e676;--yellow:#d4ff00;--red:#ff3b5c;
+  --text:#f0e8ff;--muted:#7a6b8a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:480px;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.subtitle{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;}
+.section{margin-bottom:20px;}
+.section-label{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+.pass-list{display:flex;flex-direction:column;gap:6px;}
+.pass-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:12px;font-family:'Space Mono',monospace;}
+.pass-icon{width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .3s;}
+.pass-icon.ok{background:var(--green);border-color:var(--green);color:#000;}
+.pass-icon.err{background:var(--red);border-color:var(--red);}
+.pass-icon.skip{background:var(--yellow);border-color:var(--yellow);color:#000;}
+.pass-name{flex:1;color:var(--text);}
+.pass-status{font-size:10px;color:var(--muted);}
+.btn-run{
+  width:100%;padding:16px;border-radius:14px;border:none;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;
+  cursor:pointer;letter-spacing:1px;margin-top:4px;
+  transition:opacity .2s;
+}
+.btn-run:hover{opacity:.9;}
+.btn-run:disabled{opacity:.4;cursor:not-allowed;}
+.log{margin-top:16px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);line-height:1.8;display:none;max-height:160px;overflow-y:auto;}
+.log.show{display:block;}
+.log .ok{color:var(--green);}
+.log .err{color:var(--red);}
+.log .info{color:var(--yellow);}
+.result{margin-top:16px;padding:16px;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:12px;display:none;text-align:center;}
+.result.show{display:block;}
+.result-title{font-size:18px;font-weight:800;color:var(--green);margin-bottom:6px;}
+.result-desc{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+.btn-dl{
+  display:inline-block;padding:12px 24px;border-radius:10px;border:none;
+  background:var(--green);color:#000;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
+  cursor:pointer;letter-spacing:.5px;
+}
+.creds{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+.cred-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;}
+.cred-key{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);width:80px;flex-shrink:0;}
+.cred-val{font-size:11px;font-family:'Space Mono',monospace;color:var(--pink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.5px;}
+.badge.firebase{background:rgba(255,149,0,0.15);color:#ff9500;}
+.badge.cloudinary{background:rgba(191,0,255,0.15);color:var(--purple);}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">PIXIES</div>
+  <div class="subtitle">RFM Fixer &mdash; Firebase + Cloudinary</div>
+
+  <div class="section">
+    <div class="section-label">Credenciales que se inyectan</div>
+    <div class="creds">
+      <div class="cred-row"><div class="cred-key">Cloud</div><div class="cred-val">deeloaqth</div><span class="badge cloudinary">Cloudinary</span></div>
+      <div class="cred-row"><div class="cred-key">Preset</div><div class="cred-val">pixies_upload</div><span class="badge cloudinary">Cloudinary</span></div>
+      <div class="cred-row"><div class="cred-key">Project</div><div class="cred-val">pixies-cocktails</div><span class="badge firebase">Firebase</span></div>
+      <div class="cred-row"><div class="cred-key">DB URL</div><div class="cred-val">pixies-cocktails-default-rtdb</div><span class="badge firebase">Firebase</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">9 Passes</div>
+    <div class="pass-list" id="passList">
+      <div class="pass-item" id="p0"><div class="pass-icon" id="pi0"></div><div class="pass-name">Cloudinary Cloud Name</div><div class="pass-status" id="ps0">pendiente</div></div>
+      <div class="pass-item" id="p1"><div class="pass-icon" id="pi1"></div><div class="pass-name">Cloudinary Upload Preset</div><div class="pass-status" id="ps1">pendiente</div></div>
+      <div class="pass-item" id="p2"><div class="pass-icon" id="pi2"></div><div class="pass-name">Upload folder → pixies_upload</div><div class="pass-status" id="ps2">pendiente</div></div>
+      <div class="pass-item" id="p3"><div class="pass-icon" id="pi3"></div><div class="pass-name">Firebase SDK (script tags)</div><div class="pass-status" id="ps3">pendiente</div></div>
+      <div class="pass-item" id="p4"><div class="pass-icon" id="pi4"></div><div class="pass-name">Firebase init + loadFromFirebase()</div><div class="pass-status" id="ps4">pendiente</div></div>
+      <div class="pass-item" id="p5"><div class="pass-icon" id="pi5"></div><div class="pass-name">checkPin → carga desde Firebase</div><div class="pass-status" id="ps5">pendiente</div></div>
+      <div class="pass-item" id="p6"><div class="pass-icon" id="pi6"></div><div class="pass-name">saveChanges → escribe a Firebase</div><div class="pass-status" id="ps6">pendiente</div></div>
+      <div class="pass-item" id="p7"><div class="pass-icon" id="pi7"></div><div class="pass-name">Push to Live → escribe /live</div><div class="pass-status" id="ps7">pendiente</div></div>
+      <div class="pass-item" id="p8"><div class="pass-icon" id="pi8"></div><div class="pass-name">Mensaje Push success actualizado</div><div class="pass-status" id="ps8">pendiente</div></div>
+    </div>
+  </div>
+
+  <button class="btn-run" id="btnRun" onclick="runFixer()">&#9654; Correr Fixer</button>
+
+  <div class="log" id="log"></div>
+
+  <div class="result" id="result">
+    <div class="result-title">&#10003; rfm_fixed.html listo</div>
+    <div class="result-desc">Descarga el archivo, sube a GitHub como <strong>rfm.html</strong><br>reemplazando el archivo actual.</div>
+    <button class="btn-dl" id="btnDl">&#11015; Descargar rfm_fixed.html</button>
+  </div>
+</div>
+
+<script>
+var SOURCE_URL = 'https://raw.githubusercontent.com/mtrichmond-cell/Pixies.cocktails/main/rfm.html';
+var fixedContent = '';
+
+var PASSES = [
+  {
+    name: 'Cloudinary Cloud Name',
+    find: "var CLOUD_NAME   = 'YOUR_CLOUD_NAME';",
+    replace: "var CLOUD_NAME   = 'deeloaqth';"
+  },
+  {
+    name: 'Cloudinary Upload Preset',
+    find: "var UPLOAD_PRESET = 'YOUR_UPLOAD_PRESET';",
+    replace: "var UPLOAD_PRESET = 'pixies_upload';"
+  },
+  {
+    name: 'Upload folder',
+    find: "fd.append('folder', 'pixies');",
+    replace: "fd.append('folder', 'pixies_upload');"
+  },
+  {
+    name: 'Firebase SDK',
+    find: '</head>',
+    replace: '<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"><\/script>\n<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"><\/script>\n</head>'
+  },
+  {
+    name: 'Firebase init + loadFromFirebase',
+    find: '// \u2500\u2500 HELPERS \u2500\u2500',
+    replace: '// \u2500\u2500 FIREBASE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nfirebase.initializeApp({\n  apiKey: "AIzaSyDE0SAPuxvu0G1Ylfo0VG5rY1UDrJHEA9c",\n  authDomain: "pixies-cocktails.firebaseapp.com",\n  databaseURL: "https://pixies-cocktails-default-rtdb.firebaseio.com",\n  projectId: "pixies-cocktails",\n  storageBucket: "pixies-cocktails.firebasestorage.app",\n  messagingSenderId: "154370181028",\n  appId: "1:154370181028:web:a2c94706ec0e61206a2331"\n});\nvar db = firebase.database();\n\nfunction loadFromFirebase(callback){\n  db.ref(\'/config\').once(\'value\').then(function(snap){\n    var data = snap.val();\n    if(data){ CFG = data; }\n    callback();\n  }).catch(function(){ callback(); });\n}\n\n// \u2500\u2500 HELPERS \u2500\u2500'
+  },
+  {
+    name: 'checkPin with Firebase load',
+    find: "    document.getElementById('pinScreen').style.display='none';\n    document.getElementById('app').classList.add('visible');\n    switchTab('candies');",
+    replace: "    loadFromFirebase(function(){\n      document.getElementById('pinScreen').style.display='none';\n      document.getElementById('app').classList.add('visible');\n      switchTab('candies');\n    });"
+  },
+  {
+    name: 'saveChanges → Firebase write',
+    find: "function saveChanges(){\n  var payload=JSON.stringify(CFG,null,2);\n  var blob=new Blob([payload],{type:'application/json'});\n  var a=document.createElement('a');\n  a.href=URL.createObjectURL(blob);\n  a.download='pixies_config.json';\n  a.click();\n  unsaved=false;\n  document.getElementById('unsavedDot').classList.remove('show');\n  showToast('Guardado \u2014 descarga lista','success');\n}",
+    replace: "function saveChanges(){\n  db.ref('/config').set(CFG).then(function(){\n    unsaved=false;\n    document.getElementById('unsavedDot').classList.remove('show');\n    showToast('Guardado en Firebase \u2713','success');\n  }).catch(function(){\n    showToast('Error al guardar','error');\n  });\n}"
+  },
+  {
+    name: 'Push to Live → Firebase /live',
+    find: "function checkPushPin(){\n  if(pushBuffer===DEPLOY_PIN){document.getElementById('pushPinView').style.display='none';document.getElementById('pushSuccessView').style.display='block';}\n  else{updatePushDots(pushBuffer,'error');document.getElementById('pushError').textContent='PIN de despliegue incorrecto';setTimeout(function(){pushBuffer='';updatePushDots('');document.getElementById('pushError').textContent='';},900);}\n}",
+    replace: "function checkPushPin(){\n  if(pushBuffer===DEPLOY_PIN){\n    db.ref('/live').set(CFG).then(function(){\n      document.getElementById('pushPinView').style.display='none';\n      document.getElementById('pushSuccessView').style.display='block';\n    }).catch(function(){\n      updatePushDots(pushBuffer,'error');\n      document.getElementById('pushError').textContent='Error al publicar en Firebase';\n      setTimeout(function(){pushBuffer='';updatePushDots('');document.getElementById('pushError').textContent='';},900);\n    });\n  } else {\n    updatePushDots(pushBuffer,'error');\n    document.getElementById('pushError').textContent='PIN de despliegue incorrecto';\n    setTimeout(function(){pushBuffer='';updatePushDots('');document.getElementById('pushError').textContent='';},900);\n  }\n}"
+  },
+  {
+    name: 'Push success message',
+    find: "<div class=\"modal-success-icon\">&#128274;</div>\n        <div class=\"modal-title\" style=\"margin-bottom:12px\">No configurado</div>\n        <div class=\"modal-success-text\">El servidor de despliegue a&#250;n no est&#225; configurado.<br><br>Cuando el VPS est&#233; listo, este bot&#243;n publicar&#225; los cambios autom&#225;ticamente en ~60 segundos.</div>",
+    replace: "<div class=\"modal-success-icon\">&#127881;</div>\n        <div class=\"modal-title\" style=\"margin-bottom:12px\">&#161;Publicado!</div>\n        <div class=\"modal-success-text\">Los cambios fueron enviados a Firebase.<br><br>El sitio p&#250;blico y el POS se actualizar&#225;n autom&#225;ticamente.</div>"
+  }
+];
+
+function log(msg, cls){
+  var el = document.getElementById('log');
+  el.classList.add('show');
+  el.innerHTML += '<span class="'+(cls||'')+'">' + msg + '</span>\n';
+  el.scrollTop = el.scrollHeight;
+}
+
+function setPass(i, status, msg){
+  var icon = document.getElementById('pi'+i);
+  var stat = document.getElementById('ps'+i);
+  if(status === 'ok'){ icon.textContent = '✓'; icon.className = 'pass-icon ok'; }
+  else if(status === 'err'){ icon.textContent = '✗'; icon.className = 'pass-icon err'; }
+  else if(status === 'skip'){ icon.textContent = '~'; icon.className = 'pass-icon skip'; }
+  if(stat) stat.textContent = msg || status;
+}
+
+async function runFixer(){
+  var btn = document.getElementById('btnRun');
+  btn.disabled = true;
+  btn.textContent = 'Procesando...';
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('result').classList.remove('show');
+
+  log('Descargando rfm.html desde GitHub...', 'info');
+
+  var html;
+  try {
+    var resp = await fetch(SOURCE_URL);
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    html = await resp.text();
+    log('✓ Descargado (' + html.length + ' chars)', 'ok');
+  } catch(e) {
+    log('✗ Error descargando: ' + e.message, 'err');
+    btn.disabled = false;
+    btn.textContent = '▶ Correr Fixer';
+    return;
+  }
+
+  var result = html;
+  var allOk = true;
+
+  for(var i = 0; i < PASSES.length; i++){
+    var pass = PASSES[i];
+    if(result.indexOf(pass.find) === -1){
+      log('~ Pass ' + (i+1) + ' no encontrado: ' + pass.name, 'err');
+      setPass(i, 'skip', 'no encontrado');
+      // don't fail hard — some passes might already be applied
+    } else {
+      result = result.replace(pass.find, pass.replace);
+      log('✓ Pass ' + (i+1) + ': ' + pass.name, 'ok');
+      setPass(i, 'ok', 'aplicado');
+    }
+  }
+
+  fixedContent = result;
+  log('─────────────────────────────', '');
+  log('Fixer completo. ' + PASSES.length + ' passes procesados.', 'ok');
+
+  document.getElementById('result').classList.add('show');
+  btn.disabled = false;
+  btn.textContent = '▶ Correr Fixer';
+}
+
+document.getElementById('btnDl').addEventListener('click', function(){
+  if(!fixedContent){ alert('Corre el fixer primero'); return; }
+  var blob = new Blob([fixedContent], {type: 'text/html'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rfm_fixed.html';
+  a.click();
+});
+</script>
+</body>
+</html>
