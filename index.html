@@ -28,7 +28,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .btn-main:active{opacity:.85;transform:scale(.98)}
 .section-label{font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;text-align:center}
 .flavor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.flavor-card{border-radius:16px;padding:16px 12px;cursor:pointer;border:1px solid;transition:transform .15s}
+.flavor-card{position:relative;border-radius:16px;padding:16px 12px;cursor:pointer;border:1px solid;transition:transform .15s}
 .flavor-card:active{transform:scale(.96)}
 .fc-emoji{font-size:36px;display:block;margin-bottom:8px}
 .fc-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:2px}
@@ -37,7 +37,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .badge-liq{background:rgba(212,255,0,.15);border:1px solid rgba(212,255,0,.4);color:var(--yellow)}
 .badge-noliq{background:rgba(100,200,255,.15);border:1px solid rgba(100,200,255,.3);color:#88ddff}
 .size-list{display:flex;flex-direction:column;gap:10px}
-.size-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .15s}
+.size-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .15s;flex-wrap:wrap}
 .size-card:active{opacity:.7}
 .size-card.selected{border-color:var(--pink);background:rgba(255,45,143,.1);box-shadow:0 0 16px rgba(255,45,143,.2)}
 .sc-icon{font-size:28px;flex-shrink:0}
@@ -62,9 +62,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .ci-name{font-size:10px;font-weight:800;line-height:1.3}
 .ci-num{font-size:9px;color:var(--muted)}
 .ci-check{font-size:12px;flex-shrink:0}
-.cta-float{position:fixed;bottom:0;left:0;right:0;padding:12px 16px 28px;background:linear-gradient(to top,#0a0010 50%,transparent);z-index:60;transform:translateY(120px);transition:transform .3s}
+.cta-float{position:fixed;bottom:0;left:0;right:0;padding:14px 16px 28px;background:linear-gradient(135deg,#6b00cc,#ff2d8f);z-index:60;transform:translateY(120px);transition:transform .3s;box-shadow:0 -4px 20px rgba(255,45,143,.4)}
 .cta-float.show{transform:translateY(0)}
-.cta-float .btn-main{max-width:480px;margin:0 auto;display:block}
+.cta-float .btn-main{max-width:480px;margin:0 auto;display:block;background:transparent;box-shadow:none}
 .toggle-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:12px}
 .tc-header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
 .tc-emoji{font-size:32px}
@@ -136,43 +136,65 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .done-pay-tag{display:inline-block;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:900;margin-bottom:10px}
 .done-table-tag{display:inline-block;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:900;background:rgba(107,0,204,.2);border:1px solid var(--border);color:#cc88ff;margin-bottom:16px}
 .btn-ghost{width:100%;padding:13px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--muted);font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
-.cart-bubble{position:fixed;bottom:22px;right:16px;z-index:200;background:linear-gradient(135deg,var(--purple),var(--pink));border-radius:50px;padding:11px 18px;display:flex;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(255,45,143,.5);cursor:pointer}
+.cart-bubble{position:fixed;bottom:14px;right:12px;z-index:201;background:rgba(15,0,30,0.92);border:2px solid rgba(255,45,143,0.6);border-radius:50px;padding:8px 14px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(255,45,143,.5);cursor:pointer;backdrop-filter:blur(8px)}
 .cart-bubble:active{transform:scale(.94)}
 .cart-bubble.hidden{display:none}
 .cb-count{background:white;color:var(--purple);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
 .cb-total{font-size:13px;font-weight:900;color:white;font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
-</style></head><body><div id="p-home" class="page show"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">&#128205; Cra 4 #44A, Ibagu&eacute;</div><div class="sa-hours">&#128336; 16:00 &ndash; 23:59</div></a></div><div class="page-content"><div class="hero"><div class="logo-wrap"><img src="https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/preview_gdumct.png" style="width:100%;height:100%;object-fit:cover"/></div><div class="brand-title">PIXIES <span class="pink">COCKTAILS</span></div><div class="slogan">Somos Pixies &iquest;y t&uacute;? &#10024;</div></div><div class="hero-card"><div class="hero-steps">&#127827; Elige tu sabor favorito<br>&#10024; Selecciona tu tama&ntilde;o m&aacute;gico<br>&#127852; Escoge tus dulces<br>&#129794; Agrega Polvo de Hada o Elixir<br>&#128242; Paga y disfruta</div><button class="btn-main" onclick="showPage('p-flavor')">&#161;ORDENAR AHORA!</button></div><div class="section-label">Nuestros Sabores</div><div class="flavor-grid" id="homeFlavors"></div></div></div><div id="p-flavor" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">&#128205; Cra 4 #44A, Ibagu&eacute;</div><div class="sa-hours">&#128336; 16:00 &ndash; 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-home')">&#8592; Inicio</button><div class="screen-title">ELIGE TU <span class="pink">SABOR</span></div><div class="screen-sub">Granizados preparados con amor &#10024;</div><div class="flavor-grid" id="flavorGrid"></div></div></div><div id="p-size" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="data:image/png;base64,REMOVED"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">&#128205; Cra 4 #44A, Ibagu&eacute;</div><div class="sa-hours">&#128336; 16:00 &ndash; 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-flavor')">&#8592; Volver</button><div class="screen-title">TAMA&Ntilde;O <span class="pink">M&Aacute;GICO</span></div><div class="screen-sub">&#191;Cu&aacute;nta magia quieres hoy?</div><div class="size-list" id="sizeGrid"></div></div></div><div id="p-candies" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="data:image/png;base64,REMOVED"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">&#128205; Cra 4 #44A, Ibagu&eacute;</div><div class="sa-hours">&#128336; 16:00 &ndash; 23:59</div></a></div><div style="padding:10px 16px 0"><button class="btn-back" onclick="showPage('p-size')">&#8592; Volver</button></div><div class="candy-sticky"><div><div class="cs-title">&#127852; TUS DULCES</div><div class="cs-sub" id="candySub">3 gratis &middot; extras +$3.000 c/u</div></div><div class="candy-counter cc-free" id="candyCtr">0/3 gratis</div></div><div class="candy-grid" id="candyGrid"></div><div class="cta-float" id="ctaFloat"><button class="btn-main" onclick="addToCart()">AGREGAR AL CARRITO &#128722;</button></div></div><div id="p-tajin" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="data:image/png;base64,REMOVED"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">&#128205; Cra 4 #44A, Ibagu&eacute;</div><div class="sa-hours">&#128336; 16:00 &ndash; 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-candies')">&#8592; Volver</button><div class="screen-title">TOPPINGS <span class="pink">M&Aacute;GICOS</span></div><div class="screen-sub">Completamente gratis &#10024;</div><div class="toggle-card"><div class="tc-header"><div class="tc-emoji">&#129794;</div><div class="tc-info"><div class="tc-name">POLVO DE HADA</div><div class="tc-desc">Taj&iacute;n &mdash; toque picante y c&iacute;trico</div><div class="tc-free">&#10024; Gratis</div></div></div><div class="toggle-wrap"><button class="toggle-btn si-inactive" id="tajin-si" onclick="setTopping('tajin',true)">S&Iacute;</button><button class="toggle-btn no" id="tajin-no" onclick="setTopping('tajin',false)">NO</button></div></div><div class="toggle-card"><div class="tc-header"><div class="tc-emoji">&#127855;</div><div class="tc-info"><div class="tc-name">ELIXIR</div><div class="tc-desc">Chamoy &mdash; dulce, picante y adictivo</div><div class="tc-free">&#10024; Gratis</div></div></div><div class="toggle-wrap"><button class="toggle-btn si-inactive" id="chamoy-si" onclick="setTopping('chamoy',true)">S&Iacute;</button><button class="toggle-btn no" id="chamoy-no" onclick="setTopping('chamoy',false)">NO</button></div></div><button class="btn-main" onclick="addToCart()">AGREGAR AL CARRITO &#128722;</button></div></div><div id="p-cart" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="data:image/png;base64,REMOVED"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">&#128205; Cra 4 #44A, Ibagu&eacute;</div><div class="sa-hours">&#128336; 16:00 &ndash; 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-home')">&#8592; Inicio</button><div class="screen-title">TU <span class="pink">CARRITO</span></div><div style="height:10px"></div><div id="cartItems"></div><div class="add-more" onclick="startNewDrink()">&#10133; Agregar otra bebida</div><div class="table-section"><div class="ts-label">&#128205; &iquest;D&oacute;nde vas a disfrutarlo?</div><div class="table-grid" id="tableGrid"></div></div><div class="total-bar"><div><div class="tb-label">Total</div><div style="font-size:10px;color:var(--muted);font-weight:700">Incluye dulces extras</div></div><div class="tb-amount" id="cartTotal">$0</div></div><button class="btn-main" onclick="showPage('p-payment')">CONTINUAR AL PAGO &#8594;</button></div></div><div id="p-payment" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="data:image/png;base64,REMOVED"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">&#128205; Cra 4 #44A, Ibagu&eacute;</div><div class="sa-hours">&#128336; 16:00 &ndash; 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-cart')">&#8592; Volver</button><div class="screen-title">M&Eacute;TODO DE <span class="pink">PAGO</span></div><div class="screen-sub">&#191;C&oacute;mo vas a pagar?</div><div class="pay-grid" style="grid-template-columns:1fr 1fr"><div class="pay-card" style="background:rgba(0,180,80,.08);border-color:rgba(0,180,80,.3)" id="pay-cash" onclick="selectPay('cash')"><div style="font-size:32px;margin-bottom:6px">&#128181;</div><div class="pay-name" style="color:#00e676">Efectivo</div></div><div class="pay-card" style="background:rgba(180,100,255,.08);border-color:rgba(180,100,255,.3)" id="pay-nequi" onclick="selectPay('nequi')"><img class="pay-icon" src="data:image/png;base64,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"/><div class="pay-name" style="color:#cc88ff">Nequi</div></div><div class="pay-card" style="background:rgba(255,220,0,.06);border-color:rgba(255,200,0,.25)" id="pay-banco" onclick="selectPay('banco')"><img class="pay-icon" src="data:image/png;base64,REMOVED" style="border-radius:50%"/><div class="pay-name" style="color:#ffd700">Transferencia</div></div><div class="pay-card" style="background:rgba(0,80,200,.08);border-color:rgba(0,100,220,.3)" id="pay-card" onclick="selectPay('card')"><img class="pay-icon" src="data:image/png;base64,REMOVED" style="object-fit:contain;border-radius:6px"/><div class="pay-name" style="color:#88aaff">Cr&eacute;dito / D&eacute;bito</div></div></div><div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,45,143,.2);border-radius:14px;padding:14px 18px;margin-bottom:16px"><div style="font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Total a pagar</div><div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--pink)" id="payTotal">$0</div></div><button class="btn-main" onclick="proceedPay()">CONFIRMAR &#8594;</button></div></div><div id="p-nequi" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">&#128205; Cra 4 #44A, Ibagu&eacute;</div><div class="sa-hours">&#128336; 16:00 &ndash; 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-payment')">&#8592; Volver</button><div class="payment-screen"><img class="ps-logo" src="data:image/png;base64,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"/><div class="ps-title">PAGO CON NEQUI</div><div class="ps-sub">Escanea el c&oacute;digo con tu app Nequi</div><div class="amount-box" style="background:rgba(180,100,255,.1);border:1px solid rgba(180,100,255,.3)"><div class="ab-label" style="color:#cc88ff">Total a pagar</div><div class="ab-amount" style="color:#cc88ff" id="nequiAmt">$0</div></div><div class="qr-box" id="nequiQR"></div><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:14px">N&uacute;mero: <strong style="color:#cc88ff">+57 324 201 0008</strong></div><div class="steps-box" style="background:rgba(180,100,255,.08);border:1px solid rgba(180,100,255,.2)"><div class="step-row"><div class="step-num" style="background:#7c3aff">1</div>Abre tu app Nequi</div><div class="step-row"><div class="step-num" style="background:#7c3aff">2</div>Escanea el c&oacute;digo QR</div><div class="step-row"><div class="step-num" style="background:#7c3aff">3</div>Confirma el monto exacto</div><div class="step-row"><div class="step-num" style="background:#7c3aff">4</div>Muestra confirmaci&oacute;n al cajero</div></div><button class="btn-main" style="background:#7c3aff;box-shadow:0 6px 24px rgba(124,58,255,.5);margin-bottom:10px" onclick="submitOrder('Nequi')">&#9989; YA PAG&Uacute; &mdash; ENVIAR ORDEN</button><button class="btn-ghost" onclick="showPage('p-payment')">Cancelar</button></div></div></div><div id="p-banco" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">&#128205; Cra 4 #44A, Ibagu&eacute;</div><div class="sa-hours">&#128336; 16:00 &ndash; 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-payment')">&#8592; Volver</button><div class="payment-screen"><img class="ps-logo" src="data:image/png;base64,REMOVED" style="border-radius:50%"/><div class="ps-title" style="color:#ffd700">BANCOLOMBIA</div><div class="ps-sub">Transferencia a cuenta Pixies</div><div class="amount-box" style="background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.25)"><div class="ab-label" style="color:#ffd700">Total a transferir</div><div class="ab-amount" style="color:#ffd700" id="bancoAmt">$0</div></div><div class="qr-box" id="bancoQR"></div><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:14px">Cuenta: <strong style="color:#ffd700">XXX-XXXXXXX</strong></div><div class="steps-box" style="background:rgba(255,200,0,.06);border:1px solid rgba(255,200,0,.2)"><div class="step-row"><div class="step-num" style="background:#c8a000">1</div>Abre tu app Bancolombia</div><div class="step-row"><div class="step-num" style="background:#c8a000">2</div>Escanea el QR o transfiere</div><div class="step-row"><div class="step-num" style="background:#c8a000">3</div>Confirma el monto exacto</div><div class="step-row"><div class="step-num" style="background:#c8a000">4</div>Muestra confirmaci&oacute;n al cajero</div></div><button class="btn-main" style="background:linear-gradient(135deg,#c8a000,#ffdd00);color:#1a1000;margin-bottom:10px" onclick="submitOrder('Bancolombia')">&#9989; YA PAG&Uacute; &mdash; ENVIAR ORDEN</button><button class="btn-ghost" onclick="showPage('p-payment')">Cancelar</button></div></div></div><div id="p-done" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">&#128205; Cra 4 #44A, Ibagu&eacute;</div><div class="sa-hours">&#128336; 16:00 &ndash; 23:59</div></a></div><div class="page-content"><div class="done-wrap"><div class="done-icon">&#127850;&#10024;</div><div class="done-title">&#161;ORDEN ENVIADA!</div><div class="done-sub">Tu Pixie est&aacute; siendo preparado<br>con toda la magia &#128156;</div><div class="order-num-card"><div class="onc-label">Tu n&uacute;mero de orden</div><div class="onc-num" id="doneNum">---</div><div class="onc-hint">Espera tu n&uacute;mero en pantalla &#128250;</div></div><div class="done-summary" id="doneSummary"></div><div class="done-table-tag" id="doneTable"></div><div class="done-pay-tag" id="donePayTag"></div><button class="btn-ghost" onclick="resetAll()">Hacer otra orden &#128260;</button></div></div></div><div class="cart-bubble hidden" id="cartBubble" onclick="showPage('p-cart')"><span style="font-size:18px">&#128722;</span><span class="cb-count" id="cbCount">0</span><span class="cb-total" id="cbTotal">$0</span></div><script>var F=[
-  {id:1,n:'Fresa',e:'&#127827;',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',d:'Dulce y refrescante',liq:true},
-  {id:2,n:'Mango',e:'&#129389;',c:'#ff9500',bg:'rgba(255,149,0,0.08)',br:'rgba(255,149,0,0.3)',d:'Tropical y jugoso',liq:true},
-  {id:3,n:'Uva',e:'&#127815;',c:'#bf00ff',bg:'rgba(191,0,255,0.08)',br:'rgba(191,0,255,0.3)',d:'Intenso y frutal',liq:true},
-  {id:4,n:'Lim\u00f3n',e:'&#127819;',c:'#d4ff00',bg:'rgba(212,255,0,0.06)',br:'rgba(212,255,0,0.25)',d:'\u00c1cido y refrescante',liq:true},
-  {id:5,n:'Tamarindo',e:'&#129753;',c:'#ff6b35',bg:'rgba(255,107,53,0.08)',br:'rgba(255,107,53,0.3)',d:'Dulce con toque agrio',liq:true},
-  {id:6,n:'Mora',e:'&#129744;',c:'#a855f7',bg:'rgba(168,85,247,0.08)',br:'rgba(168,85,247,0.3)',d:'Silvestre y arom\u00e1tico',liq:false}
-];
-var SZ=[
-  {id:'deseo',n:'Deseo',e:'&#10024;',oz:'16 oz',d:'Una chispita de magia',p:12000},
-  {id:'varita',n:'Varita',e:'&#129668;',oz:'20 oz',d:'La varita est\u00e1 en tu mano',p:15000},
-  {id:'hada',n:'Hada',e:'&#127775;',oz:'1 litro',d:'Toda el hada para ti',p:22000},
-  {id:'nube',n:'Nube',e:'&#128032;',oz:'2 litros',d:'La Pecera \u2014 para compartir',p:54000},
-  {id:'mundo',n:'Mundo M\u00e1gico',e:'&#129802;',oz:'3 litros',d:'La Nevera \u2014 para la familia',p:74000}
-];
-var CD=[
-  {id:1,n:'Gomitas Ositos',e:'&#128059;'},{id:2,n:'Skittles',e:'&#127752;'},{id:3,n:'Man\u00ed Japon\u00e9s',e:'&#129372;'},
-  {id:4,n:'Paleta Chamoy',e:'&#127853;'},{id:5,n:'Chicles Globo',e:'&#129511;'},{id:6,n:'Toffee',e:'&#127852;'},
-  {id:7,n:'Pulparindo',e:'&#127798;'},{id:8,n:'Trolli Gusanos',e:'&#128027;'},{id:9,n:'Jelly Beans',e:'&#129768;'},
-  {id:10,n:'Conejitos',e:'&#128007;'},{id:11,n:'Mazap\u00e1n',e:'&#127800;'},{id:12,n:'Sour Patch',e:'&#128534;'},
-  {id:13,n:'M&Ms',e:'&#128996;'},{id:14,n:'Regaliz Rojo',e:'&#10084;'},{id:15,n:'Coco Rallado',e:'&#129381;'},
-  {id:16,n:'Chupeta Pica',e:'&#127841;'},{id:17,n:'Nucita',e:'&#127851;'},{id:18,n:'Bon Bon Bum',e:'&#127880;'},
-  {id:19,n:'Frunas',e:'&#127818;'},{id:20,n:'Mentitas',e:'&#128994;'},{id:21,n:'Choco Krispis',e:'&#127806;'},
-  {id:22,n:'Piruleta',e:'&#127853;'},{id:23,n:'Choco Jet',e:'&#9992;'},{id:24,n:'Gomitas Cola',e:'&#127844;'},
-  {id:25,n:'Caramelo Duro',e:'&#11088;'},{id:26,n:'Perlas Choco',e:'&#128156;'},{id:27,n:'Yogur Cubierto',e:'&#129744;'},
-  {id:28,n:'Masmelos',e:'&#9925;'},{id:29,n:'Wafer Vainilla',e:'&#127850;'},{id:30,n:'Chitos',e:'&#129505;'},
-  {id:31,n:'Chupa Sand\u00eda',e:'&#127817;'},{id:32,n:'\u00c1cidos Verdes',e:'&#128154;'},{id:33,n:'Trozos Coco',e:'&#127796;'},
-  {id:34,n:'Gomitas Planas',e:'&#129720;'},{id:35,n:'Caramelo Leche',e:'&#129371;'},{id:36,n:'Obleas',e:'&#129619;'},
-  {id:37,n:'Chicle Menta',e:'&#127807;'},{id:38,n:'Kumis Goma',e:'&#127862;'},{id:39,n:'Uvas Pasas',e:'&#127815;'},
-  {id:40,n:'Sorpresa Pixie',e:'&#10024;'}
-];
-var cur={f:null,s:null,cd:[],tj:false,cm:false};
+.ci-stepper{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.stepper-btn{width:22px;height:22px;border-radius:50%;border:none;background:rgba(255,45,143,0.3);color:white;font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.stepper-btn:active{background:rgba(255,45,143,0.7);}
+.stepper-val{font-size:13px;font-weight:900;color:#ff2d8f;min-width:16px;text-align:center;}
+#pxModal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;}
+</style></head><body>
+<!-- SOCIAL BAR MACRO: WA=green IG=pink TT=white GMAIL=red -->
+<div id="p-home" class="page show"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">📍 Cra 4 #44A, Ibagué</div><div class="sa-hours">🕐 16:00 – 23:59</div></a></div><div class="page-content"><div class="hero"><div class="logo-wrap"><img src="https://res.cloudinary.com/deeloaqth/image/upload/v1774670816/preview_gdumct.png" style="width:100%;height:100%;object-fit:cover"/></div><div class="brand-title">PIXIES <span class="pink">COCKTAILS</span></div><div class="slogan">Somos Pixies ¿y tú? ✨</div></div><div class="hero-card"><div class="hero-steps">🍓 Elige tu sabor favorito<br>✨ Selecciona tu tamaño mágico<br>🍬 Escoge tus dulces<br>📱 Paga y disfruta</div><button class="btn-main" onclick="showPage('p-flavor')">¡ORDENAR AHORA!</button></div><div class="section-label">Nuestros Sabores</div><div class="flavor-grid" id="homeFlavors"></div></div></div>
+
+<div id="p-flavor" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">📍 Cra 4 #44A, Ibagué</div><div class="sa-hours">🕐 16:00 – 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-home')">← Inicio</button><div class="screen-title">ELIGE TU <span class="pink">SABOR</span></div><div class="screen-sub">¡Puedes mezclar todos los sabores que quieras! ✨</div><div class="flavor-grid" id="flavorGrid"></div><div id="flavorCta" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;padding:14px 16px 28px;background:linear-gradient(135deg,#6b00cc,#ff2d8f);box-shadow:0 -4px 20px rgba(255,45,143,.4);"><button onclick="confirmFlavors()" style="width:100%;max-width:480px;display:block;margin:0 auto;padding:16px;border:none;border-radius:14px;background:transparent;color:white;font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;font-family:'Bebas Neue',sans-serif;">SIGUIENTE PASO →</button></div></div></div>
+
+<div id="p-size" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">📍 Cra 4 #44A, Ibagué</div><div class="sa-hours">🕐 16:00 – 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-flavor')">← Volver</button><div class="screen-title">TAMAÑO <span class="pink">MÁGICO</span></div><div class="screen-sub">¿Cuánta magia quieres hoy?</div><div class="size-list" id="sizeGrid"></div></div></div>
+
+<div id="p-candies" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">📍 Cra 4 #44A, Ibagué</div><div class="sa-hours">🕐 16:00 – 23:59</div></a></div><div style="padding:10px 16px 0"><button class="btn-back" onclick="showPage('p-size')">← Volver</button></div><div class="candy-sticky"><div><div class="cs-title">🍬 TUS DULCES</div><div class="cs-sub" id="candySub">3 gratis · extras +$3.000 c/u</div></div><div class="candy-counter cc-free" id="candyCtr">0/3 gratis</div></div><div class="candy-grid" id="candyGrid"></div><div class="cta-float" id="ctaFloat"><button class="btn-main" onclick="addToCart()">AGREGAR AL CARRITO 🛒</button></div></div>
+
+<div id="p-cart" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">📍 Cra 4 #44A, Ibagué</div><div class="sa-hours">🕐 16:00 – 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-home')">← Inicio</button><div class="screen-title">TU <span class="pink">CARRITO</span></div><div style="height:10px"></div><div id="cartItems"></div><div class="add-more" onclick="startNewDrink()">➕ Agregar otra bebida</div><div class="table-section"><div class="ts-label">📍 ¿Dónde vas a disfrutarlo?</div><div class="table-grid" id="tableGrid"></div></div><div class="total-bar"><div><div class="tb-label">Total</div><div style="font-size:10px;color:var(--muted);font-weight:700">Incluye dulces extras</div></div><div class="tb-amount" id="cartTotal">$0</div></div><button class="btn-main" onclick="showPage('p-payment')">CONTINUAR AL PAGO →</button></div></div>
+
+<div id="p-payment" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">📍 Cra 4 #44A, Ibagué</div><div class="sa-hours">🕐 16:00 – 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-cart')">← Volver</button><div class="screen-title">MÉTODO DE <span class="pink">PAGO</span></div><div class="screen-sub">¿Cómo vas a pagar?</div><div class="pay-grid" style="grid-template-columns:1fr 1fr"><div class="pay-card" style="background:rgba(0,180,80,.08);border-color:rgba(0,180,80,.3)" id="pay-cash" onclick="selectPay('cash')"><div style="font-size:32px;margin-bottom:6px">💵</div><div class="pay-name" style="color:#00e676">Efectivo</div></div><div class="pay-card" style="background:rgba(180,100,255,.08);border-color:rgba(180,100,255,.3)" id="pay-nequi" onclick="selectPay('nequi')"><img class="pay-icon" src="https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8477_xuh9oh.jpg"/><div class="pay-name" style="color:#cc88ff">Nequi</div></div><div class="pay-card" style="background:rgba(255,220,0,.06);border-color:rgba(255,200,0,.25)" id="pay-banco" onclick="selectPay('banco')"><img class="pay-icon" src="https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8483_pk73rq.png" style="border-radius:50%"/><div class="pay-name" style="color:#ffd700">Transferencia</div></div><div class="pay-card" style="background:rgba(0,80,200,.08);border-color:rgba(0,100,220,.3)" id="pay-card" onclick="selectPay('card')"><img class="pay-icon" src="https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8491_ix6yng.jpg" style="object-fit:contain;border-radius:6px"/><div class="pay-name" style="color:#88aaff">Crédito / Débito</div></div></div><div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,45,143,.2);border-radius:14px;padding:14px 18px;margin-bottom:16px"><div style="font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Total a pagar</div><div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--pink)" id="payTotal">$0</div></div><button class="btn-main" onclick="proceedPay()">CONFIRMAR →</button></div></div>
+
+<div id="p-nequi" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">📍 Cra 4 #44A, Ibagué</div><div class="sa-hours">🕐 16:00 – 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-payment')">← Volver</button><div class="payment-screen"><img class="ps-logo" src="https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8477_xuh9oh.jpg" style="width:70px;height:70px;border-radius:16px;object-fit:cover"/><div class="ps-title">PAGO CON NEQUI</div><div class="ps-sub">Escanea el código con tu app Nequi</div><div class="amount-box" style="background:rgba(180,100,255,.1);border:1px solid rgba(180,100,255,.3)"><div class="ab-label" style="color:#cc88ff">Total a pagar</div><div class="ab-amount" style="color:#cc88ff" id="nequiAmt">$0</div></div><div class="qr-box" id="nequiQR"></div><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:14px">Número: <strong style="color:#cc88ff">+57 324 201 0008</strong></div><div class="steps-box" style="background:rgba(180,100,255,.08);border:1px solid rgba(180,100,255,.2)"><div class="step-row"><div class="step-num" style="background:#7c3aff">1</div>Abre tu app Nequi</div><div class="step-row"><div class="step-num" style="background:#7c3aff">2</div>Escanea el código QR</div><div class="step-row"><div class="step-num" style="background:#7c3aff">3</div>Confirma el monto exacto</div><div class="step-row"><div class="step-num" style="background:#7c3aff">4</div>Muestra confirmación al cajero</div></div><button class="btn-main" style="background:#7c3aff;box-shadow:0 6px 24px rgba(124,58,255,.5);margin-bottom:10px" onclick="submitOrder('Nequi')">✅ YA PAGUÉ — ENVIAR ORDEN</button><button class="btn-ghost" onclick="showPage('p-payment')">Cancelar</button></div></div></div>
+
+<div id="p-banco" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">📍 Cra 4 #44A, Ibagué</div><div class="sa-hours">🕐 16:00 – 23:59</div></a></div><div class="page-content"><button class="btn-back" onclick="showPage('p-payment')">← Volver</button><div class="payment-screen"><img class="ps-logo" src="https://res.cloudinary.com/deeloaqth/image/upload/v1774927551/IMG_8483_pk73rq.png" style="width:70px;height:70px;border-radius:50%;object-fit:cover"/><div class="ps-title" style="color:#ffd700">BANCOLOMBIA</div><div class="ps-sub">Transferencia a cuenta Pixies</div><div class="amount-box" style="background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.25)"><div class="ab-label" style="color:#ffd700">Total a transferir</div><div class="ab-amount" style="color:#ffd700" id="bancoAmt">$0</div></div><div class="qr-box" id="bancoQR"></div><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:14px">Cuenta: <strong style="color:#ffd700">XXX-XXXXXXX</strong></div><div class="steps-box" style="background:rgba(255,200,0,.06);border:1px solid rgba(255,200,0,.2)"><div class="step-row"><div class="step-num" style="background:#c8a000">1</div>Abre tu app Bancolombia</div><div class="step-row"><div class="step-num" style="background:#c8a000">2</div>Escanea el QR o transfiere</div><div class="step-row"><div class="step-num" style="background:#c8a000">3</div>Confirma el monto exacto</div><div class="step-row"><div class="step-num" style="background:#c8a000">4</div>Muestra confirmación al cajero</div></div><button class="btn-main" style="background:linear-gradient(135deg,#c8a000,#ffdd00);color:#1a1000;margin-bottom:10px" onclick="submitOrder('Bancolombia')">✅ YA PAGUÉ — ENVIAR ORDEN</button><button class="btn-ghost" onclick="showPage('p-payment')">Cancelar</button></div></div></div>
+
+<div id="p-done" class="page"><div class="social-bar"><div class="social-icons"><a href="https://wa.me/573242010008" target="_blank"><img src="https://cdn.simpleicons.org/whatsapp/25d366" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://instagram.com/pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/instagram/ff2d8f" style="width:32px;height:32px;border-radius:8px"/></a><a href="https://tiktok.com/@pixies_cocktails" target="_blank"><img src="https://cdn.simpleicons.org/tiktok/ffffff" style="width:32px;height:32px;border-radius:8px"/></a><a href="#" onclick="window.location='mail'+'to:Pixiescocktails23'+'@gmail.com';return false;"><img src="https://cdn.simpleicons.org/gmail/ea4335" style="width:32px;height:32px;border-radius:8px"/></a></div><a href="https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia" target="_blank" style="text-decoration:none"><div class="sa-name">📍 Cra 4 #44A, Ibagué</div><div class="sa-hours">🕐 16:00 – 23:59</div></a></div><div class="page-content"><div class="done-wrap"><div class="done-icon">🍧✨</div><div class="done-title">¡ORDEN ENVIADA!</div><div class="done-sub">Tu Pixie está siendo preparado<br>con toda la magia 💜</div><div class="order-num-card"><div class="onc-label">Tu número de orden</div><div class="onc-num" id="doneNum">---</div><div class="onc-hint">Espera tu número en pantalla 📺</div></div><div class="done-summary" id="doneSummary"></div><div class="done-table-tag" id="doneTable"></div><div class="done-pay-tag" id="donePayTag"></div><button class="btn-ghost" onclick="resetAll()">Hacer otra orden 🔄</button></div></div></div>
+
+<div class="cart-bubble hidden" id="cartBubble" onclick="showPage('p-cart')"><span style="font-size:18px">🛒</span><span class="cb-count" id="cbCount">0</span><span class="cb-total" id="cbTotal">$0</span></div>
+
+<!-- SIGUIENTE PASO bar for size page -->
+<div id="pxSzBar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;padding:14px 16px 28px;background:linear-gradient(135deg,#6b00cc,#ff2d8f);box-shadow:0 -4px 20px rgba(255,45,143,.4);"><button onclick="if(window.cur&&window.cur.s){document.getElementById('pxSzBar').style.display='none';if(typeof window.bC==='function')window.bC();if(typeof window.showPage==='function')window.showPage('p-candies');}" style="width:100%;max-width:480px;display:block;margin:0 auto;padding:16px;border:none;border-radius:14px;background:transparent;color:white;font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;font-family:'Bebas Neue',sans-serif;">SIGUIENTE PASO →</button></div>
+
+<!-- Photo Modal -->
+<div id="pxModal"><div style="position:relative;width:100%;max-width:320px;background:rgba(30,0,50,.97);border:1px solid rgba(180,0,255,.3);border-radius:20px;overflow:hidden;box-shadow:0 0 40px rgba(255,45,143,.3);"><button id="pxClose" style="position:absolute;top:10px;right:10px;background:rgba(255,45,143,.25);border:1px solid rgba(255,45,143,.5);color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;z-index:1;line-height:1;">✕</button><div id="pxEmoji" style="display:none;font-size:90px;text-align:center;padding:28px 0 8px;"></div><img id="pxImg" src="" style="width:100%;display:none;max-height:260px;object-fit:cover;"/><div style="padding:14px 16px 18px;text-align:center;"><div id="pxName" style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:#f5e6ff;"></div><div id="pxSub" style="font-size:11px;color:#8855aa;font-weight:700;margin-top:4px;"></div></div></div></div>
+<script>
+// Modal functions
+document.getElementById('pxClose').onclick=function(){document.getElementById('pxModal').style.display='none';};
+document.getElementById('pxModal').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
+function showPxModal(src,emoji,name,sub){
+  var ie=document.getElementById('pxImg'),ee=document.getElementById('pxEmoji');
+  if(src){ie.src=src;ie.style.display='block';ee.style.display='none';}
+  else{ie.src='';ie.style.display='none';ee.textContent=emoji||'📷';ee.style.display='block';}
+  document.getElementById('pxName').textContent=name||'';
+  document.getElementById('pxSub').textContent=(sub||'')+(src?'':' — Foto próximamente 📸');
+  document.getElementById('pxModal').style.display='flex';
+}
+
+var CFG={"store": {"name": "Pixies Cocktails", "slogan": "Somos Pixies ¿y tú?", "address": "Cra 4 #44A, Ibagué", "hours": "16:00 – 23:59", "phone": "+57 324 201 0008", "instagram": "pixies_cocktails", "tiktok": "pixies_cocktails", "email": "Pixiescocktails23@gmail.com", "maps": "https://maps.google.com/?q=Carrera+4+44A,+Ibagu%C3%A9,+Tolima,+Colombia"}, "payment": {"nequi": {"active": true, "number": "+57 324 201 0008", "account": "", "qr": ""}, "bancolombia": {"active": true, "account": "XXX-XXXXXXX", "qr": ""}, "cash": {"active": true}, "card": {"active": true}}, "flavors": [{"id": 1, "n": "Fresa", "e": "🍓", "c": "#ff2d8f", "bg": "rgba(255,45,143,0.08)", "br": "rgba(255,45,143,0.3)", "d": "Dulce y refrescante", "liq": true, "active": true}, {"id": 2, "n": "Mango", "e": "🥭", "c": "#ff9500", "bg": "rgba(255,149,0,0.08)", "br": "rgba(255,149,0,0.3)", "d": "Tropical y jugoso", "liq": true, "active": true}, {"id": 3, "n": "Uva", "e": "🍇", "c": "#bf00ff", "bg": "rgba(191,0,255,0.08)", "br": "rgba(191,0,255,0.3)", "d": "Intenso y frutal", "liq": true, "active": true}, {"id": 4, "n": "Limón", "e": "🍋", "c": "#d4ff00", "bg": "rgba(212,255,0,0.06)", "br": "rgba(212,255,0,0.25)", "d": "Ácido y refrescante", "liq": true, "active": true}, {"id": 5, "n": "Tamarindo", "e": "🫙", "c": "#ff6b35", "bg": "rgba(255,107,53,0.08)", "br": "rgba(255,107,53,0.3)", "d": "Dulce con toque agrio", "liq": true, "active": true}, {"id": 6, "n": "Mora", "e": "🫐", "c": "#a855f7", "bg": "rgba(168,85,247,0.08)", "br": "rgba(168,85,247,0.3)", "d": "Silvestre y aromático", "liq": false, "active": true}], "sizes": [{"id": "deseo", "n": "Deseo", "e": "✨", "oz": "16 oz", "d": "Una chispita de magia", "p": 12000, "active": true}, {"id": "varita", "n": "Varita", "e": "🪄", "oz": "20 oz", "d": "La varita está en tu mano", "p": 15000, "active": true}, {"id": "hada", "n": "Hada", "e": "🌟", "oz": "1 litro", "d": "Toda el hada para ti", "p": 22000, "active": true}, {"id": "nube", "n": "Nube", "e": "🐠", "oz": "2 litros", "d": "La Pecera — para compartir", "p": 54000, "active": true}, {"id": "mundo", "n": "Mundo Mágico", "e": "🧊", "oz": "3 litros", "d": "La Nevera — para la familia", "p": 74000, "active": true}], "candies": [{"id": 1, "n": "Gomitas Ositos", "e": "🐻", "cell": "A1", "active": true, "img": "", "allowMultiple": true}, {"id": 2, "n": "Skittles", "e": "🌈", "cell": "A2", "active": true, "img": "", "allowMultiple": true}, {"id": 3, "n": "Maní Japonés", "e": "🥜", "cell": "A3", "active": true, "img": "", "allowMultiple": true}, {"id": 4, "n": "Paleta Chamoy", "e": "🍭", "cell": "A4", "active": true, "img": "", "allowMultiple": true}, {"id": 5, "n": "Chicles Globo", "e": "🎏", "cell": "A5", "active": true, "img": "", "allowMultiple": true}, {"id": 6, "n": "Toffee", "e": "🍬", "cell": "A6", "active": true, "img": "", "allowMultiple": true}, {"id": 7, "n": "Pulparindo", "e": "🌶", "cell": "A7", "active": true, "img": "", "allowMultiple": true}, {"id": 8, "n": "Trolli Gusanos", "e": "🐛", "cell": "A8", "active": true, "img": "", "allowMultiple": true}, {"id": 9, "n": "Jelly Beans", "e": "😮", "cell": "A9", "active": true, "img": "", "allowMultiple": true}, {"id": 10, "n": "Conejitos", "e": "🐇", "cell": "A10", "active": true, "img": "", "allowMultiple": true}, {"id": 11, "n": "Mazapán", "e": "🌸", "cell": "B1", "active": true, "img": "", "allowMultiple": true}, {"id": 12, "n": "Sour Patch", "e": "😝", "cell": "B2", "active": true, "img": "", "allowMultiple": true}, {"id": 13, "n": "M&Ms", "e": "🟤", "cell": "B3", "active": true, "img": "", "allowMultiple": true}, {"id": 14, "n": "Regaliz Rojo", "e": "❤️", "cell": "B4", "active": true, "img": "", "allowMultiple": true}, {"id": 15, "n": "Coco Rallado", "e": "🥥", "cell": "B5", "active": true, "img": "", "allowMultiple": true}, {"id": 16, "n": "Chupeta Pica", "e": "🍡", "cell": "B6", "active": true, "img": "", "allowMultiple": true}, {"id": 17, "n": "Nucita", "e": "🍫", "cell": "B7", "active": true, "img": "", "allowMultiple": true}, {"id": 18, "n": "Bon Bon Bum", "e": "🎈", "cell": "B8", "active": true, "img": "", "allowMultiple": true}, {"id": 19, "n": "Frunas", "e": "🍊", "cell": "B9", "active": true, "img": "", "allowMultiple": true}, {"id": 20, "n": "Mentitas", "e": "🟢", "cell": "B10", "active": true, "img": "", "allowMultiple": true}, {"id": 21, "n": "Choco Krispis", "e": "🌾", "cell": "C1", "active": true, "img": "", "allowMultiple": true}, {"id": 22, "n": "Piruleta", "e": "🍭", "cell": "C2", "active": true, "img": "", "allowMultiple": true}, {"id": 23, "n": "Choco Jet", "e": "✈️", "cell": "C3", "active": true, "img": "", "allowMultiple": true}, {"id": 24, "n": "Gomitas Cola", "e": "🦅", "cell": "C4", "active": true, "img": "", "allowMultiple": true}, {"id": 25, "n": "Caramelo Duro", "e": "⭐", "cell": "C5", "active": true, "img": "", "allowMultiple": true}, {"id": 26, "n": "Perlas Choco", "e": "💜", "cell": "C6", "active": true, "img": "", "allowMultiple": true}, {"id": 27, "n": "Yogur Cubierto", "e": "🫐", "cell": "C7", "active": true, "img": "", "allowMultiple": true}, {"id": 28, "n": "Masmelos", "e": "⛅", "cell": "C8", "active": true, "img": "", "allowMultiple": true}, {"id": 29, "n": "Wafer Vainilla", "e": "🍦", "cell": "C9", "active": true, "img": "", "allowMultiple": true}, {"id": 30, "n": "Chitos", "e": "🧡", "cell": "C10", "active": true, "img": "", "allowMultiple": true}, {"id": 31, "n": "Chupa Sandía", "e": "🍉", "cell": "D1", "active": true, "img": "", "allowMultiple": true}, {"id": 32, "n": "Ácidos Verdes", "e": "💚", "cell": "D2", "active": true, "img": "", "allowMultiple": true}, {"id": 33, "n": "Trozos Coco", "e": "🌴", "cell": "D3", "active": true, "img": "", "allowMultiple": true}, {"id": 34, "n": "Gomitas Planas", "e": "🫳", "cell": "D4", "active": true, "img": "", "allowMultiple": true}, {"id": 35, "n": "Caramelo Leche", "e": "🫙", "cell": "D5", "active": true, "img": "", "allowMultiple": true}, {"id": 36, "n": "Obleas", "e": "🥞", "cell": "D6", "active": true, "img": "", "allowMultiple": true}, {"id": 37, "n": "Chicle Menta", "e": "🌿", "cell": "D7", "active": true, "img": "", "allowMultiple": true}, {"id": 38, "n": "Kumis Goma", "e": "🍶", "cell": "D8", "active": true, "img": "", "allowMultiple": true}, {"id": 39, "n": "Uvas Pasas", "e": "🍇", "cell": "D9", "active": true, "img": "", "allowMultiple": true}, {"id": 40, "n": "Sorpresa Pixie", "e": "✨", "cell": "D10", "active": true, "img": "", "allowMultiple": true}], "extras": {"candyExtraPrice": 3000, "freeCandiesSmall": 3, "freeCandiesLarge": 12, "largeSizes": ["nube", "mundo"]}, "tables": ["🛋️ Sofá", "Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "🥡 Para Llevar"]};
+
+var F=CFG.flavors.filter(function(f){return f.active;});
+var SZ=CFG.sizes.filter(function(s){return s.active;});
+var CD=CFG.candies.filter(function(c){return c.active;});
+var store=CFG.store;
+var extras=CFG.extras;
+
+var cur={f:null,fs:[],s:null,cd:[],cdQty:{}};
 var cart=[];var sT=null;var sP=null;
 
 function fmt(n){return '$'+Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
@@ -181,27 +203,67 @@ function showPage(id){
   var ps=document.querySelectorAll('.page');
   for(var i=0;i<ps.length;i++) ps[i].classList.remove('show');
   document.getElementById(id).classList.add('show');
-  window.scrollTo(0,0);ub();
+  window.scrollTo(0,0);
+  // Hide size bar when leaving size page
+  if(id!=='p-size'){var sb=document.getElementById('pxSzBar');if(sb)sb.style.display='none';}
+  ub();
 }
 
-function startNewDrink(){cur={f:null,s:null,cd:[],tj:false,cm:false};showPage('p-flavor');}
+function startNewDrink(){cur={f:null,fs:[],s:null,cd:[],cdQty:{}};bF();showPage('p-flavor');}
 
 function bF(){
-  var h='';
+  var hHome='';
   for(var i=0;i<F.length;i++){
     var f=F[i];
-    h+='<div class="flavor-card" style="background:'+f.bg+';border-color:'+f.br+'" onclick="pF('+f.id+')">';
-    h+='<span class="fc-emoji">'+f.e+'</span><div class="fc-name" style="color:'+f.c+'">'+f.n+'</div>';
-    h+='<div class="fc-desc">'+f.d+'</div>';
-    h+='<span class="fc-badge '+(f.liq?'badge-liq':'badge-noliq')+'">'+(f.liq?'&#127811; Con licor':'&#127818; Sin licor')+'</span>';
-    h+='</div>';
+    hHome+='<div class="flavor-card" style="background:'+f.bg+';border-color:'+f.br+'" onclick="showPage(&quot;p-flavor&quot;)">';
+    hHome+='<span class="fc-emoji">'+f.e+'</span><div class="fc-name" style="color:'+f.c+'">'+f.n+'</div>';
+    hHome+='<div class="fc-desc">'+f.d+'</div>';
+    hHome+='<span class="fc-badge '+(f.liq?'badge-liq':'badge-noliq')+'">'+(f.liq?'&#127811; Con licor':'&#127818; Sin licor')+'</span>';
+    hHome+='</div>';
   }
-  var e1=document.getElementById('homeFlavors');var e2=document.getElementById('flavorGrid');
-  if(e1)e1.innerHTML=h;if(e2)e2.innerHTML=h;
+  var hSel='';
+  for(var i=0;i<F.length;i++){
+    var f=F[i];
+    hSel+='<div class="flavor-card" id="fc'+f.id+'" style="position:relative;background:'+f.bg+';border-color:'+f.br+'" onclick="tF('+f.id+')">';
+    hSel+='<span class="fc-emoji">'+f.e+'</span><div class="fc-name" style="color:'+f.c+'">'+f.n+'</div>';
+    hSel+='<div class="fc-desc">'+f.d+'</div>';
+    hSel+='<span class="fc-badge '+(f.liq?'badge-liq':'badge-noliq')+'">'+(f.liq?'&#127811; Con licor':'&#127818; Sin licor')+'</span>';
+    hSel+='<div class="fc-check" id="fck'+f.id+'" style="display:none;position:absolute;top:8px;right:8px;font-size:18px">&#9989;</div>';
+    hSel+='</div>';
+  }
+  var e1=document.getElementById('homeFlavors');
+  var e2=document.getElementById('flavorGrid');
+  if(e1)e1.innerHTML=hHome;
+  if(e2)e2.innerHTML=hSel;
 }
 
-function pF(id){
-  for(var i=0;i<F.length;i++){if(F[i].id===id){cur.f=F[i];break;}}
+function tF(id){
+  if(!cur.fs) cur.fs=[];
+  var idx=cur.fs.indexOf(id);
+  if(idx>=0){
+    cur.fs.splice(idx,1);
+    document.getElementById('fc'+id).classList.remove('selected');
+    document.getElementById('fck'+id).style.display='none';
+  } else {
+    cur.fs.push(id);
+    document.getElementById('fc'+id).classList.add('selected');
+    document.getElementById('fck'+id).style.display='block';
+  }
+  var cta=document.getElementById('flavorCta');
+  if(cta) cta.style.display=cur.fs.length>0?'flex':'none';
+}
+
+function confirmFlavors(){
+  if(!cur.fs||cur.fs.length===0) return;
+  cur.f=[];
+  var hasLiq=false;
+  for(var i=0;i<F.length;i++){
+    if(cur.fs.indexOf(F[i].id)>=0){
+      cur.f.push(F[i]);
+      if(F[i].liq) hasLiq=true;
+    }
+  }
+  cur.liq=hasLiq;
   bS();showPage('p-size');
 }
 
@@ -218,26 +280,51 @@ function bS(){
   document.getElementById('sizeGrid').innerHTML=h;
 }
 
+function getFr(){
+  if(!cur.s) return extras.freeCandiesSmall;
+  var large=extras.largeSizes||['nube','mundo'];
+  return(large.indexOf(cur.s.id)>=0)?extras.freeCandiesLarge:extras.freeCandiesSmall;
+}
+
 function pS(i){
-  cur.s=SZ[i];
-  cur.fr=(cur.s.id==='nube'||cur.s.id==='mundo')?12:3;
+  cur.s=SZ[i];cur.cd=[];cur.cdDouble={};
   var cs=document.querySelectorAll('.size-card');
   for(var j=0;j<cs.length;j++) cs[j].classList.remove('selected');
   document.getElementById('sz'+i).classList.add('selected');
-  cur.cd=[];
-  setTimeout(function(){bC();showPage('p-candies');},180);
+  // Show SIGUIENTE PASO bar
+  document.getElementById('pxSzBar').style.display='block';
+  // Remove existing cam buttons from all size cards
+  var oldCams=document.querySelectorAll('.px-sz-cam');
+  for(var k=0;k<oldCams.length;k++) oldCams[k].remove();
+  // Add camera button to selected card
+  var size=SZ[i];
+  var card=document.getElementById('sz'+i);
+  var cb=document.createElement('button');
+  cb.className='px-sz-cam';
+  cb.style.cssText='background:rgba(255,45,143,.18);border:1px solid rgba(255,45,143,.4);border-radius:8px;padding:5px 12px;font-size:13px;font-weight:800;cursor:pointer;margin-top:10px;display:flex;align-items:center;gap:6px;color:#f5e6ff;width:100%;';
+  cb.innerHTML='📷 Ver foto';
+  (function(s){cb.onclick=function(e){e.stopPropagation();showPxModal(s.img||'',s.e||'🥤',s.n,s.oz+' — '+s.d);};})(size);
+  card.appendChild(cb);
 }
 
 function bC(){
   var fr=getFr();
   var sub=document.getElementById('candySub');
-  if(sub)sub.textContent=fr+' gratis'+(fr<12?' · extras +$3.000 c/u':'');
+  if(sub)sub.innerHTML=fr+' gratis'+(fr<extras.freeCandiesLarge?' &middot; extras +'+fmt(extras.candyExtraPrice)+' c/u':'');
   var h='';
   for(var i=0;i<CD.length;i++){
     var c=CD[i];
     h+='<div class="candy-item" id="ci'+c.id+'" onclick="tC('+c.id+')">';
-    h+='<div class="ci-emoji">'+c.e+'</div>';
-    h+='<div class="ci-info"><div class="ci-name">'+c.n+'</div><div class="ci-num">#'+c.id+'</div></div>';
+    h+='<div class="ci-emoji">'+(c.img?'<img src="'+c.img+'" style="width:36px;height:36px;border-radius:8px;object-fit:cover"/>':c.e)+'</div>';
+    h+='<div class="ci-info"><div class="ci-name">'+c.n+'</div>';
+    if(c.allowMultiple){
+      h+='<div class="ci-stepper" id="cs'+c.id+'" style="display:none" onclick="event.stopPropagation()">';
+      h+='<button class="stepper-btn" onclick="cQty('+c.id+',-1)">&#8722;</button>';
+      h+='<span class="stepper-val" id="cv'+c.id+'">1</span>';
+      h+='<button class="stepper-btn" onclick="cQty('+c.id+',1)">+</button>';
+      h+='</div>';
+    }
+    h+='</div>';
     h+='<div class="ci-check" id="ck'+c.id+'" style="display:none">&#9989;</div>';
     h+='</div>';
   }
@@ -246,35 +333,83 @@ function bC(){
 
 function tC(id){
   var idx=cur.cd.indexOf(id);
-  if(idx>=0){cur.cd.splice(idx,1);document.getElementById('ci'+id).classList.remove('sel');document.getElementById('ck'+id).style.display='none';}
-  else{cur.cd.push(id);document.getElementById('ci'+id).classList.add('sel');document.getElementById('ck'+id).style.display='block';}
+  if(idx>=0){
+    cur.cd.splice(idx,1);
+    delete cur.cdQty[id];
+    document.getElementById('ci'+id).classList.remove('sel');
+    document.getElementById('ck'+id).style.display='none';
+    var cs=document.getElementById('cs'+id);
+    if(cs)cs.style.display='none';
+    var cam=document.getElementById('ci'+id).querySelector('.px-cam');
+    if(cam)cam.remove();
+  } else {
+    cur.cd.push(id);
+    cur.cdQty[id]=1;
+    document.getElementById('ci'+id).classList.add('sel');
+    document.getElementById('ck'+id).style.display='block';
+    var cs=document.getElementById('cs'+id);
+    if(cs){cs.style.display='flex';document.getElementById('cv'+id).textContent='1';}
+    // Add camera button to stepper
+    var candy=CFG.candies.find(function(c){return c.id===id;});
+    if(candy){
+      var stepper=document.getElementById('cs'+id);
+      var target=stepper||document.getElementById('ci'+id).querySelector('.ci-info');
+      var cam=document.createElement('button');
+      cam.className='px-cam';
+      cam.style.cssText='background:rgba(255,45,143,.18);border:1px solid rgba(255,45,143,.4);border-radius:8px;padding:3px 8px;font-size:15px;cursor:pointer;margin-left:6px;flex-shrink:0;line-height:1;vertical-align:middle;';
+      cam.textContent='📷';
+      (function(c){cam.onclick=function(e){e.stopPropagation();showPxModal(c.img||'',c.e||'🍬',c.n,'');};})(candy);
+      if(target)target.appendChild(cam);
+    }
+  }
   uC();
 }
 
-function getFr(){return(cur.s&&(cur.s.id==='nube'||cur.s.id==='mundo'))?12:3;}
+function cQty(id,delta){
+  if(!cur.cdQty[id]) cur.cdQty[id]=1;
+  var newVal=cur.cdQty[id]+delta;
+  if(newVal<1){tC(id);return;}
+  cur.cdQty[id]=newVal;
+  var cv=document.getElementById('cv'+id);
+  if(cv)cv.textContent=newVal;
+  uC();
+}
+
+function countCandies(){
+  var n=0;
+  for(var i=0;i<cur.cd.length;i++){
+    n+=(cur.cdQty&&cur.cdQty[cur.cd[i]])?cur.cdQty[cur.cd[i]]:1;
+  }
+  return n;
+}
+
 function uC(){
-  var n=cur.cd.length;var ct=document.getElementById('candyCtr');
-  var fr=getFr();var big=(fr===12);var ex=Math.max(0,n-fr);
+  var n=countCandies();var ct=document.getElementById('candyCtr');
+  var fr=getFr();var big=(fr===extras.freeCandiesLarge);
+  var ex=Math.max(0,n-fr);
   if(n<fr){ct.textContent=n+'/'+fr+' gratis';ct.className='candy-counter cc-free';}
   else if(n<=fr||big){ct.textContent=fr+'/'+fr+' \u2713';ct.className='candy-counter cc-done';}
-  else{ct.textContent='3 + '+ex+' extra';ct.className='candy-counter cc-paid';}
+  else{ct.textContent=fr+' + '+ex+' extra';ct.className='candy-counter cc-paid';}
   if(n>=fr)document.getElementById('ctaFloat').classList.add('show');
   else document.getElementById('ctaFloat').classList.remove('show');
 }
 
-function setTopping(t,v){
-  if(t==='tajin'){cur.tj=v;document.getElementById('tajin-si').className='toggle-btn '+(v?'si':'si-inactive');document.getElementById('tajin-no').className='toggle-btn '+(v?'no-active':'no');}
-  else{cur.cm=v;document.getElementById('chamoy-si').className='toggle-btn '+(v?'si':'si-inactive');document.getElementById('chamoy-no').className='toggle-btn '+(v?'no-active':'no');}
-}
-
 function addToCart(){
-  var fr=getFr();var big=(fr===12);
-  var ex=big?0:Math.max(0,cur.cd.length-fr);
-  cart.push({id:Date.now(),fn:cur.f.n,fe:cur.f.e,fc:cur.f.c,fb:cur.f.br,liq:cur.f.liq,sn:cur.s.n,se:cur.s.e,soz:cur.s.oz,bp:cur.s.p,cd:cur.cd.slice(),ex:ex,freeCD:fr});
+  var fr=getFr();var big=(fr===extras.freeCandiesLarge);
+  var ex=big?0:Math.max(0,countCandies()-fr);
+  var flavors=Array.isArray(cur.f)?cur.f:[cur.f];
+  var fn=flavors.map(function(f){return f.n;}).join(' + ');
+  var fe=flavors.map(function(f){return f.e;}).join('');
+  var fc=flavors[0].c; var fb=flavors[0].br;
+  var liq=cur.liq||false;
+  cart.push({id:Date.now(),fn:fn,fe:fe,fc:fc,fb:fb,liq:liq,
+    sn:cur.s.n,se:cur.s.e,soz:cur.s.oz,bp:cur.s.p,
+    cd:cur.cd.slice(),cdQty:JSON.parse(JSON.stringify(cur.cdQty)),
+    ex:ex,freeCD:fr});
   bCart();showPage('p-cart');
 }
 
-function gP(i){return i.bp+i.ex*3000;}
+function gP(i){return i.bp+i.ex*extras.candyExtraPrice;}
 
 function bCart(){
   var tot=0;var h='';
@@ -283,14 +418,22 @@ function bCart(){
     h+='<div class="cart-item-card" style="border-color:'+it.fb+'">';
     h+='<div class="cic-top"><div class="cic-emoji">'+it.fe+'</div>';
     h+='<div class="cic-info"><div class="cic-name" style="color:'+it.fc+'">'+it.fn+'</div>';
-    h+='<div class="cic-meta">'+it.se+' '+it.sn+' &middot; '+it.soz+(it.liq?' &middot; Con licor':'')+'</div></div>';
+    h+='<div class="cic-meta">'+it.se+' '+it.sn+' \u00b7 '+it.soz+(it.liq?' \u00b7 Con licor':'')+'</div></div>';
     h+='<div class="cic-price">'+fmt(pr)+'</div></div>';
     h+='<div class="cic-tags">';
-    var sh=0;
-    for(var j=0;j<it.cd.length&&sh<4;j++){for(var k=0;k<CD.length;k++){if(CD[k].id===it.cd[j]){h+='<span class="tag">'+CD[k].e+' '+CD[k].n+'</span>';sh++;break;}}}
+    var shown=0;
+    for(var j=0;j<it.cd.length&&shown<4;j++){
+      for(var k=0;k<CD.length;k++){
+        if(CD[k].id===it.cd[j]){
+          var qty=it.cdQty&&it.cdQty[it.cd[j]]?it.cdQty[it.cd[j]]:1;
+          h+='<span class="tag">'+CD[k].e+' '+CD[k].n+(qty>1?' x'+qty:'')+'</span>';
+          shown++;break;
+        }
+      }
+    }
     if(it.cd.length>4)h+='<span class="tag">+'+(it.cd.length-4)+' m\u00e1s</span>';
-    if(it.freeCD)h+='<span class="tag tag-green">'+it.freeCD+' dulces incluidos</span>';if(it.ex>0)h+='<span class="tag tag-yellow">+'+it.ex+' extras (+'+fmt(it.ex*3000)+')</span>';
-
+    if(it.ex>0)h+='<span class="tag tag-yellow">+'+it.ex+' extras (+'+fmt(it.ex*extras.candyExtraPrice)+')</span>';
+    if(it.freeCD>=extras.freeCandiesLarge)h+='<span class="tag tag-green">'+it.freeCD+' dulces incluidos</span>';
     h+='</div><button class="btn-remove" onclick="rI('+it.id+')">&#128465; Eliminar</button></div>';
   }
   document.getElementById('cartItems').innerHTML=h;
@@ -302,7 +445,7 @@ function bCart(){
 function rI(id){var nc=[];for(var i=0;i<cart.length;i++)if(cart[i].id!==id)nc.push(cart[i]);cart=nc;bCart();}
 
 function bTG(){
-  var opts=['\ud83d\udecb\ufe0f Sof\u00e1','Mesa 1','Mesa 2','Mesa 3','Mesa 4','Mesa 5','Mesa 6','Mesa 7','\ud83e\xb61 Para Llevar'];
+  var opts=CFG.tables;
   var h='';
   for(var i=0;i<opts.length;i++)h+='<button class="table-btn'+(sT===opts[i]?' sel':'')+'" onclick="pT('+i+')">'+opts[i]+'</button>';
   document.getElementById('tableGrid').innerHTML=h;window._to=opts;
@@ -320,7 +463,8 @@ function ub(){
 }
 
 function selectPay(t){
-  sP=t;var ts=['cash','nequi','banco','card'];
+  sP=t;
+  var ts=['cash','nequi','banco','card'];
   for(var i=0;i<ts.length;i++){var el=document.getElementById('pay-'+ts[i]);if(el)el.classList.remove('sel');}
   document.getElementById('pay-'+t).classList.add('sel');
 }
@@ -352,17 +496,18 @@ function submitOrder(method){
     h+='<div class="ds-row"><span>'+it.fe+'</span><span>'+it.fn+' '+it.se+' '+it.sn+'</span><span class="ds-price">'+fmt(pr)+'</span></div>';
   }
   document.getElementById('doneSummary').innerHTML=h;
-  document.getElementById('doneTable').textContent=sT?'&#128205; '+sT:'&#128205; Sin mesa';
+  document.getElementById('doneTable').textContent=sT?'\uD83D\uDCCD '+sT:'\uD83D\uDCCD Sin mesa';
   var pt=document.getElementById('donePayTag');
-  if(method==='Nequi'){pt.style.cssText='background:rgba(124,58,255,.2);border:1px solid rgba(124,58,255,.4);color:#b388ff';pt.textContent='&#128242; Pagado con Nequi';}
-  else if(method==='Bancolombia'){pt.style.cssText='background:rgba(200,160,0,.15);border:1px solid rgba(200,160,0,.3);color:#ffd700';pt.textContent='&#127974; Pagado con Bancolombia';}
-  else if(method==='Cr\u00e9dito/D\u00e9bito'){pt.style.cssText='background:rgba(0,100,220,.15);border:1px solid rgba(0,120,255,.3);color:#88aaff';pt.textContent='&#128179; Cr\u00e9dito/D\u00e9bito';}
-  else{pt.style.cssText='background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.3);color:#00e676';pt.textContent='&#128181; Paga en caja \u2014 '+fmt(tot);}
+  if(method==='Nequi'){pt.style.cssText='background:rgba(124,58,255,.2);border:1px solid rgba(124,58,255,.4);color:#b388ff';pt.textContent='\uD83D\uDCF2 Pagado con Nequi';}
+  else if(method==='Bancolombia'){pt.style.cssText='background:rgba(200,160,0,.15);border:1px solid rgba(200,160,0,.3);color:#ffd700';pt.textContent='\uD83C\uDFE6 Pagado con Bancolombia';}
+  else if(method==='Cr\u00e9dito/D\u00e9bito'){pt.style.cssText='background:rgba(0,100,220,.15);border:1px solid rgba(0,120,255,.3);color:#88aaff';pt.textContent='\uD83D\uDCB3 Cr\u00e9dito/D\u00e9bito';}
+  else{pt.style.cssText='background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.3);color:#00e676';pt.textContent='\uD83D\uDCB5 Paga en caja \u2014 '+fmt(tot);}
   showPage('p-done');
 }
 
 function resetAll(){
-  cart=[];sT=null;sP=null;cur={f:null,s:null,cd:[],tj:false,cm:false};ub();showPage('p-home');
+  cart=[];sT=null;sP=null;cur={f:null,fs:[],s:null,cd:[],cdQty:{}};bF();ub();showPage('p-home');
 }
 
-bF();bTG();</script></body></html>
+bF();bTG();
+</script></body></html>
