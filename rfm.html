@@ -284,6 +284,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .unsaved-dot{width:7px;height:7px;border-radius:50%;background:var(--pink);display:inline-block;margin-left:6px;box-shadow:0 0 6px var(--pink);opacity:0;transition:opacity .3s;}
 .unsaved-dot.show{opacity:1;}
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -364,9 +366,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
     </div>
     <div id="pushSuccessView" style="display:none">
       <div class="modal-success">
-        <div class="modal-success-icon">&#128274;</div>
-        <div class="modal-title" style="margin-bottom:12px">No configurado</div>
-        <div class="modal-success-text">El servidor de despliegue a&#250;n no est&#225; configurado.<br><br>Cuando el VPS est&#233; listo, este bot&#243;n publicar&#225; los cambios autom&#225;ticamente en ~60 segundos.</div>
+        <div class="modal-success-icon">&#127881;</div>
+        <div class="modal-title" style="margin-bottom:12px">&#161;Publicado!</div>
+        <div class="modal-success-text">Los cambios fueron enviados a Firebase.<br><br>El sitio p&#250;blico y el POS se actualizar&#225;n autom&#225;ticamente.</div>
         <br>
         <button class="btn-cancel" onclick="closePushModal()">Entendido</button>
       </div>
@@ -383,8 +385,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 <script>
 // ── CLOUDINARY CONFIG ─────────────────────────────────────
 // Replace these two values once your Cloudinary account is ready
-var CLOUD_NAME   = 'YOUR_CLOUD_NAME';    // e.g. 'pixiescocktails'
-var UPLOAD_PRESET = 'YOUR_UPLOAD_PRESET'; // unsigned preset name
+var CLOUD_NAME   = 'deeloaqth';    // e.g. 'pixiescocktails'
+var UPLOAD_PRESET = 'pixies_upload'; // unsigned preset name
 
 // ── APP CONFIG ───────────────────────────────────────────
 var ADMIN_PIN   = '0000';
@@ -399,6 +401,26 @@ var openForms = {};
 
 // pending upload target: {type, id}
 var pendingUpload = null;
+
+// ── FIREBASE ────────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey: "AIzaSyDE0SAPuxvu0G1Ylfo0VG5rY1UDrJHEA9c",
+  authDomain: "pixies-cocktails.firebaseapp.com",
+  databaseURL: "https://pixies-cocktails-default-rtdb.firebaseio.com",
+  projectId: "pixies-cocktails",
+  storageBucket: "pixies-cocktails.firebasestorage.app",
+  messagingSenderId: "154370181028",
+  appId: "1:154370181028:web:a2c94706ec0e61206a2331"
+});
+var db = firebase.database();
+
+function loadFromFirebase(callback){
+  db.ref('/config').once('value').then(function(snap){
+    var data = snap.val();
+    if(data){ CFG = data; }
+    callback();
+  }).catch(function(){ callback(); });
+}
 
 // ── HELPERS ──────────────────────────────────────────────
 function fmt(n){return '$'+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');}
@@ -416,9 +438,11 @@ function pinDel(){if(!pinBuffer.length)return;pinBuffer=pinBuffer.slice(0,-1);up
 function updatePinDots(prefix,buf,cls){for(var i=0;i<4;i++){var d=document.getElementById(prefix+i);d.className='pin-dot'+(i<buf.length?' filled':'');if(cls&&i<buf.length)d.className='pin-dot '+cls;}}
 function checkPin(){
   if(pinBuffer===ADMIN_PIN){
-    document.getElementById('pinScreen').style.display='none';
-    document.getElementById('app').classList.add('visible');
-    switchTab('candies');
+    loadFromFirebase(function(){
+      document.getElementById('pinScreen').style.display='none';
+      document.getElementById('app').classList.add('visible');
+      switchTab('candies');
+    });
   } else {
     updatePinDots('pd',pinBuffer,'error');
     document.getElementById('pinError').textContent='PIN incorrecto';
@@ -434,8 +458,20 @@ function updatePushDots(buf,cls){for(var i=0;i<4;i++){var d=document.getElementB
 function pushKey(d){if(pushBuffer.length>=4)return;pushBuffer+=d;updatePushDots(pushBuffer);if(pushBuffer.length===4)setTimeout(checkPushPin,120);}
 function pushDel(){if(!pushBuffer.length)return;pushBuffer=pushBuffer.slice(0,-1);updatePushDots(pushBuffer);document.getElementById('pushError').textContent='';}
 function checkPushPin(){
-  if(pushBuffer===DEPLOY_PIN){document.getElementById('pushPinView').style.display='none';document.getElementById('pushSuccessView').style.display='block';}
-  else{updatePushDots(pushBuffer,'error');document.getElementById('pushError').textContent='PIN de despliegue incorrecto';setTimeout(function(){pushBuffer='';updatePushDots('');document.getElementById('pushError').textContent='';},900);}
+  if(pushBuffer===DEPLOY_PIN){
+    db.ref('/live').set(CFG).then(function(){
+      document.getElementById('pushPinView').style.display='none';
+      document.getElementById('pushSuccessView').style.display='block';
+    }).catch(function(){
+      updatePushDots(pushBuffer,'error');
+      document.getElementById('pushError').textContent='Error al publicar en Firebase';
+      setTimeout(function(){pushBuffer='';updatePushDots('');document.getElementById('pushError').textContent='';},900);
+    });
+  } else {
+    updatePushDots(pushBuffer,'error');
+    document.getElementById('pushError').textContent='PIN de despliegue incorrecto';
+    setTimeout(function(){pushBuffer='';updatePushDots('');document.getElementById('pushError').textContent='';},900);
+  }
 }
 
 // ── TABS ─────────────────────────────────────────────────
@@ -496,7 +532,7 @@ function handleFileSelected(input){
   var fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', UPLOAD_PRESET);
-  fd.append('folder', 'pixies');
+  fd.append('folder', 'pixies_upload');
 
   fetch('https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/image/upload', {
     method: 'POST',
@@ -753,15 +789,13 @@ function updateCardClass(cardId,active){
 
 // ── SAVE ─────────────────────────────────────────────────
 function saveChanges(){
-  var payload=JSON.stringify(CFG,null,2);
-  var blob=new Blob([payload],{type:'application/json'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='pixies_config.json';
-  a.click();
-  unsaved=false;
-  document.getElementById('unsavedDot').classList.remove('show');
-  showToast('Guardado — descarga lista','success');
+  db.ref('/config').set(CFG).then(function(){
+    unsaved=false;
+    document.getElementById('unsavedDot').classList.remove('show');
+    showToast('Guardado en Firebase ✓','success');
+  }).catch(function(){
+    showToast('Error al guardar','error');
+  });
 }
 </script>
 </body>
