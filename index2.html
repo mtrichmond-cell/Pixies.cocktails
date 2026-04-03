@@ -251,7 +251,7 @@ function pS(i){
   var cs=document.querySelectorAll('.size-card');
   for(var j=0;j<cs.length;j++) cs[j].classList.remove('selected');
   document.getElementById('sz'+i).classList.add('selected');
-  setTimeout(function(){bC();showPage('p-candies');},180);
+  /* auto-advance removed by cleaner v4.3 — SIGUIENTE PASO bar handles this */
 }
 
 function bC(){
