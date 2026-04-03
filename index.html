@@ -510,4 +510,33 @@ function resetAll(){
 }
 
 bF();bTG();
-</script></body></html>
+</script><!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+(function(){
+  var FIREBASE_CONFIG={apiKey:"AIzaSyDE0SAPuxvu0G1Ylfo0VG5rY1UDrJHEA9c",authDomain:"pixies-cocktails.firebaseapp.com",databaseURL:"https://pixies-cocktails-default-rtdb.firebaseio.com",projectId:"pixies-cocktails",storageBucket:"pixies-cocktails.firebasestorage.app",messagingSenderId:"154370181028",appId:"1:154370181028:web:a2c94706ec0e61206a2331"};
+  try{
+    if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.database().ref('config').once('value')
+      .then(function(snap){
+        var data=snap.val();
+        if(!data)return;
+        if(data.flavors)CFG.flavors=data.flavors;
+        if(data.sizes)CFG.sizes=data.sizes;
+        if(data.candies)CFG.candies=data.candies;
+        if(data.extras)CFG.extras=data.extras;
+        if(data.store)CFG.store=data.store;
+        if(data.payment)CFG.payment=data.payment;
+        if(data.tables)CFG.tables=data.tables;
+        F=CFG.flavors.filter(function(f){return f.active;});
+        SZ=CFG.sizes.filter(function(s){return s.active;});
+        CD=CFG.candies.filter(function(c){return c.active;});
+        extras=CFG.extras;
+        bF();bTG();
+      })
+      .catch(function(){});
+  }catch(e){}
+})();
+</script>
+</body></html>
