@@ -4,6 +4,19 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>Pixies RFM</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyDE0SAPuxvu0G1Ylfo0VG5rY1UDrJHEA9c",
+  authDomain:"pixies-cocktails.firebaseapp.com",
+  databaseURL:"https://pixies-cocktails-default-rtdb.firebaseio.com",
+  projectId:"pixies-cocktails",
+  storageBucket:"pixies-cocktails.firebasestorage.app",
+  messagingSenderId:"154370181028",
+  appId:"1:154370181048:web:a2c94706ec0e61206a2331"
+});
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
 :root{
@@ -166,7 +179,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 </div>
 <div id="app">
   <div class="rfm-header">
-    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.2</div>
+    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.21</div>
     <div class="rfm-actions">
       <button class="btn-push" onclick="openPushModal()">&#9650; Push to Live</button>
       <button class="btn-save" onclick="saveChanges()">&#10003; Guardar <span class="unsaved-dot" id="unsavedDot"></span></button>
@@ -268,7 +281,7 @@ function pinKey(d){if(pinBuffer.length>=4)return;pinBuffer+=d;updatePinDots('pd'
 function pinDel(){if(!pinBuffer.length)return;pinBuffer=pinBuffer.slice(0,-1);updatePinDots('pd',pinBuffer);document.getElementById('pinError').textContent='';}
 function updatePinDots(prefix,buf,cls){for(var i=0;i<4;i++){var d=document.getElementById(prefix+i);d.className='pin-dot'+(i<buf.length?' filled':'');if(cls&&i<buf.length)d.className='pin-dot '+cls;}}
 function checkPin(){
-  if(pinBuffer===ADMIN_PIN){document.getElementById('pinScreen').style.display='none';document.getElementById('app').classList.add('visible');switchTab('flavors');}
+  if(pinBuffer===ADMIN_PIN){document.getElementById('pinScreen').style.display='none';document.getElementById('app').classList.add('visible');loadFromFirebase();}
   else{updatePinDots('pd',pinBuffer,'error');document.getElementById('pinError').textContent='PIN incorrecto';setTimeout(function(){pinBuffer='';updatePinDots('pd','');document.getElementById('pinError').textContent='';},900);}
 }
 var pushBuffer='';
@@ -485,10 +498,38 @@ function toggleForm(key){
 }
 function updateCardClass(id,active){var el=document.getElementById(id);if(el){if(active)el.classList.remove('inactive');else el.classList.add('inactive');}}
 function saveChanges(){
-  var blob=new Blob([JSON.stringify(CFG,null,2)],{type:'application/json'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pixies_config.json';a.click();
-  unsaved=false;document.getElementById('unsavedDot').classList.remove('show');
-  showToast('Guardado \u2014 descarga lista','success');
+  showToast('Guardando...','success');
+  var db=firebase.database();
+  db.ref('/config').set(CFG)
+    .then(function(){
+      unsaved=false;
+      document.getElementById('unsavedDot').classList.remove('show');
+      showToast('Guardado \u2014 sitio actualizado','success');
+    })
+    .catch(function(err){
+      showToast('Error al guardar','error');
+      console.error(err);
+    });
+}
+</script>
+<script>
+// Load existing config from Firebase on unlock
+function loadFromFirebase(){
+  firebase.database().ref('/config').once('value').then(function(snap){
+    if(snap.exists()){
+      var data=snap.val();
+      // Merge carefully — keep defaults for any missing keys
+      if(data.flavors) CFG.flavors=data.flavors;
+      if(data.sizes) CFG.sizes=data.sizes;
+      if(data.candies) CFG.candies=data.candies;
+      if(data.store) CFG.store=data.store;
+      if(data.payment) CFG.payment=data.payment;
+      if(data.extras) CFG.extras=data.extras;
+    }
+    renderTab(currentTab);
+  }).catch(function(){
+    renderTab(currentTab);
+  });
 }
 </script>
 </body>
