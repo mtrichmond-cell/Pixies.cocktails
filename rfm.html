@@ -387,19 +387,19 @@ function renderFlavorCard(f){
   h+='<div class="form-group"><div class="form-label">Emoji</div><input class="form-input" value="'+f.e+'" onchange="updateFlavor('+f.id+',\'e\',this.value)"/></div></div>';
 
   // CREMOSO row — dimmed if sinLicor is on
-  h+='<div class="form-toggle-row'+''+'">';
+  h+='<div class="form-toggle-row">';
   h+='<div><div class="form-toggle-label">Cremoso</div><div class="form-toggle-desc">Tiene ingrediente cremoso (requiere licor)</div></div>';
   h+='<label class="toggle"><input type="checkbox"'+(f.cremoso?' checked':'')+' onchange="toggleCremoso('+f.id+',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
   h+='</div>';
-  h+='<div class="form-row single'+''+'">';
+  h+='<div class="form-row single">';
   h+='<div class="form-group"><div class="form-label">Recargo Cremoso (COP)</div><input class="form-input" type="number" value="'+f.cremoso_upcharge+'" onchange="updateFlavor('+f.id+',\'cremoso_upcharge\',parseInt(this.value))"/></div></div>';
 
   // SIN LICOR row — hidden if cremoso is on
-  h+='<div class="form-toggle-row" '>'; 
+  h+='<div class="form-toggle-row">';
   h+='<div><div class="form-toggle-label">Sin Licor</div><div class="form-toggle-desc">Se puede pedir sin alcohol</div></div>';
   h+='<label class="toggle"><input type="checkbox"'+(f.sinLicor?' checked':'')+' onchange="toggleSinLicor('+f.id+',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
   h+='</div>';
-  h+='<div class="form-row single" '>'; 
+  h+='<div class="form-row single">';
   h+='<div class="form-group"><div class="form-label">Descuento Sin Licor (COP)</div><input class="form-input" type="number" value="'+f.sinLicor_discount+'" onchange="updateFlavor('+f.id+',\'sinLicor_discount\',parseInt(this.value))"/></div></div>';
 
   h+=buildUploadArea('flavor',f.id,f.img);
