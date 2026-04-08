@@ -164,6 +164,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 <body>
 <div id="pinScreen">
   <div class="pin-logo"><span>PIXIES</span> RFM</div>
+  <div style="font-size:11px;font-family:var(--font-mono);color:var(--muted);letter-spacing:2px;">v2.4</div>
   <div class="pin-title">Acceso Restringido<small>Ingresa tu PIN de administrador</small></div>
   <div class="pin-dots">
     <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
@@ -179,7 +180,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 </div>
 <div id="app">
   <div class="rfm-header">
-    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.3</div>
+    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.4</div>
     <div class="rfm-actions">
       <button class="btn-push" onclick="openPushModal()">&#9650; Push to Live</button>
       <button class="btn-save" onclick="saveChanges()">&#10003; Guardar <span class="unsaved-dot" id="unsavedDot"></span></button>
@@ -189,6 +190,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
     <div class="tab active" onclick="switchTab('flavors')" id="tab-flavors">&#127827; Sabores</div>
     <div class="tab" onclick="switchTab('candies')" id="tab-candies">&#127852; Dulces</div>
     <div class="tab" onclick="switchTab('sizes')" id="tab-sizes">&#10024; Tama&#241;os</div>
+    <div class="tab" onclick="switchTab('extras')" id="tab-extras">&#10024; Extras</div>
     <div class="tab" onclick="switchTab('payment')" id="tab-payment">&#128179; Pagos</div>
     <div class="tab" onclick="switchTab('settings')" id="tab-settings">&#9881; Config</div>
   </div>
@@ -267,7 +269,7 @@ var CFG={
     {id:31,n:'Gomas Agrias',e:'\ud83d\udc0d',cell:'D1',active:true,img:''},{id:32,n:'Cocosette',e:'\ud83c\udf70',cell:'D2',active:true,img:''},{id:33,n:'Explosivos',e:'\ud83d\udca5',cell:'D3',active:true,img:''},{id:34,n:'Lunetas',e:'\ud83d\udd35',cell:'D4',active:true,img:''},{id:35,n:'Acirema',e:'\ud83c\udf6f',cell:'D5',active:true,img:''},
     {id:36,n:'Ositos de Canela',e:'\ud83e\udd89',cell:'D6',active:true,img:''},{id:37,n:'Chicharrones',e:'\ud83d\udc37',cell:'D7',active:true,img:''},{id:38,n:'Peach Rings',e:'\ud83c\udf51',cell:'D8',active:true,img:''},{id:39,n:'Gomas Cola',e:'\ud83e\udd4a',cell:'D9',active:true,img:''},{id:40,n:'Tiras \u00c1cidas',e:'\ud83d\udc9a',cell:'D0',active:true,img:''}
   ],
-  extras:{candyExtraPrice:3000}
+  extras:{candyExtraPrice:3000,extrasActive:false,extrasItems:[]}
 };
 function fmt(n){return '$'+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');}
 function markUnsaved(){unsaved=true;document.getElementById('unsavedDot').classList.add('show');}
@@ -305,6 +307,7 @@ function renderTab(tab){
   if(tab==='flavors')el.innerHTML=renderFlavors();
   else if(tab==='candies')el.innerHTML=renderCandies();
   else if(tab==='sizes')el.innerHTML=renderSizes();
+  else if(tab==='extras')el.innerHTML=renderExtras();
   else if(tab==='payment')el.innerHTML=renderPayment();
   else if(tab==='settings')el.innerHTML=renderSettings();
 }
@@ -469,6 +472,55 @@ function deleteSize(id){
 function toggleSize(id,val){var s=getSizeById(id);if(s)s.active=val;markUnsaved();updateCardClass('card-size-'+id,val);}
 function updateSize(id,key,val){var s=getSizeById(id);if(!s)return;s[key]=val;markUnsaved();if(key==='n'){var el=document.querySelector('#card-size-'+id+' .item-name');if(el)el.textContent=val;}if(key==='p'){var el=document.querySelector('#card-size-'+id+' .tag-price');if(el)el.textContent=fmt(val);}}
 function getSizeById(id){for(var i=0;i<CFG.sizes.length;i++)if(CFG.sizes[i].id===id)return CFG.sizes[i];return null;}
+function renderExtras(){
+  var items=CFG.extras.extrasItems||[];
+  var h='<div class="section-header"><div class="section-title">'+items.length+' extras</div></div>';
+  h+='<div class="settings-card" style="margin-bottom:16px">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between">';
+  h+='<div><div class="settings-key">Extras activos</div><div class="settings-desc">Muestra la secci\u00f3n de extras en el sitio</div></div>';
+  h+='<label class="toggle"><input type="checkbox"'+(CFG.extras.extrasActive?' checked':'')+' onchange="CFG.extras.extrasActive=this.checked;markUnsaved()"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
+  h+='</div></div>';
+  for(var i=0;i<items.length;i++){
+    var x=items[i];
+    var isOpen=openForms['extra_'+x.id];
+    h+='<div class="item-card'+(x.active?'':' inactive')+'" id="card-extra-'+x.id+'">';
+    h+='<div class="item-card-row">';
+    h+='<div class="item-emoji">'+x.e+'</div>';
+    h+='<div class="item-info"><div class="item-name">'+x.n+'</div>';
+    h+='<div class="item-meta"><span class="item-price">+'+fmt(x.price)+'</span> <span style="color:var(--muted);font-size:11px">'+(x.d||'')+'</span></div>';
+    h+='</div>';
+    if(x.img){h+='<img class="item-thumb" id="thumb-extra-'+x.id+'" src="'+x.img+'" alt=""/>';}
+    else{h+='<div class="item-thumb-placeholder" id="thumb-extra-'+x.id+'">\ud83d\udcf7</div>';}
+    h+='<div class="item-controls">';
+    h+='<label class="toggle"><input type="checkbox"'+(x.active?' checked':'')+' onchange="toggleExtra('+x.id+',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
+    h+='<button class="btn-edit" onclick="toggleForm(\'extra_'+x.id+'\')">\u270f</button>';
+    h+='<button class="btn-delete" onclick="deleteExtra('+x.id+')">\ud83d\uddd1</button>';
+    h+='</div></div>';
+    h+='<div class="item-form'+(isOpen?' open':'')+'" id="form-extra-'+x.id+'">';
+    h+='<div class="form-row"><div class="form-group"><div class="form-label">Nombre</div><input class="form-input" value="'+x.n+'" onchange="updateExtra('+x.id+',\'n\',this.value)"/></div>';
+    h+='<div class="form-group"><div class="form-label">Emoji</div><input class="form-input" value="'+x.e+'" onchange="updateExtra('+x.id+',\'e\',this.value)"/></div></div>';
+    h+='<div class="form-row single"><div class="form-group"><div class="form-label">Descripci\u00f3n</div><input class="form-input" value="'+(x.d||'')+'" placeholder="Ej. T\u00f3pping m\u00e1gico" onchange="updateExtra('+x.id+',\'d\',this.value)"/></div></div>';
+    h+='<div class="form-row single"><div class="form-group"><div class="form-label">Precio adicional (COP)</div><input class="form-input" type="number" value="'+x.price+'" onchange="updateExtra('+x.id+',\'price\',parseInt(this.value))"/></div></div>';
+    h+=buildUploadArea('extra',x.id,x.img);
+    h+='</div></div>';
+  }
+  h+='<button class="btn-add" onclick="addExtra()">\uff0b Agregar Extra</button>';
+  return h;
+}
+function toggleExtra(id,val){var x=getExtraById(id);if(x)x.active=val;markUnsaved();updateCardClass('card-extra-'+id,val);}
+function updateExtra(id,key,val){var x=getExtraById(id);if(!x)return;x[key]=val;markUnsaved();}
+function getExtraById(id){var arr=CFG.extras.extrasItems||[];for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i];return null;}
+function addExtra(){
+  if(!CFG.extras.extrasItems)CFG.extras.extrasItems=[];
+  var nx={id:nextId(CFG.extras.extrasItems),n:'Nuevo Extra',e:'\u2728',d:'',price:2000,active:true,img:''};
+  CFG.extras.extrasItems.push(nx);markUnsaved();renderTab('extras');
+}
+function deleteExtra(id){
+  openConfirm('\u00bfEliminar extra?','Esta acci\u00f3n no se puede deshacer.',function(){
+    CFG.extras.extrasItems=CFG.extras.extrasItems.filter(function(x){return x.id!==id;});
+    markUnsaved();renderTab('extras');
+  });
+}
 function renderPayment(){
   var p=CFG.payment;
   var h='<div class="section-title" style="margin-bottom:12px">M\u00e9todos de pago</div>';
@@ -525,7 +577,7 @@ function loadFromFirebase(){
       if(data.candies) CFG.candies=data.candies;
       if(data.store) CFG.store=data.store;
       if(data.payment) CFG.payment=data.payment;
-      if(data.extras) CFG.extras=data.extras;
+      if(data.extras){CFG.extras=data.extras;if(!CFG.extras.extrasItems)CFG.extras.extrasItems=[];if(CFG.extras.extrasActive===undefined)CFG.extras.extrasActive=false;}
     }
     renderTab(currentTab);
   }).catch(function(){
