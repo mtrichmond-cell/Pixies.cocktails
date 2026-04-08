@@ -374,6 +374,16 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // ── FIREBASE LISTENER ─────────────────────────────────────
+// Load completed orders from Firebase for recall persistence
+db.ref('completed_orders').orderByChild('completedAt').limitToLast(20).once('value',function(snap){
+  snap.forEach(function(c){
+    var o=c.val();
+    var ci=colorCounter%6;colorCounter++;
+    recallList.push({key:c.key,order:o,colorIdx:ci});
+  });
+  recallList.reverse();
+});
+
 db.ref('orders').on('value', function(snap){
   var data = snap.val() || {};
   // Only show pending orders
@@ -617,8 +627,19 @@ function confirmDelete(){
     recallList.unshift({key:key, order:JSON.parse(JSON.stringify(order)), colorIdx:colorMap[key]||0});
     if(recallList.length > 20) recallList.pop();
   }
-  // Mark completed in Firebase
+  // Mark completed in Firebase + persist in completed_orders (last 20)
   db.ref('orders/'+key+'/status').set('completed');
+  if(order){
+    var co = JSON.parse(JSON.stringify(order));
+    co.completedAt = firebase.database.ServerValue.TIMESTAMP;
+    db.ref('completed_orders').push(co).then(function(){
+      // Trim to last 20
+      db.ref('completed_orders').orderByChild('completedAt').once('value',function(s){
+        var keys=[];s.forEach(function(c){keys.push(c.key);});
+        if(keys.length>20){keys.slice(0,keys.length-20).forEach(function(k){db.ref('completed_orders/'+k).remove();});}
+      });
+    });
+  }
   // Clean up local state
   delete tapMap[key];
   pendingDelete = null;
