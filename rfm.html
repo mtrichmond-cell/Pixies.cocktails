@@ -14,7 +14,7 @@ firebase.initializeApp({
   projectId:"pixies-cocktails",
   storageBucket:"pixies-cocktails.firebasestorage.app",
   messagingSenderId:"154370181028",
-  appId:"1:154370181028:web:a2c94706ec0e61206a2331"
+  appId:"1:154370181048:web:a2c94706ec0e61206a2331"
 });
 </script>
 <style>
@@ -179,7 +179,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 </div>
 <div id="app">
   <div class="rfm-header">
-    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.26</div>
+    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.21</div>
     <div class="rfm-actions">
       <button class="btn-push" onclick="openPushModal()">&#9650; Push to Live</button>
       <button class="btn-save" onclick="saveChanges()">&#10003; Guardar <span class="unsaved-dot" id="unsavedDot"></span></button>
@@ -243,19 +243,19 @@ var CFG={
   store:{name:'Pixies Cocktails',slogan:'Somos Pixies \u00bfy t\u00fa?',address:'Cra 4 #44A, Ibagu\u00e9',hours:'16:00 \u2013 23:59',phone:'+57 324 201 0008',instagram:'pixies_cocktails'},
   payment:{nequi:{active:true,number:'+57 324 201 0008'},bancolombia:{active:true,account:'XXX-XXXXXXX'},cash:{active:true},card:{active:true}},
   flavors:[
-    {id:1,n:'Fresa',e:'\ud83c\udf53',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
-    {id:2,n:'Mango',e:'\ud83e\udd6d',c:'#ff9500',bg:'rgba(255,149,0,0.08)',br:'rgba(255,149,0,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
-    {id:3,n:'Uva',e:'\ud83c\udf47',c:'#bf00ff',bg:'rgba(191,0,255,0.08)',br:'rgba(191,0,255,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
-    {id:4,n:'Lim\u00f3n',e:'\ud83c\udf4b',c:'#d4ff00',bg:'rgba(212,255,0,0.06)',br:'rgba(212,255,0,0.25)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
-    {id:5,n:'Tamarindo',e:'\ud83e\udef9',c:'#ff6b35',bg:'rgba(255,107,53,0.08)',br:'rgba(255,107,53,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
-    {id:6,n:'Mora',e:'\ud83e\uded0',c:'#a855f7',bg:'rgba(168,85,247,0.08)',br:'rgba(168,85,247,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''}
+    {id:1,n:'Fresa',e:'\ud83c\udf53',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
+    {id:2,n:'Mango',e:'\ud83e\udd6d',c:'#ff9500',bg:'rgba(255,149,0,0.08)',br:'rgba(255,149,0,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
+    {id:3,n:'Uva',e:'\ud83c\udf47',c:'#bf00ff',bg:'rgba(191,0,255,0.08)',br:'rgba(191,0,255,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
+    {id:4,n:'Lim\u00f3n',e:'\ud83c\udf4b',c:'#d4ff00',bg:'rgba(212,255,0,0.06)',br:'rgba(212,255,0,0.25)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
+    {id:5,n:'Tamarindo',e:'\ud83e\udef9',c:'#ff6b35',bg:'rgba(255,107,53,0.08)',br:'rgba(255,107,53,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
+    {id:6,n:'Mora',e:'\ud83e\uded0',c:'#a855f7',bg:'rgba(168,85,247,0.08)',br:'rgba(168,85,247,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''}
   ],
   sizes:[
-    {id:'deseo',n:'Deseo',e:'\u2728',oz:'8 oz',p:12000,candies:3,active:true,img:''},
-    {id:'varita',n:'Varita',e:'\ud83e\ude84',oz:'12 oz',p:15000,candies:3,active:true,img:''},
-    {id:'hada',n:'Hada',e:'\ud83c\udf1f',oz:'16 oz',p:17000,candies:5,active:true,img:''},
-    {id:'nube',n:'Nube',e:'\ud83d\udc20',oz:'32 oz',p:28000,candies:8,active:true,img:''},
-    {id:'mundo',n:'Mundo M\u00e1gico',e:'\ud83e\uddca',oz:'3 Lts',p:72000,candies:12,active:true,img:''}
+    {id:'deseo',n:'Deseo',e:'\u2728',oz:'8 oz',p:12000,candies:3,active:true},
+    {id:'varita',n:'Varita',e:'\ud83e\ude84',oz:'12 oz',p:15000,candies:3,active:true},
+    {id:'hada',n:'Hada',e:'\ud83c\udf1f',oz:'16 oz',p:17000,candies:5,active:true},
+    {id:'nube',n:'Nube',e:'\ud83d\udc20',oz:'32 oz',p:28000,candies:8,active:true},
+    {id:'mundo',n:'Mundo M\u00e1gico',e:'\ud83e\uddca',oz:'3 Lts',p:72000,candies:12,active:true}
   ],
   candies:[
     {id:1,n:'Gomitas Ositos',e:'\ud83d\udc3b',cell:'A1',active:true,img:''},{id:2,n:'Skittles',e:'\ud83c\udf08',cell:'A2',active:true,img:''},{id:3,n:'Man\u00ed Japon\u00e9s',e:'\ud83e\udd5c',cell:'A3',active:true,img:''},{id:4,n:'Paleta Chamoy',e:'\ud83c\udf6d',cell:'A4',active:true,img:''},{id:5,n:'Chicles Globo',e:'\ud83c\udf0f',cell:'A5',active:true,img:''},
@@ -324,7 +324,6 @@ function handleFileSelected(input){
       var url=data.secure_url;
       if(p.type==='candy'){var c=getCandyById(p.id);if(c)c.img=url;}
       else if(p.type==='flavor'){var f=getFlavorById(p.id);if(f)f.img=url;}
-      else if(p.type==='size'){var s=getSizeById(p.id);if(s)s.img=url;}
       markUnsaved();
       if(barEl)barEl.style.width='100%';if(statEl){statEl.textContent='Listo';statEl.className='upload-status ok';}
       if(prevEl){prevEl.src=url;prevEl.classList.add('show');}if(holdEl)holdEl.classList.add('hide');
@@ -342,23 +341,10 @@ function buildUploadArea(type,id,currentImg){
   if(currentImg){h+='<img class="upload-preview show" id="upload-prev-'+uid+'" src="'+currentImg+'" alt=""/><div class="upload-placeholder hide" id="upload-hold-'+uid+'">\ud83d\udcf7</div>';}
   else{h+='<img class="upload-preview" id="upload-prev-'+uid+'" src="" alt=""/><div class="upload-placeholder" id="upload-hold-'+uid+'">\ud83d\udcf7</div>';}
   h+='<div class="upload-info"><div class="upload-filename" id="upload-name-'+uid+'">'+(currentImg?'Imagen actual':'Sin imagen')+'</div>';
-  h+='<div style="display:flex;gap:6px;align-items:center">';
   h+='<button class="btn-upload" id="upload-btn-'+uid+'" onclick="triggerUpload(\''+type+'\','+id+')">Subir foto</button>';
-  h+='<button class="btn-upload" style="border-color:rgba(255,59,92,.4);color:var(--red)" onclick="deleteImage(\''+type+'\','+id+')">Eliminar</button>';
-  h+='</div>';
   h+='<div class="upload-progress" id="upload-prog-'+uid+'"><div class="upload-progress-bar" id="upload-bar-'+uid+'"></div></div>';
   h+='<div class="upload-status" id="upload-stat-'+uid+'"></div></div></div>';
   return h;
-}
-function deleteImage(type,id){
-  var obj=null;
-  if(type==='candy') obj=getCandyById(id);
-  else if(type==='flavor') obj=getFlavorById(id);
-  else if(type==='size') obj=getSizeById(id);
-  if(!obj) return;
-  obj.img='';
-  markUnsaved();
-  renderTab(currentTab);
 }
 function renderFlavors(){
   var h='<div class="section-header"><div class="section-title">'+CFG.flavors.length+' sabores \u2014 todos mezclables</div></div>';
@@ -369,7 +355,7 @@ function renderFlavors(){
 function renderFlavorCard(f){
   var isOpen=openForms['flavor_'+f.id];
   var tags='';
-  if(f.cremoso)tags+='<span class="tag tag-cremoso">Cremoso +'+fmt(f.cremoso_upcharge)+'</span> <span class="tag tag-licor">Con Licor</span> ';
+  if(f.cremoso)tags+='<span class="tag tag-cremoso">Cremoso +'+fmt(f.cremoso_upcharge)+'</span> ';
   if(f.sinLicor)tags+='<span class="tag tag-sinlicor">Sin Licor -'+fmt(f.sinLicor_discount)+'</span> ';
   if(!f.cremoso&&!f.sinLicor)tags+='<span class="tag tag-licor">Con Licor</span>';
   var h='<div class="item-card'+(f.active?'':' inactive')+'" id="card-flavor-'+f.id+'">';
@@ -385,34 +371,33 @@ function renderFlavorCard(f){
   h+='<div class="item-form'+(isOpen?' open':'')+'" id="form-flavor-'+f.id+'">';
   h+='<div class="form-row"><div class="form-group"><div class="form-label">Nombre</div><input class="form-input" value="'+f.n+'" onchange="updateFlavor('+f.id+',\'n\',this.value)"/></div>';
   h+='<div class="form-group"><div class="form-label">Emoji</div><input class="form-input" value="'+f.e+'" onchange="updateFlavor('+f.id+',\'e\',this.value)"/></div></div>';
-  h+='<div class="form-row single"><div class="form-group"><div class="form-label">Descripci\u00f3n</div><input class="form-input" value="'+(f.d||'')+'" onchange="updateFlavor('+f.id+',\'d\',this.value)"/></div></div>';
 
   // CREMOSO row — dimmed if sinLicor is on
-  h+='<div class="form-toggle-row">';
+  h+='<div class="form-toggle-row'+(f.sinLicor?' dimmed':'')+'">';
   h+='<div><div class="form-toggle-label">Cremoso</div><div class="form-toggle-desc">Tiene ingrediente cremoso (requiere licor)</div></div>';
   h+='<label class="toggle"><input type="checkbox"'+(f.cremoso?' checked':'')+' onchange="toggleCremoso('+f.id+',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
   h+='</div>';
-  h+='<div class="form-row single">';
+  h+='<div class="form-row single'+(f.sinLicor?' dimmed':'')+'">';
   h+='<div class="form-group"><div class="form-label">Recargo Cremoso (COP)</div><input class="form-input" type="number" value="'+f.cremoso_upcharge+'" onchange="updateFlavor('+f.id+',\'cremoso_upcharge\',parseInt(this.value))"/></div></div>';
 
-  // SIN LICOR row — hidden if cremoso is on
-  h+='<div class="form-toggle-row">';
+  // SIN LICOR row — dimmed if cremoso is on
+  h+='<div class="form-toggle-row'+(f.cremoso?' dimmed':'')+'">';
   h+='<div><div class="form-toggle-label">Sin Licor</div><div class="form-toggle-desc">Se puede pedir sin alcohol</div></div>';
   h+='<label class="toggle"><input type="checkbox"'+(f.sinLicor?' checked':'')+' onchange="toggleSinLicor('+f.id+',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
   h+='</div>';
-  h+='<div class="form-row single">';
+  h+='<div class="form-row single'+(f.cremoso?' dimmed':'')+'">';
   h+='<div class="form-group"><div class="form-label">Descuento Sin Licor (COP)</div><input class="form-input" type="number" value="'+f.sinLicor_discount+'" onchange="updateFlavor('+f.id+',\'sinLicor_discount\',parseInt(this.value))"/></div></div>';
 
   h+=buildUploadArea('flavor',f.id,f.img);
   h+='</div></div>';
   return h;
 }
-function toggleCremoso(id,val){var f=getFlavorById(id);if(!f)return;f.cremoso=val;markUnsaved();renderTab('flavors');}
-function toggleSinLicor(id,val){var f=getFlavorById(id);if(!f)return;f.sinLicor=val;markUnsaved();renderTab('flavors');}
+function toggleCremoso(id,val){var f=getFlavorById(id);if(!f)return;f.cremoso=val;if(val)f.sinLicor=false;markUnsaved();renderTab('flavors');}
+function toggleSinLicor(id,val){var f=getFlavorById(id);if(!f)return;f.sinLicor=val;if(val)f.cremoso=false;markUnsaved();renderTab('flavors');}
 function toggleFlavor(id,val){var f=getFlavorById(id);if(f)f.active=val;markUnsaved();updateCardClass('card-flavor-'+id,val);}
 function updateFlavor(id,key,val){var f=getFlavorById(id);if(!f)return;f[key]=val;markUnsaved();}
 function addFlavor(){
-  var nf={id:nextId(CFG.flavors),n:'Nuevo Sabor',e:'\ud83c\udf79',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''};
+  var nf={id:nextId(CFG.flavors),n:'Nuevo Sabor',e:'\ud83c\udf79',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''};
   CFG.flavors.push(nf);markUnsaved();renderTab('flavors');
   setTimeout(function(){toggleForm('flavor_'+nf.id);},50);
 }
@@ -454,8 +439,6 @@ function renderSizes(){
     h+='<div class="item-card-row"><div class="item-emoji">'+s.e+'</div>';
     h+='<div class="item-info"><div class="item-name">'+s.n+'</div>';
     h+='<div class="item-meta">'+s.oz+' &middot; <span class="tag-price">'+fmt(s.p)+'</span> &middot; <span style="color:var(--blue);font-family:var(--font-mono);font-size:11px">'+s.candies+' dulces</span></div></div>';
-    if(s.img){h+='<img class="item-thumb" id="thumb-size-'+s.id+'" src="'+s.img+'" alt=""/>';}
-    else{h+='<div class="item-thumb-placeholder" id="thumb-size-'+s.id+'">\ud83d\udcf7</div>';}
     h+='<div class="item-controls"><label class="toggle"><input type="checkbox"'+(s.active?' checked':'')+' onchange="toggleSize(\''+s.id+'\',this.checked)"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
     h+='<button class="btn-edit" onclick="toggleForm(\'size_'+s.id+'\')">\u270f</button>';
     h+='<button class="btn-delete" onclick="deleteSize(\''+s.id+'\')">\ud83d\uddd1</button></div></div>';
@@ -466,14 +449,13 @@ function renderSizes(){
     h+='<div class="form-group"><div class="form-label">Oz / Vol</div><input class="form-input" value="'+s.oz+'" onchange="updateSize(\''+s.id+'\',\'oz\',this.value)"/></div>';
     h+='<div class="form-group"><div class="form-label">Precio (COP)</div><input class="form-input" type="number" value="'+s.p+'" onchange="updateSize(\''+s.id+'\',\'p\',parseInt(this.value))"/></div>';
     h+='<div class="form-group"><div class="form-label">Dulces incluidos</div><input class="form-input" type="number" min="0" value="'+s.candies+'" onchange="updateSize(\''+s.id+'\',\'candies\',parseInt(this.value))"/></div>';
-    h+=buildUploadArea('size',s.id,s.img||'');
     h+='</div></div></div>';
   }
   h+='<button class="btn-add" onclick="addSize()">\uff0b Agregar Tama\u00f1o</button>';
   return h;
 }
 function addSize(){
-  var ns={id:'size_'+Date.now(),n:'Nuevo Tama\u00f1o',e:'\ud83e\uddca',oz:'oz',p:0,candies:3,active:true,img:''};
+  var ns={id:'size_'+Date.now(),n:'Nuevo Tama\u00f1o',e:'\ud83e\uddca',oz:'oz',p:0,candies:3,active:true};
   CFG.sizes.push(ns);markUnsaved();renderTab('sizes');
   setTimeout(function(){toggleForm('size_'+ns.id);},50);
 }
@@ -529,7 +511,8 @@ function saveChanges(){
       console.error(err);
     });
 }
-
+</script>
+<script>
 // Load existing config from Firebase on unlock
 function loadFromFirebase(){
   firebase.database().ref('/config').once('value').then(function(snap){
