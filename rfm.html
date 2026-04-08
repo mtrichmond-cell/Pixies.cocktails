@@ -179,7 +179,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 </div>
 <div id="app">
   <div class="rfm-header">
-    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.21</div>
+    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.3</div>
     <div class="rfm-actions">
       <button class="btn-push" onclick="openPushModal()">&#9650; Push to Live</button>
       <button class="btn-save" onclick="saveChanges()">&#10003; Guardar <span class="unsaved-dot" id="unsavedDot"></span></button>
@@ -355,8 +355,8 @@ function renderFlavors(){
 function renderFlavorCard(f){
   var isOpen=openForms['flavor_'+f.id];
   var tags='';
-  if(f.cremoso)tags+='<span class="tag tag-cremoso">Cremoso +'+fmt(f.cremoso_upcharge)+'</span> ';
-  if(f.sinLicor)tags+='<span class="tag tag-sinlicor">Sin Licor -'+fmt(f.sinLicor_discount)+'</span> ';
+  if(f.cremoso)tags+='<span class="tag tag-cremoso">Cremosa con licor</span> ';
+  if(f.sinLicor)tags+='<span class="tag tag-sinlicor">Sin Licor</span> ';
   if(!f.cremoso&&!f.sinLicor)tags+='<span class="tag tag-licor">Con Licor</span>';
   var h='<div class="item-card'+(f.active?'':' inactive')+'" id="card-flavor-'+f.id+'">';
   h+='<div class="item-card-row"><div class="item-emoji">'+f.e+'</div>';
@@ -371,6 +371,7 @@ function renderFlavorCard(f){
   h+='<div class="item-form'+(isOpen?' open':'')+'" id="form-flavor-'+f.id+'">';
   h+='<div class="form-row"><div class="form-group"><div class="form-label">Nombre</div><input class="form-input" value="'+f.n+'" onchange="updateFlavor('+f.id+',\'n\',this.value)"/></div>';
   h+='<div class="form-group"><div class="form-label">Emoji</div><input class="form-input" value="'+f.e+'" onchange="updateFlavor('+f.id+',\'e\',this.value)"/></div></div>';
+  h+='<div class="form-row single"><div class="form-group"><div class="form-label">Descripci\u00f3n</div><input class="form-input" value="'+(f.d||'')+'" placeholder="Ej. Dulce y refrescante" onchange="updateFlavor('+f.id+',\'d\',this.value)"/></div></div>';
 
   // CREMOSO row — dimmed if sinLicor is on
   h+='<div class="form-toggle-row'+(f.sinLicor?' dimmed':'')+'">';
@@ -392,12 +393,12 @@ function renderFlavorCard(f){
   h+='</div></div>';
   return h;
 }
-function toggleCremoso(id,val){var f=getFlavorById(id);if(!f)return;f.cremoso=val;if(val)f.sinLicor=false;markUnsaved();renderTab('flavors');}
-function toggleSinLicor(id,val){var f=getFlavorById(id);if(!f)return;f.sinLicor=val;if(val)f.cremoso=false;markUnsaved();renderTab('flavors');}
+function toggleCremoso(id,val){var f=getFlavorById(id);if(!f)return;f.cremoso=val;if(val){f.sinLicor=false;f.liq=true;}markUnsaved();renderTab('flavors');}
+function toggleSinLicor(id,val){var f=getFlavorById(id);if(!f)return;f.sinLicor=val;if(val){f.cremoso=false;f.liq=false;}else{f.liq=true;}markUnsaved();renderTab('flavors');}
 function toggleFlavor(id,val){var f=getFlavorById(id);if(f)f.active=val;markUnsaved();updateCardClass('card-flavor-'+id,val);}
 function updateFlavor(id,key,val){var f=getFlavorById(id);if(!f)return;f[key]=val;markUnsaved();}
 function addFlavor(){
-  var nf={id:nextId(CFG.flavors),n:'Nuevo Sabor',e:'\ud83c\udf79',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,liq:true,active:true,img:''};
+  var nf={id:nextId(CFG.flavors),n:'Nuevo Sabor',e:'\ud83c\udf79',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,liq:true,active:true,img:''};
   CFG.flavors.push(nf);markUnsaved();renderTab('flavors');
   setTimeout(function(){toggleForm('flavor_'+nf.id);},50);
 }
