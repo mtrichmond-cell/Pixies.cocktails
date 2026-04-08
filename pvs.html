@@ -2,697 +2,315 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,orientation=landscape"/>
-<title>Pixies · Magia v1.0</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pixies · Magia v1.1</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=Bebas+Neue&display=swap');
-
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{
-  width:100%;height:100%;overflow:hidden;
-  background:#060010;color:#f0e8ff;
-  font-family:'Syne',sans-serif;
-  user-select:none;-webkit-user-select:none;
-}
-@media (orientation:portrait){body::after{content:"Rotar pantalla a horizontal";position:fixed;inset:0;background:#060010;display:flex;align-items:center;justify-content:center;font-size:18px;color:#7a6b8a;font-family:Space Mono,monospace;z-index:9999;display:flex;}}
+html,body{width:100%;height:100%;overflow:hidden;background:#060010;color:#f0e8ff;font-family:'Syne',sans-serif;user-select:none;-webkit-user-select:none;}
 
-/* ── HEADER ── */
-#pvsHeader{
-  height:52px;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;
-  background:rgba(10,0,20,.95);
-  border-bottom:1px solid rgba(255,255,255,.07);
-  flex-shrink:0;
-  position:relative;z-index:10;
-}
+/* HEADER */
+#pvsHeader{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(10,0,20,.97);border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;}
 .pvs-brand{font-size:13px;font-family:'Space Mono',monospace;color:#7a6b8a;letter-spacing:3px;text-transform:uppercase;}
 .pvs-brand span{color:#ff2d8f;}
 #pvsClock{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:#f0e8ff;}
-.pvs-header-btns{display:flex;gap:10px;}
-.btn-recall{
-  padding:8px 16px;border-radius:10px;
-  border:1px solid rgba(255,45,143,.4);
-  background:rgba(255,45,143,.08);
-  color:#ff2d8f;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;
-  cursor:pointer;letter-spacing:.5px;transition:all .15s;
-}
-.btn-recall:active{background:rgba(255,45,143,.2);}
-#orderCountBadge{
-  padding:8px 16px;border-radius:10px;
-  background:rgba(255,255,255,.05);
-  color:#7a6b8a;font-family:'Space Mono',monospace;font-size:11px;
-  border:1px solid rgba(255,255,255,.07);
-}
+.pvs-header-right{display:flex;align-items:center;gap:12px;}
+#orderCountBadge{padding:6px 14px;border-radius:10px;background:rgba(255,255,255,.05);color:#7a6b8a;font-family:'Space Mono',monospace;font-size:11px;border:1px solid rgba(255,255,255,.07);}
+.btn-recall{padding:10px 24px;border-radius:12px;border:2px solid #ff2d8f;background:rgba(255,45,143,.12);color:#ff2d8f;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.5px;transition:all .15s;}
+.btn-recall:active{background:rgba(255,45,143,.25);}
 
-/* ── GRID ── */
-#pvsGrid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(2,1fr);
-  gap:10px;
-  padding:10px;
-  height:calc(100vh - 52px);
-}
+/* GRID — 4×2 = 8 slots */
+#pvsGrid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:8px;padding:8px;height:calc(100vh - 52px);}
 
-/* ── ORDER CARD ── */
-.order-card{
-  border-radius:16px;
-  border:2px solid;
-  overflow:hidden;
-  display:flex;flex-direction:column;
-  cursor:pointer;
-  transition:transform .15s, box-shadow .15s;
-  position:relative;
-}
-.order-card.highlighted{
-  transform:scale(1.02);
-  z-index:5;
-}
-.order-card.confirm-delete{
-  animation:confirmPulse .4s ease-in-out infinite;
-}
-@keyframes confirmPulse{
-  0%,100%{opacity:1;}
-  50%{opacity:.5;}
-}
+/* ORDER CARD */
+.order-card{border-radius:14px;border:2px solid;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .12s,box-shadow .12s;position:relative;background:#08001a;}
+.order-card.highlighted{transform:scale(1.015);z-index:5;}
+.order-card.span2{grid-column:span 2;}
+.order-card.span3{grid-column:span 3;}
+.order-card.span4{grid-column:span 4;}
 
-/* ── DELIVERY CARD ── */
-.order-card.delivery{
-  animation:rainbowBorder 2s linear infinite;
-}
-@keyframes rainbowBorder{
-  0%{border-color:#ff2d8f;box-shadow:0 0 20px rgba(255,45,143,.5);}
-  16%{border-color:#ff6b35;box-shadow:0 0 20px rgba(255,107,53,.5);}
-  33%{border-color:#d4ff00;box-shadow:0 0 20px rgba(212,255,0,.5);}
-  50%{border-color:#00e676;box-shadow:0 0 20px rgba(0,230,118,.5);}
-  66%{border-color:#00e5ff;box-shadow:0 0 20px rgba(0,229,255,.5);}
-  83%{border-color:#bf00ff;box-shadow:0 0 20px rgba(191,0,255,.5);}
-  100%{border-color:#ff2d8f;box-shadow:0 0 20px rgba(255,45,143,.5);}
-}
+/* DELIVERY */
+.order-card.delivery{animation:deliveryBorder 2s linear infinite;}
+@keyframes deliveryBorder{0%{border-color:#ff2d8f;}16%{border-color:#ff6b35;}33%{border-color:#d4ff00;}50%{border-color:#00e676;}66%{border-color:#00e5ff;}83%{border-color:#bf00ff;}100%{border-color:#ff2d8f;}}
+.delivery-tag{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;padding:2px 7px;border-radius:5px;background:linear-gradient(90deg,#ff2d8f,#bf00ff,#00e5ff,#d4ff00,#ff2d8f);background-size:200% auto;animation:rainbowShift 1.5s linear infinite;color:white;flex-shrink:0;}
+@keyframes rainbowShift{to{background-position:200% center;}}
 
-/* ── ORDER HEADER ── */
-.oc-header{
-  padding:8px 12px;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;
-}
-.oc-num{
-  font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;
-  line-height:1;
-}
-.oc-timer{
-  font-family:'Space Mono',monospace;font-size:13px;font-weight:700;
-  opacity:.9;
-}
-.oc-timer.warning{color:#d4ff00;}
-.oc-timer.urgent{color:#ff3b5c;animation:timerFlash .8s ease-in-out infinite;}
-@keyframes timerFlash{0%,100%{opacity:1;}50%{opacity:.4;}}
+/* CARD HEADER */
+.oc-header{padding:7px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;}
+.oc-header-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+.oc-num{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;line-height:1;flex-shrink:0;}
+.oc-table{font-size:12px;font-weight:800;color:#f0e8ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.oc-parallevar{font-size:10px;font-weight:800;padding:2px 6px;border-radius:4px;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.3);color:#00e5ff;flex-shrink:0;}
+.oc-timer{font-family:'Space Mono',monospace;font-size:11px;color:#7a6b8a;flex-shrink:0;}
 
-.delivery-tag{
-  font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;
-  padding:2px 10px;border-radius:6px;
-  background:linear-gradient(90deg,#ff2d8f,#bf00ff,#00e5ff,#d4ff00,#ff2d8f);
-  background-size:200% auto;
-  animation:rainbowText 1.5s linear infinite;
-  color:white;margin-bottom:4px;display:inline-block;
-}
-@keyframes rainbowText{to{background-position:200% center;}}
+/* BODY */
+.oc-body{flex:1;overflow:hidden;padding:5px 10px 10px;display:flex;gap:8px;}
 
-/* ── ORDER BODY ── */
-.oc-body{
-  flex:1;overflow:hidden;
-  padding:6px 12px 10px;
-  display:flex;flex-direction:column;gap:5px;
-}
-.oc-table{
-  font-size:13px;font-weight:800;color:#f0e8ff;
-  display:flex;align-items:center;gap:5px;
-}
-.oc-section{font-size:10px;font-family:'Space Mono',monospace;color:#7a6b8a;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
-.oc-machines{
-  display:flex;flex-wrap:wrap;gap:5px;
-}
-.machine-tag{
-  font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;
-  padding:2px 8px;border-radius:6px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.15);
-}
-.size-tag{
-  font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;
-  padding:2px 8px;border-radius:6px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.1);
-  color:#d4ff00;
-  display:inline-flex;align-items:center;gap:4px;
-}
-.candy-grid{
-  display:flex;flex-wrap:wrap;gap:4px;
-  margin-top:2px;
-}
-.candy-cell{
-  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
-  padding:2px 6px;border-radius:5px;
-  background:rgba(255,45,143,.12);
-  border:1px solid rgba(255,45,143,.3);
-  color:#ff9de8;
-}
-.candy-cell.multi{
-  background:rgba(212,255,0,.12);
-  border-color:rgba(212,255,0,.4);
-  color:#d4ff00;
-}
-.extra-tag{
-  font-size:11px;font-weight:800;
-  padding:2px 7px;border-radius:5px;
-  background:rgba(0,229,255,.1);
-  border:1px solid rgba(0,229,255,.3);
-  color:#00e5ff;
-  display:inline-flex;align-items:center;gap:3px;
-}
-.oc-extras{display:flex;flex-wrap:wrap;gap:4px;}
+/* DRINK COLUMN */
+.drink-col{flex:1;min-width:0;border-left:1px solid rgba(255,255,255,.07);padding-left:8px;}
+.drink-col:first-child{border-left:none;padding-left:0;}
+.drink-label{font-size:9px;font-family:'Space Mono',monospace;color:#7a6b8a;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.drink-sabor{font-size:13px;font-weight:800;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.drink-size{font-size:11px;color:#d4ff00;font-weight:700;margin-bottom:5px;}
+.drink-candies{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;}
+.candy-cell{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(255,45,143,.12);border:1px solid rgba(255,45,143,.25);color:#ff9de8;}
+.candy-cell.multi{background:rgba(212,255,0,.1);border-color:rgba(212,255,0,.35);color:#d4ff00;}
+.drink-extras{display:flex;flex-wrap:wrap;gap:3px;}
+.extra-tag{font-size:10px;font-weight:800;padding:1px 6px;border-radius:4px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:#00e5ff;}
 
-/* ── OVERFLOW CARD ── */
-.overflow-card{
-  border-radius:16px;
-  border:2px solid;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:10px;
-  cursor:pointer;
-  opacity:.85;
-}
-.oc-overflow-num{
-  font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px;
-}
-.oc-overflow-arrow{font-size:28px;opacity:.7;}
-.oc-overflow-label{font-size:11px;font-family:'Space Mono',monospace;color:#7a6b8a;letter-spacing:1px;}
+/* TIMER BADGE */
+.timer-badge{position:absolute;bottom:8px;right:8px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;opacity:0;pointer-events:none;}
+.timer-badge.warn{opacity:1;background:rgba(212,255,0,.15);border:2px solid #d4ff00;}
+.timer-badge.urgent{opacity:1;border:2px solid transparent;animation:rainbowBorder 1s linear infinite,urgentFlash .6s ease-in-out infinite;}
+@keyframes rainbowBorder{0%{border-color:#ff2d8f;box-shadow:0 0 8px rgba(255,45,143,.6);}25%{border-color:#d4ff00;box-shadow:0 0 8px rgba(212,255,0,.6);}50%{border-color:#00e5ff;box-shadow:0 0 8px rgba(0,229,255,.6);}75%{border-color:#bf00ff;box-shadow:0 0 8px rgba(191,0,255,.6);}100%{border-color:#ff2d8f;box-shadow:0 0 8px rgba(255,45,143,.6);}}
+@keyframes urgentFlash{0%,100%{opacity:1;}50%{opacity:.35;}}
+.timer-badge.urgent::after{content:'¡APÚRATE!';position:absolute;bottom:36px;right:0;font-size:9px;font-weight:800;font-family:'Syne',sans-serif;color:#ff2d8f;white-space:nowrap;text-shadow:0 0 8px rgba(255,45,143,.8);}
 
-/* ── EMPTY SLOT ── */
-.empty-slot{
-  border-radius:16px;
-  border:1px dashed rgba(255,255,255,.06);
-  background:rgba(255,255,255,.01);
-  display:flex;align-items:center;justify-content:center;
-}
-.empty-slot-inner{font-size:28px;opacity:.08;}
+/* EMPTY SLOT */
+.empty-slot{border-radius:14px;border:1px dashed rgba(255,255,255,.05);background:rgba(255,255,255,.005);display:flex;align-items:center;justify-content:center;}
+.empty-dot{font-size:18px;opacity:.05;}
 
-/* ── RECALL DRAWER ── */
-#recallDrawer{
-  position:fixed;bottom:-100%;left:0;right:0;
-  height:50vh;
-  background:rgba(10,0,20,.98);
-  border-top:1px solid rgba(255,255,255,.1);
-  border-radius:20px 20px 0 0;
-  z-index:100;
-  transition:bottom .35s cubic-bezier(0.34,1.56,0.64,1);
-  padding:16px;
-  display:flex;flex-direction:column;
-}
+/* EMPTY STATE */
+#emptyState{position:absolute;inset:52px 0 0 0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;pointer-events:none;}
+#emptyState.show{display:flex;}
+.es-icon{font-size:52px;opacity:.1;}
+.es-text{font-size:12px;font-family:'Space Mono',monospace;color:#7a6b8a;letter-spacing:2px;}
+
+/* RECALL DRAWER */
+#recallDrawer{position:fixed;bottom:-100%;left:0;right:0;height:46vh;background:rgba(8,0,20,.98);border-top:2px solid rgba(255,45,143,.3);border-radius:20px 20px 0 0;z-index:100;transition:bottom .3s cubic-bezier(0.34,1.56,0.64,1);padding:14px 16px;display:flex;flex-direction:column;}
 #recallDrawer.open{bottom:0;}
-.recall-header{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:14px;flex-shrink:0;
-}
-.recall-title{font-size:14px;font-weight:800;letter-spacing:1px;}
-.btn-close-recall{
-  width:32px;height:32px;border-radius:8px;
-  border:1px solid rgba(255,255,255,.1);
-  background:transparent;color:#7a6b8a;font-size:18px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-}
-#recallList{
-  flex:1;overflow-x:auto;overflow-y:hidden;
-  display:flex;gap:12px;
-  padding-bottom:8px;
-}
+.recall-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0;}
+.recall-title{font-size:15px;font-weight:800;color:#ff2d8f;letter-spacing:1px;}
+.btn-close-recall{width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#7a6b8a;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+#recallList{flex:1;overflow-x:auto;overflow-y:hidden;display:flex;gap:10px;padding-bottom:6px;}
 #recallList::-webkit-scrollbar{height:3px;}
 #recallList::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px;}
-.recall-card{
-  flex-shrink:0;width:200px;
-  border-radius:12px;border:1px solid;
-  padding:12px;cursor:pointer;
-  transition:opacity .15s;
-}
-.recall-card:active{opacity:.7;}
-.rc-num{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;}
+.recall-card{flex-shrink:0;width:180px;border-radius:12px;border:1px solid;padding:12px;cursor:pointer;}
+.rc-num{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;}
 .rc-table{font-size:11px;color:#7a6b8a;font-family:'Space Mono',monospace;margin-top:2px;}
-.rc-info{font-size:12px;font-weight:700;margin-top:6px;opacity:.8;}
-.btn-restore{
-  width:100%;margin-top:8px;padding:6px;border-radius:8px;
-  border:1px solid rgba(255,255,255,.15);background:transparent;
-  color:#f0e8ff;font-size:11px;font-weight:800;cursor:pointer;
-  font-family:'Syne',sans-serif;
-}
-
-/* ── DELETE CONFIRM OVERLAY ── */
-#deleteConfirm{
-  position:fixed;inset:0;z-index:200;
-  background:rgba(0,0,0,.85);backdrop-filter:blur(4px);
-  display:none;align-items:center;justify-content:center;
-}
-#deleteConfirm.open{display:flex;}
-.dc-box{
-  background:#0d0a14;border:2px solid #ff3b5c;border-radius:20px;
-  padding:32px;text-align:center;max-width:340px;
-  animation:popIn .25s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes popIn{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
-.dc-num{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1;}
-.dc-title{font-size:16px;font-weight:800;color:#ff3b5c;margin-bottom:6px;}
-.dc-sub{font-size:12px;color:#7a6b8a;font-family:'Space Mono',monospace;margin-bottom:24px;}
-.dc-btns{display:flex;gap:10px;}
-.btn-dc-confirm{
-  flex:1;padding:14px;border-radius:12px;border:none;
-  background:#ff3b5c;color:white;font-size:14px;font-weight:800;
-  cursor:pointer;font-family:'Syne',sans-serif;
-}
-.btn-dc-cancel{
-  flex:1;padding:14px;border-radius:12px;
-  border:1px solid rgba(255,255,255,.1);background:transparent;
-  color:#7a6b8a;font-size:14px;font-weight:800;
-  cursor:pointer;font-family:'Syne',sans-serif;
-}
-
-/* ── EMPTY STATE ── */
-#emptyState{
-  position:absolute;inset:52px 0 0 0;
-  display:none;align-items:center;justify-content:center;
-  flex-direction:column;gap:16px;pointer-events:none;
-}
-#emptyState.show{display:flex;}
-.es-icon{font-size:64px;opacity:.15;}
-.es-text{font-size:13px;font-family:'Space Mono',monospace;color:#7a6b8a;letter-spacing:1px;}
+.rc-info{font-size:11px;font-weight:700;margin-top:5px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.btn-restore{width:100%;margin-top:8px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#f0e8ff;font-size:12px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif;}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div id="pvsHeader">
-  <div class="pvs-brand"><span>MAGIA</span> <span style="color:#7a6b8a;font-size:10px;">v1.0</span></div>
+  <div class="pvs-brand"><span>MAGIA</span> <span style="font-size:10px;color:#7a6b8a;">v1.1</span></div>
   <div id="pvsClock">00:00:00</div>
-  <div class="pvs-header-btns">
+  <div class="pvs-header-right">
     <div id="orderCountBadge">0 órdenes</div>
-    <button class="btn-recall" onclick="openRecall()">&#9851; Recuperar</button>
+    <button class="btn-recall" onclick="openRecall()">↩ Recuperar</button>
   </div>
 </div>
 
-<!-- 6-SLOT GRID -->
 <div id="pvsGrid"></div>
 
-<!-- EMPTY STATE -->
 <div id="emptyState">
   <div class="es-icon">🍧</div>
   <div class="es-text">ESPERANDO ÓRDENES...</div>
 </div>
 
-<!-- RECALL DRAWER -->
 <div id="recallDrawer">
   <div class="recall-header">
-    <div class="recall-title">&#9851; ÓRDENES RECUPERADAS</div>
-    <button class="btn-close-recall" onclick="closeRecall()">&#10005;</button>
+    <div class="recall-title">↩ ÓRDENES COMPLETADAS</div>
+    <button class="btn-close-recall" onclick="closeRecall()">✕</button>
   </div>
   <div id="recallList"></div>
 </div>
 
-<!-- DELETE CONFIRM -->
-<div id="deleteConfirm">
-  <div class="dc-box">
-    <div class="dc-num" id="dcNum" style="color:#ff2d8f">#00</div>
-    <div class="dc-title">¿ORDEN COMPLETADA?</div>
-    <div class="dc-sub">Esta acción moverá la orden al historial.<br>Usa Recall si fue un error.</div>
-    <div class="dc-btns">
-      <button class="btn-dc-cancel" onclick="cancelDelete()">Cancelar</button>
-      <button class="btn-dc-confirm" onclick="confirmDelete()">✓ Completar</button>
-    </div>
-  </div>
-</div>
-
 <script>
-// ── FIREBASE ──────────────────────────────────────────────
-var FIREBASE_CONFIG={
-  apiKey:"AIzaSyDE0SAPuxvu0G1Ylfo0VG5rY1UDrJHEA9c",
-  authDomain:"pixies-cocktails.firebaseapp.com",
-  databaseURL:"https://pixies-cocktails-default-rtdb.firebaseio.com",
-  projectId:"pixies-cocktails",
-  storageBucket:"pixies-cocktails.firebasestorage.app",
-  messagingSenderId:"154370181028",
-  appId:"1:154370181028:web:a2c94706ec0e61206a2331"
-};
-if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-var db = firebase.database();
+var FIREBASE_CONFIG={apiKey:"AIzaSyDE0SAPuxvu0G1Ylfo0VG5rY1UDrJHEA9c",authDomain:"pixies-cocktails.firebaseapp.com",databaseURL:"https://pixies-cocktails-default-rtdb.firebaseio.com",projectId:"pixies-cocktails",storageBucket:"pixies-cocktails.firebasestorage.app",messagingSenderId:"154370181028",appId:"1:154370181028:web:a2c94706ec0e61206a2331"};
+if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+var db=firebase.database();
 
-// ── COLOR PALETTE ─────────────────────────────────────────
-var COLORS = [
-  {border:'#ff2d8f', bg:'rgba(255,45,143,.12)', text:'#ff2d8f', glow:'rgba(255,45,143,.4)'},
-  {border:'#00e5ff', bg:'rgba(0,229,255,.1)',   text:'#00e5ff', glow:'rgba(0,229,255,.35)'},
-  {border:'#d4ff00', bg:'rgba(212,255,0,.1)',   text:'#d4ff00', glow:'rgba(212,255,0,.35)'},
-  {border:'#00e676', bg:'rgba(0,230,118,.1)',   text:'#00e676', glow:'rgba(0,230,118,.35)'},
-  {border:'#bf00ff', bg:'rgba(191,0,255,.12)',  text:'#df88ff', glow:'rgba(191,0,255,.4)'},
-  {border:'#ff6b35', bg:'rgba(255,107,53,.12)', text:'#ff9a70', glow:'rgba(255,107,53,.4)'},
+var COLORS=[
+  {border:'#ff2d8f',bg:'rgba(255,45,143,.1)',text:'#ff2d8f'},
+  {border:'#00e5ff',bg:'rgba(0,229,255,.08)',text:'#00e5ff'},
+  {border:'#d4ff00',bg:'rgba(212,255,0,.08)',text:'#d4ff00'},
+  {border:'#00e676',bg:'rgba(0,230,118,.08)',text:'#00e676'},
+  {border:'#bf00ff',bg:'rgba(191,0,255,.1)',text:'#df88ff'},
+  {border:'#ff6b35',bg:'rgba(255,107,53,.1)',text:'#ff9a70'},
+  {border:'#ff2d8f',bg:'rgba(255,45,143,.1)',text:'#ff2d8f'},
+  {border:'#00e5ff',bg:'rgba(0,229,255,.08)',text:'#00e5ff'},
 ];
 
-// ── STATE ─────────────────────────────────────────────────
-var orders = {};         // Firebase key -> order object
-var colorMap = {};       // order Firebase key -> color index
-var colorCounter = 0;
-var tapMap = {};         // Firebase key -> tap count + timer
-var pendingDelete = null;// Firebase key pending delete confirm
-var recallList = [];     // Array of completed orders
+var orders={},colorMap={},colorCounter=0,tapMap={},recallList=[];
 
-// ── CLOCK ─────────────────────────────────────────────────
-function updateClock(){
-  var now = new Date();
-  var h = String(now.getHours()).padStart(2,'0');
-  var m = String(now.getMinutes()).padStart(2,'0');
-  var s = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('pvsClock').textContent = h+':'+m+':'+s;
-}
-setInterval(updateClock, 1000);
-updateClock();
+function updateClock(){var n=new Date();document.getElementById('pvsClock').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');}
+setInterval(updateClock,1000);updateClock();
 
-// ── FIREBASE LISTENER ─────────────────────────────────────
-// Load completed orders from Firebase for recall persistence
-db.ref('completed_orders').orderByChild('completedAt').limitToLast(20).once('value',function(snap){
-  snap.forEach(function(c){
-    var o=c.val();
-    var ci=colorCounter%6;colorCounter++;
-    recallList.push({key:c.key,order:o,colorIdx:ci});
+db.ref('orders').on('value',function(snap){
+  var data=snap.val()||{},fresh={};
+  Object.keys(data).forEach(function(k){
+    if(data[k].status==='pending'){fresh[k]=data[k];if(colorMap[k]===undefined){colorMap[k]=colorCounter%8;colorCounter++;}}
   });
+  orders=fresh;render();
+});
+
+db.ref('completed_orders').orderByChild('completedAt').limitToLast(20).once('value',function(snap){
+  snap.forEach(function(c){recallList.push({key:c.key,order:c.val(),colorIdx:colorCounter%8});colorCounter++;});
   recallList.reverse();
 });
 
-db.ref('orders').on('value', function(snap){
-  var data = snap.val() || {};
-  // Only show pending orders
-  var newOrders = {};
-  Object.keys(data).forEach(function(key){
-    var o = data[key];
-    if(o.status === 'pending'){
-      newOrders[key] = o;
-      if(colorMap[key] === undefined){
-        colorMap[key] = colorCounter % 6;
-        colorCounter++;
-      }
-    }
-  });
-  orders = newOrders;
-  render();
-});
-
-// ── SORT ──────────────────────────────────────────────────
 function getSorted(){
-  return Object.keys(orders).map(function(key){
-    return {key:key, order:orders[key]};
-  }).sort(function(a,b){
-    if(a.order.isDelivery && !b.order.isDelivery) return -1;
-    if(!a.order.isDelivery && b.order.isDelivery) return 1;
-    return (a.order.timestamp||0) - (b.order.timestamp||0);
-  });
-}
-
-// ── OVERFLOW DETECTION ────────────────────────────────────
-function needsOverflow(order){
-  var items = order.items || [];
-  var totalCandies = 0;
-  items.forEach(function(it){ totalCandies += (it.candyCells||[]).length; });
-  return items.length > 2 || totalCandies > 9;
-}
-
-// ── SLOT BUILDER ──────────────────────────────────────────
-function buildSlots(){
-  var sorted = getSorted();
-  var slots = [];
-  for(var i=0; i<sorted.length && slots.length<6; i++){
-    var key = sorted[i].key;
-    var order = sorted[i].order;
-    slots.push({type:'order', key:key, order:order});
-    if(slots.length<6 && needsOverflow(order)){
-      slots.push({type:'overflow', key:key, order:order});
-    }
-  }
-  while(slots.length < 6) slots.push({type:'empty'});
-  return slots.slice(0,6);
-}
-
-// ── TIMER DISPLAY ─────────────────────────────────────────
-function getElapsed(ts){
-  if(!ts) return '0:00';
-  var secs = Math.floor((Date.now() - ts) / 1000);
-  var m = Math.floor(secs/60);
-  var s = secs % 60;
-  return m+':'+(s<10?'0':'')+s;
-}
-function getTimerClass(ts){
-  if(!ts) return '';
-  var mins = (Date.now()-ts)/60000;
-  if(mins >= 7) return 'urgent';
-  if(mins >= 4) return 'warning';
-  return '';
-}
-// Update timers every second
-setInterval(function(){
-  document.querySelectorAll('.oc-timer').forEach(function(el){
-    var ts = parseInt(el.dataset.ts);
-    if(!ts) return;
-    el.textContent = '⏱ '+getElapsed(ts);
-    el.className = 'oc-timer '+getTimerClass(ts);
-  });
-}, 1000);
-
-// ── RENDER ORDER CARD ─────────────────────────────────────
-function renderOrderCard(key, order){
-  var ci = colorMap[key] !== undefined ? colorMap[key] : 0;
-  var col = COLORS[ci];
-  var isDelivery = order.isDelivery;
-  var items = order.items || [];
-
-  var headerStyle = 'background:'+col.bg+';border-bottom:1px solid '+col.border+'33;';
-  var deliveryHTML = isDelivery ? '<div class="delivery-tag">📦 ENTREGA</div>' : '';
-
-  // Machines across all items
-  var allMachines = [];
-  items.forEach(function(it){
-    (it.machines||[]).forEach(function(m){ if(allMachines.indexOf(m)<0) allMachines.push(m); });
-  });
-  allMachines.sort(function(a,b){return a-b;});
-
-  var machinesHTML = allMachines.map(function(m){
-    return '<span class="machine-tag" style="color:'+col.text+'">MÁQ '+m+'</span>';
-  }).join('');
-
-  // Sizes
-  var sizesHTML = items.map(function(it){
-    return '<span class="size-tag">'+it.se+' '+it.sn+'</span>';
-  }).join(' ');
-
-  // Candy cells
-  var allCells = [];
-  items.forEach(function(it){
-    (it.candyCells||[]).forEach(function(cc){ allCells.push(cc); });
-  });
-  var cellsHTML = allCells.map(function(cc){
-    var isMulti = (cc.qty||1) > 1;
-    return '<span class="candy-cell'+(isMulti?' multi':'')+'">'
-      +cc.cell+(isMulti?' ×'+cc.qty:'')+
-    '</span>';
-  }).join('');
-
-  // Extras
-  var allExtras = [];
-  items.forEach(function(it){ (it.selExtras||[]).forEach(function(e){ allExtras.push(e); }); });
-  var extrasHTML = allExtras.length ? allExtras.map(function(e){
-    return '<span class="extra-tag">'+e.e+' '+e.n+'</span>';
-  }).join('') : '';
-
-  var tapCount = tapMap[key] ? tapMap[key].count : 0;
-  var highlighted = tapCount === 1;
-  var glowStyle = highlighted ? 'box-shadow:0 0 24px '+col.glow+',inset 0 0 12px '+col.glow+'40;' : '';
-
-  return '<div class="order-card'+(isDelivery?' delivery':'')+(highlighted?' highlighted':'')+'"'
-    +' id="oc-'+key+'"'
-    +' style="border-color:'+col.border+';background:#0a0016;'+glowStyle+'"'
-    +' onclick="handleTap(\''+key+'\')">'
-
-    // Header
-    +'<div class="oc-header" style="'+headerStyle+'">'
-    +'<div>'
-    +deliveryHTML
-    +'<div class="oc-num" style="color:'+col.text+'">#'+String(order.num||0).padStart(2,'0')+'</div>'
-    +'</div>'
-    +'<div class="oc-timer '+getTimerClass(order.timestamp)+'" data-ts="'+(order.timestamp||0)+'">⏱ '+getElapsed(order.timestamp)+'</div>'
-    +'</div>'
-
-    // Body
-    +'<div class="oc-body">'
-    +'<div class="oc-table">📍 '+(order.table||'Sin mesa')+'</div>'
-    +'<div class="oc-section">MÁQUINAS</div>'
-    +'<div class="oc-machines">'+machinesHTML+'</div>'
-    +'<div class="oc-section">TAMAÑO</div>'
-    +'<div>'+sizesHTML+'</div>'
-    +'<div class="oc-section">DULCES</div>'
-    +'<div class="candy-grid">'+cellsHTML+'</div>'
-    +(extrasHTML ? '<div class="oc-section">EXTRAS</div><div class="oc-extras">'+extrasHTML+'</div>' : '')
-    +'</div>'
-    +'</div>';
-}
-
-// ── RENDER OVERFLOW CARD ──────────────────────────────────
-function renderOverflowCard(key, order){
-  var ci = colorMap[key] !== undefined ? colorMap[key] : 0;
-  var col = COLORS[ci];
-  return '<div class="overflow-card" style="border-color:'+col.border+';background:'+col.bg+'" onclick="handleTap(\''+key+'\')">'
-    +'<div class="oc-overflow-arrow">←</div>'
-    +'<div class="oc-overflow-num" style="color:'+col.text+'">#'+String(order.num||0).padStart(2,'0')+'</div>'
-    +'<div class="oc-overflow-label">CONTINÚA</div>'
-    +'</div>';
-}
-
-// ── RENDER ────────────────────────────────────────────────
-function render(){
-  var slots = buildSlots();
-  var activeCount = Object.keys(orders).length;
-
-  document.getElementById('orderCountBadge').textContent = activeCount + (activeCount===1?' orden':' órdenes');
-
-  var emptyState = document.getElementById('emptyState');
-  if(activeCount === 0){
-    emptyState.classList.add('show');
-  } else {
-    emptyState.classList.remove('show');
-  }
-
-  var html = '';
-  slots.forEach(function(slot){
-    if(slot.type==='order'){
-      html += renderOrderCard(slot.key, slot.order);
-    } else if(slot.type==='overflow'){
-      html += renderOverflowCard(slot.key, slot.order);
-    } else {
-      html += '<div class="empty-slot"><div class="empty-slot-inner">✦</div></div>';
-    }
-  });
-  document.getElementById('pvsGrid').innerHTML = html;
-}
-
-// ── TAP HANDLING ──────────────────────────────────────────
-function handleTap(key){
-  if(!tapMap[key]) tapMap[key] = {count:0, timer:null};
-  var t = tapMap[key];
-
-  clearTimeout(t.timer);
-  t.count++;
-
-  if(t.count === 1){
-    // First tap: highlight
-    render();
-    t.timer = setTimeout(function(){
-      t.count = 0;
-      render();
-    }, 3000);
-  } else if(t.count >= 2){
-    // Second tap: show delete confirm
-    t.count = 0;
-    clearTimeout(t.timer);
-    showDeleteConfirm(key);
-  }
-}
-
-// ── DELETE CONFIRM ────────────────────────────────────────
-function showDeleteConfirm(key){
-  pendingDelete = key;
-  var order = orders[key];
-  if(!order) return;
-  var ci = colorMap[key]||0;
-  var col = COLORS[ci];
-  var numEl = document.getElementById('dcNum');
-  numEl.textContent = '#'+String(order.num||0).padStart(2,'0');
-  numEl.style.color = col.text;
-  document.getElementById('deleteConfirm').classList.add('open');
-}
-
-function cancelDelete(){
-  pendingDelete = null;
-  document.getElementById('deleteConfirm').classList.remove('open');
-}
-
-function confirmDelete(){
-  if(!pendingDelete) return;
-  var key = pendingDelete;
-  var order = orders[key];
-  // Add to recall list
-  if(order){
-    recallList.unshift({key:key, order:JSON.parse(JSON.stringify(order)), colorIdx:colorMap[key]||0});
-    if(recallList.length > 20) recallList.pop();
-  }
-  // Mark completed in Firebase + persist in completed_orders (last 20)
-  db.ref('orders/'+key+'/status').set('completed');
-  if(order){
-    var co = JSON.parse(JSON.stringify(order));
-    co.completedAt = firebase.database.ServerValue.TIMESTAMP;
-    db.ref('completed_orders').push(co).then(function(){
-      // Trim to last 20
-      db.ref('completed_orders').orderByChild('completedAt').once('value',function(s){
-        var keys=[];s.forEach(function(c){keys.push(c.key);});
-        if(keys.length>20){keys.slice(0,keys.length-20).forEach(function(k){db.ref('completed_orders/'+k).remove();});}
-      });
+  return Object.keys(orders).map(function(k){return{key:k,order:orders[k]};})
+    .sort(function(a,b){
+      if(a.order.isDelivery&&!b.order.isDelivery)return -1;
+      if(!a.order.isDelivery&&b.order.isDelivery)return 1;
+      return(a.order.timestamp||0)-(b.order.timestamp||0);
     });
+}
+
+function getSpan(order){return Math.min(4,Math.max(1,(order.items||[]).length));}
+
+function getElapsed(ts){
+  if(!ts)return{str:'0:00',mins:0};
+  var secs=Math.floor((Date.now()-ts)/1000);
+  var m=Math.floor(secs/60),s=secs%60;
+  return{str:m+':'+(s<10?'0':'')+s,mins:secs/60};
+}
+
+function fmtN(n){if(!n)return'0';return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+
+function renderDrink(item,idx,total){
+  var h='<div class="drink-col">';
+  if(total>1)h+='<div class="drink-label">Bebida '+(idx+1)+'</div>';
+  h+='<div class="drink-sabor" style="color:'+(item.fc||'#f0e8ff')+'">'+(item.fe?item.fe+' ':'')+item.fn+'</div>';
+  h+='<div class="drink-size">'+(item.se||'')+' '+(item.sn||'')+(item.soz?' · '+item.soz:'')+'</div>';
+  var cells=item.candyCells||[];
+  if(cells.length){
+    h+='<div class="drink-candies">';
+    cells.forEach(function(cc){var m=(cc.qty||1)>1;h+='<span class="candy-cell'+(m?' multi':'')+'">'+cc.cell+(m?' ×'+cc.qty:'')+'</span>';});
+    h+='</div>';
   }
-  // Clean up local state
+  if(item.ex&&item.ex>0)h+='<div class="drink-candies"><span class="candy-cell multi">+'+item.ex+' extra</span></div>';
+  var ex=item.selExtras||[];
+  if(ex.length){h+='<div class="drink-extras">';ex.forEach(function(e){h+='<span class="extra-tag">'+e.e+' '+e.n+'</span>';});h+='</div>';}
+  h+='</div>';
+  return h;
+}
+
+function renderCard(key,order){
+  var ci=colorMap[key]!==undefined?colorMap[key]:0,col=COLORS[ci];
+  var items=order.items||[],span=getSpan(order);
+  var tapped=tapMap[key]&&tapMap[key].count===1;
+  var ts=order.timestamp||0,el=getElapsed(ts);
+  var isParaLlevar=(order.table==='🥡 Para Llevar');
+  var glowStyle=tapped?'box-shadow:0 0 20px '+col.border+'55;':'';
+  var spanClass=span>1?' span'+span:'';
+
+  var h='<div class="order-card'+(order.isDelivery?' delivery':'')+(tapped?' highlighted':'')+spanClass+'"'
+    +' id="oc-'+key+'" style="border-color:'+col.border+';'+glowStyle+'" onclick="handleTap(\''+key+'\')">';
+
+  // Header
+  h+='<div class="oc-header" style="background:'+col.bg+';border-bottom:1px solid '+col.border+'33">';
+  h+='<div class="oc-header-left">';
+  h+='<div class="oc-num" style="color:'+col.text+'">#'+String(order.num||0).padStart(2,'0')+'</div>';
+  if(order.isDelivery)h+='<span class="delivery-tag">📦 ENTREGA</span>';
+  if(isParaLlevar)h+='<span class="oc-parallevar">🥡 Para Llevar</span>';
+  else h+='<div class="oc-table">📍 '+(order.table||'Sin mesa')+'</div>';
+  h+='</div>';
+  h+='<span class="oc-timer" data-ts="'+ts+'">⏱ '+el.str+'</span>';
+  h+='</div>';
+
+  // Drinks
+  h+='<div class="oc-body">';
+  items.forEach(function(item,idx){h+=renderDrink(item,idx,items.length);});
+  h+='</div>';
+
+  // Timer badge
+  var bc=el.mins>=5?'urgent':el.mins>=3?'warn':'';
+  var bt=el.mins>=5?'🌈':el.mins>=3?'⚠️':'';
+  h+='<div class="timer-badge'+(bc?' '+bc:'')+'">'+bt+'</div>';
+  h+='</div>';
+  return h;
+}
+
+function render(){
+  var sorted=getSorted(),count=sorted.length;
+  document.getElementById('orderCountBadge').textContent=count+(count===1?' orden':' órdenes');
+  document.getElementById('emptyState').classList.toggle('show',count===0);
+
+  var html='',slotsUsed=0;
+  for(var i=0;i<sorted.length&&slotsUsed<8;i++){
+    var span=getSpan(sorted[i].order);
+    if(slotsUsed+span>8)span=8-slotsUsed;
+    html+=renderCard(sorted[i].key,sorted[i].order);
+    slotsUsed+=span;
+  }
+  while(slotsUsed<8){html+='<div class="empty-slot"><div class="empty-dot">✦</div></div>';slotsUsed++;}
+  document.getElementById('pvsGrid').innerHTML=html;
+}
+
+setInterval(function(){
+  document.querySelectorAll('.oc-timer[data-ts]').forEach(function(el){
+    var ts=parseInt(el.dataset.ts);if(!ts)return;
+    var e=getElapsed(ts);
+    el.textContent='⏱ '+e.str;
+    var card=el.closest('.order-card');if(!card)return;
+    var b=card.querySelector('.timer-badge');if(!b)return;
+    if(e.mins>=5){b.className='timer-badge urgent';b.textContent='🌈';}
+    else if(e.mins>=3){b.className='timer-badge warn';b.textContent='⚠️';}
+    else{b.className='timer-badge';b.textContent='';}
+  });
+},1000);
+
+function handleTap(key){
+  if(!tapMap[key])tapMap[key]={count:0,timer:null};
+  var t=tapMap[key];
+  clearTimeout(t.timer);t.count++;
+  if(t.count===1){
+    render();
+    t.timer=setTimeout(function(){t.count=0;render();},3000);
+  } else {
+    t.count=0;clearTimeout(t.timer);completeOrder(key);
+  }
+}
+
+function completeOrder(key){
+  var order=orders[key];if(!order)return;
+  recallList.unshift({key:key,order:JSON.parse(JSON.stringify(order)),colorIdx:colorMap[key]||0});
+  if(recallList.length>20)recallList.pop();
+  var co=JSON.parse(JSON.stringify(order));
+  co.completedAt=firebase.database.ServerValue.TIMESTAMP;
+  db.ref('completed_orders').push(co).then(function(){
+    db.ref('completed_orders').orderByChild('completedAt').once('value',function(s){
+      var keys=[];s.forEach(function(c){keys.push(c.key);});
+      if(keys.length>20)keys.slice(0,keys.length-20).forEach(function(k){db.ref('completed_orders/'+k).remove();});
+    });
+  });
+  db.ref('orders/'+key+'/status').set('completed');
   delete tapMap[key];
-  pendingDelete = null;
-  document.getElementById('deleteConfirm').classList.remove('open');
 }
 
-// ── RECALL ────────────────────────────────────────────────
-function openRecall(){
-  buildRecallUI();
-  document.getElementById('recallDrawer').classList.add('open');
-}
-
-function closeRecall(){
-  document.getElementById('recallDrawer').classList.remove('open');
-}
+function openRecall(){buildRecallUI();document.getElementById('recallDrawer').classList.add('open');}
+function closeRecall(){document.getElementById('recallDrawer').classList.remove('open');}
 
 function buildRecallUI(){
-  if(recallList.length === 0){
-    document.getElementById('recallList').innerHTML =
-      '<div style="display:flex;align-items:center;color:#7a6b8a;font-family:Space Mono,monospace;font-size:12px;padding:20px;">No hay órdenes completadas aún</div>';
-    return;
-  }
-  var h = '';
-  recallList.forEach(function(entry, idx){
-    var col = COLORS[entry.colorIdx||0];
-    var o = entry.order;
-    var items = o.items||[];
-    var machineStr = [];
-    items.forEach(function(it){ (it.machines||[]).forEach(function(m){ if(machineStr.indexOf('MÁQ '+m)<0) machineStr.push('MÁQ '+m); }); });
-    h += '<div class="recall-card" style="border-color:'+col.border+';background:'+col.bg+'">'
+  if(!recallList.length){document.getElementById('recallList').innerHTML='<div style="display:flex;align-items:center;color:#7a6b8a;font-family:Space Mono,monospace;font-size:12px;padding:20px;">Sin órdenes completadas aún</div>';return;}
+  var h='';
+  recallList.forEach(function(entry,idx){
+    var col=COLORS[entry.colorIdx||0],o=entry.order;
+    var sabores=(o.items||[]).map(function(it){return it.fn;}).join(' · ');
+    h+='<div class="recall-card" style="border-color:'+col.border+';background:'+col.bg+'">'
       +'<div class="rc-num" style="color:'+col.text+'">#'+String(o.num||0).padStart(2,'0')+'</div>'
       +'<div class="rc-table">📍 '+(o.table||'Sin mesa')+'</div>'
-      +'<div class="rc-info">'+machineStr.join(' · ')+'</div>'
+      +'<div class="rc-info">'+sabores+'</div>'
       +'<button class="btn-restore" onclick="restoreOrder('+idx+')">↩ Restaurar</button>'
       +'</div>';
   });
-  document.getElementById('recallList').innerHTML = h;
+  document.getElementById('recallList').innerHTML=h;
 }
 
 function restoreOrder(idx){
-  var entry = recallList[idx];
-  if(!entry) return;
-  // Re-push to Firebase as pending
-  var order = JSON.parse(JSON.stringify(entry.order));
-  order.status = 'pending';
-  order.recalledAt = firebase.database.ServerValue.TIMESTAMP;
-  var newRef = db.ref('orders').push(order);
-  // Preserve color
-  colorMap[newRef.key] = entry.colorIdx;
-  // Remove from recall list
-  recallList.splice(idx,1);
-  buildRecallUI();
-  closeRecall();
+  var entry=recallList[idx];if(!entry)return;
+  var order=JSON.parse(JSON.stringify(entry.order));
+  order.status='pending';order.recalledAt=firebase.database.ServerValue.TIMESTAMP;
+  var ref=db.ref('orders').push(order);
+  colorMap[ref.key]=entry.colorIdx;
+  recallList.splice(idx,1);buildRecallUI();closeRecall();
 }
 </script>
 </body>
