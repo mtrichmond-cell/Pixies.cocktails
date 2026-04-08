@@ -179,7 +179,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 </div>
 <div id="app">
   <div class="rfm-header">
-    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.23</div>
+    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.24</div>
     <div class="rfm-actions">
       <button class="btn-push" onclick="openPushModal()">&#9650; Push to Live</button>
       <button class="btn-save" onclick="saveChanges()">&#10003; Guardar <span class="unsaved-dot" id="unsavedDot"></span></button>
@@ -243,12 +243,12 @@ var CFG={
   store:{name:'Pixies Cocktails',slogan:'Somos Pixies \u00bfy t\u00fa?',address:'Cra 4 #44A, Ibagu\u00e9',hours:'16:00 \u2013 23:59',phone:'+57 324 201 0008',instagram:'pixies_cocktails'},
   payment:{nequi:{active:true,number:'+57 324 201 0008'},bancolombia:{active:true,account:'XXX-XXXXXXX'},cash:{active:true},card:{active:true}},
   flavors:[
-    {id:1,n:'Fresa',e:'\ud83c\udf53',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
-    {id:2,n:'Mango',e:'\ud83e\udd6d',c:'#ff9500',bg:'rgba(255,149,0,0.08)',br:'rgba(255,149,0,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
-    {id:3,n:'Uva',e:'\ud83c\udf47',c:'#bf00ff',bg:'rgba(191,0,255,0.08)',br:'rgba(191,0,255,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
-    {id:4,n:'Lim\u00f3n',e:'\ud83c\udf4b',c:'#d4ff00',bg:'rgba(212,255,0,0.06)',br:'rgba(212,255,0,0.25)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
-    {id:5,n:'Tamarindo',e:'\ud83e\udef9',c:'#ff6b35',bg:'rgba(255,107,53,0.08)',br:'rgba(255,107,53,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
-    {id:6,n:'Mora',e:'\ud83e\uded0',c:'#a855f7',bg:'rgba(168,85,247,0.08)',br:'rgba(168,85,247,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''}
+    {id:1,n:'Fresa',e:'\ud83c\udf53',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
+    {id:2,n:'Mango',e:'\ud83e\udd6d',c:'#ff9500',bg:'rgba(255,149,0,0.08)',br:'rgba(255,149,0,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
+    {id:3,n:'Uva',e:'\ud83c\udf47',c:'#bf00ff',bg:'rgba(191,0,255,0.08)',br:'rgba(191,0,255,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
+    {id:4,n:'Lim\u00f3n',e:'\ud83c\udf4b',c:'#d4ff00',bg:'rgba(212,255,0,0.06)',br:'rgba(212,255,0,0.25)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
+    {id:5,n:'Tamarindo',e:'\ud83e\udef9',c:'#ff6b35',bg:'rgba(255,107,53,0.08)',br:'rgba(255,107,53,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''},
+    {id:6,n:'Mora',e:'\ud83e\uded0',c:'#a855f7',bg:'rgba(168,85,247,0.08)',br:'rgba(168,85,247,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''}
   ],
   sizes:[
     {id:'deseo',n:'Deseo',e:'\u2728',oz:'8 oz',p:12000,candies:3,active:true,img:''},
@@ -385,6 +385,7 @@ function renderFlavorCard(f){
   h+='<div class="item-form'+(isOpen?' open':'')+'" id="form-flavor-'+f.id+'">';
   h+='<div class="form-row"><div class="form-group"><div class="form-label">Nombre</div><input class="form-input" value="'+f.n+'" onchange="updateFlavor('+f.id+',\'n\',this.value)"/></div>';
   h+='<div class="form-group"><div class="form-label">Emoji</div><input class="form-input" value="'+f.e+'" onchange="updateFlavor('+f.id+',\'e\',this.value)"/></div></div>';
+  h+='<div class="form-row single"><div class="form-group"><div class="form-label">Descripci\u00f3n</div><input class="form-input" value="'+(f.d||'')+'" onchange="updateFlavor('+f.id+',\'d\',this.value)"/></div></div>';
 
   // CREMOSO row — dimmed if sinLicor is on
   h+='<div class="form-toggle-row">';
@@ -411,7 +412,7 @@ function toggleSinLicor(id,val){var f=getFlavorById(id);if(!f)return;f.sinLicor=
 function toggleFlavor(id,val){var f=getFlavorById(id);if(f)f.active=val;markUnsaved();updateCardClass('card-flavor-'+id,val);}
 function updateFlavor(id,key,val){var f=getFlavorById(id);if(!f)return;f[key]=val;markUnsaved();}
 function addFlavor(){
-  var nf={id:nextId(CFG.flavors),n:'Nuevo Sabor',e:'\ud83c\udf79',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''};
+  var nf={id:nextId(CFG.flavors),n:'Nuevo Sabor',e:'\ud83c\udf79',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',br:'rgba(255,45,143,0.3)',d:'',cremoso:false,cremoso_upcharge:3000,sinLicor:false,sinLicor_discount:2000,active:true,img:''};
   CFG.flavors.push(nf);markUnsaved();renderTab('flavors');
   setTimeout(function(){toggleForm('flavor_'+nf.id);},50);
 }
