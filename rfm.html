@@ -179,7 +179,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 </div>
 <div id="app">
   <div class="rfm-header">
-    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.25</div>
+    <div class="rfm-brand"><span>PIXIES</span> &middot; RFM v2.26</div>
     <div class="rfm-actions">
       <button class="btn-push" onclick="openPushModal()">&#9650; Push to Live</button>
       <button class="btn-save" onclick="saveChanges()">&#10003; Guardar <span class="unsaved-dot" id="unsavedDot"></span></button>
@@ -529,8 +529,7 @@ function saveChanges(){
       console.error(err);
     });
 }
-</script>
-<script>
+
 // Load existing config from Firebase on unlock
 function loadFromFirebase(){
   firebase.database().ref('/config').once('value').then(function(snap){
