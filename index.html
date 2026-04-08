@@ -560,10 +560,6 @@ function submitOrder(method){
   else if(method==='Bancolombia'){pt.style.cssText='background:rgba(200,160,0,.15);border:1px solid rgba(200,160,0,.3);color:#ffd700';pt.textContent='\uD83C\uDFE6 Pagado con Bancolombia';}
   else if(method==='Cr\u00e9dito/D\u00e9bito'){pt.style.cssText='background:rgba(0,100,220,.15);border:1px solid rgba(0,120,255,.3);color:#88aaff';pt.textContent='\uD83D\uDCB3 Cr\u00e9dito/D\u00e9bito';}
   else{pt.style.cssText='background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.3);color:#00e676';pt.textContent='\uD83D\uDCB5 Paga en caja \u2014 '+fmt(tot);}
-  // Determine node: auto methods go direct to PVS, manual go to pending
-  var isAutoMethod=(method==='Nequi'||method==='Bancolombia');
-  var isAuto=CFG.payment.autoSend&&isAutoMethod;
-  var node=isAuto?'orders':'pending_orders';
   try{
     var db=firebase.database();
     var today=new Date();
@@ -573,7 +569,7 @@ function submitOrder(method){
       document.getElementById('doneNum').textContent=num;
       var isDelivery=(sT==='\uD83E\uDD61 Para Llevar');
       var items=cart.map(function(it){return{fn:it.fn,fe:it.fe,machines:it.machines||[],sn:it.sn,se:it.se,soz:it.soz,bp:it.bp,candyCells:it.candyCells||[],ex:it.ex||0,selExtras:it.selExtras||[],price:gP(it)};});
-      db.ref(node).push({num:num,table:sT||'Sin mesa',isDelivery:isDelivery,timestamp:firebase.database.ServerValue.TIMESTAMP,status:'pending',items:items,total:tot,payMethod:method,autoSent:isAuto});
+      db.ref('orders').push({num:num,table:sT||'Sin mesa',isDelivery:isDelivery,timestamp:firebase.database.ServerValue.TIMESTAMP,status:'pending',items:items,total:tot,payMethod:method});
       showPage('p-done');
     });
   }catch(e){
@@ -616,4 +612,4 @@ bF();bTG();
   }catch(e){}
 })();
 </script>
-<div style="text-align:center;padding:20px 0 10px;font-size:10px;font-family:'Nunito',sans-serif;color:#8855aa;letter-spacing:2px;opacity:.5;">v1.0</div></body></html>
+<div style="text-align:center;padding:20px 0 10px;font-size:10px;font-family:'Nunito',sans-serif;color:#8855aa;letter-spacing:2px;opacity:.5;">v1.1</div></body></html>
