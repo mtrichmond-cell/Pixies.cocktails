@@ -281,7 +281,8 @@ function bS(){
 }
 
 function getFr(){
-  if(!cur.s) return extras.freeCandiesSmall;
+  if(!cur.s) return extras.freeCandiesSmall||3;
+  if(cur.s.candies!=null) return cur.s.candies;
   var large=extras.largeSizes||['nube','mundo'];
   return(large.indexOf(cur.s.id)>=0)?extras.freeCandiesLarge:extras.freeCandiesSmall;
 }
@@ -310,7 +311,7 @@ function pS(i){
 function bC(){
   var fr=getFr();
   var sub=document.getElementById('candySub');
-  if(sub)sub.innerHTML=fr+' gratis'+(fr<extras.freeCandiesLarge?' &middot; extras +'+fmt(extras.candyExtraPrice)+' c/u':'');
+  if(sub)sub.innerHTML=fr+' gratis &middot; extras +'+fmt(extras.candyExtraPrice)+' c/u';
   var h='';
   for(var i=0;i<CD.length;i++){
     var c=CD[i];
