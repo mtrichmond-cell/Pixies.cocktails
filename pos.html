@@ -529,7 +529,32 @@ document.addEventListener('gesturechange',function(e){e.preventDefault();});
 document.addEventListener('gestureend',function(e){e.preventDefault();});
 
 // ── CONFIG ───────────────────────────────────────────────
-var CFG={flavors:[],sizes:[],candies:[],extras:{candyExtraPrice:3000,freeCandiesSmall:3,freeCandiesLarge:12,largeSizes:['nube','mundo'],extrasItems:[]},tables:['🛋️ Sofá','Mesa 1','Mesa 2','Mesa 3','Mesa 4','Mesa 5','Mesa 6','Mesa 7','🥡 Para Llevar'],payment:{autoSend:true}};
+var CFG={
+  flavors:[
+    {id:1,n:'Fresa',e:'🍓',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',liq:true,active:true},
+    {id:2,n:'Mango',e:'🥭',c:'#ff9500',bg:'rgba(255,149,0,0.08)',liq:true,active:true},
+    {id:3,n:'Uva',e:'🍇',c:'#bf00ff',bg:'rgba(191,0,255,0.08)',liq:true,active:true},
+    {id:4,n:'Limón',e:'🍋',c:'#d4ff00',bg:'rgba(212,255,0,0.06)',liq:true,active:true},
+    {id:5,n:'Tamarindo',e:'🫙',c:'#ff6b35',bg:'rgba(255,107,53,0.08)',liq:true,active:true},
+    {id:6,n:'Mora',e:'🫐',c:'#a855f7',bg:'rgba(168,85,247,0.08)',liq:false,active:true}
+  ],
+  sizes:[
+    {id:'deseo',n:'Deseo',e:'✨',oz:'16 oz',p:12000,active:true},
+    {id:'varita',n:'Varita',e:'🪄',oz:'20 oz',p:15000,active:true},
+    {id:'hada',n:'Hada',e:'🌟',oz:'1 litro',p:22000,active:true},
+    {id:'nube',n:'Nube',e:'🐠',oz:'2 litros',p:54000,active:true},
+    {id:'mundo',n:'Mundo Mágico',e:'🧊',oz:'3 litros',p:74000,active:true}
+  ],
+  candies:[
+    {id:1,n:'Gomitas Ositos',e:'🐻',cell:'A1',active:true,allowMultiple:true},{id:2,n:'Skittles',e:'🌈',cell:'A2',active:true,allowMultiple:true},{id:3,n:'Maní Japonés',e:'🥜',cell:'A3',active:true,allowMultiple:true},{id:4,n:'Paleta Chamoy',e:'🍭',cell:'A4',active:true,allowMultiple:true},{id:5,n:'Chicles Globo',e:'🎏',cell:'A5',active:true,allowMultiple:true},{id:6,n:'Toffee',e:'🍬',cell:'A6',active:true,allowMultiple:true},{id:7,n:'Pulparindo',e:'🌶',cell:'A7',active:true,allowMultiple:true},{id:8,n:'Trolli Gusanos',e:'🐛',cell:'A8',active:true,allowMultiple:true},{id:9,n:'Jelly Beans',e:'😮',cell:'A9',active:true,allowMultiple:true},{id:10,n:'Conejitos',e:'🐇',cell:'A10',active:true,allowMultiple:true},
+    {id:11,n:'Mazapán',e:'🌸',cell:'B1',active:true,allowMultiple:true},{id:12,n:'Sour Patch',e:'😝',cell:'B2',active:true,allowMultiple:true},{id:13,n:'M&Ms',e:'🟤',cell:'B3',active:true,allowMultiple:true},{id:14,n:'Regaliz Rojo',e:'❤️',cell:'B4',active:true,allowMultiple:true},{id:15,n:'Coco Rallado',e:'🥥',cell:'B5',active:true,allowMultiple:true},{id:16,n:'Chupeta Pica',e:'🍡',cell:'B6',active:true,allowMultiple:true},{id:17,n:'Nucita',e:'🍫',cell:'B7',active:true,allowMultiple:true},{id:18,n:'Bon Bon Bum',e:'🎈',cell:'B8',active:true,allowMultiple:true},{id:19,n:'Frunas',e:'🍊',cell:'B9',active:true,allowMultiple:true},{id:20,n:'Mentitas',e:'🟢',cell:'B10',active:true,allowMultiple:true},
+    {id:21,n:'Choco Krispis',e:'🌾',cell:'C1',active:true,allowMultiple:true},{id:22,n:'Piruleta',e:'🍭',cell:'C2',active:true,allowMultiple:true},{id:23,n:'Choco Jet',e:'✈️',cell:'C3',active:true,allowMultiple:true},{id:24,n:'Gomitas Cola',e:'🦅',cell:'C4',active:true,allowMultiple:true},{id:25,n:'Caramelo Duro',e:'⭐',cell:'C5',active:true,allowMultiple:true},{id:26,n:'Perlas Choco',e:'💜',cell:'C6',active:true,allowMultiple:true},{id:27,n:'Yogur Cubierto',e:'🫐',cell:'C7',active:true,allowMultiple:true},{id:28,n:'Masmelos',e:'⛅',cell:'C8',active:true,allowMultiple:true},{id:29,n:'Wafer Vainilla',e:'🍦',cell:'C9',active:true,allowMultiple:true},{id:30,n:'Chitos',e:'🧡',cell:'C10',active:true,allowMultiple:true},
+    {id:31,n:'Chupa Sandía',e:'🍉',cell:'D1',active:true,allowMultiple:true},{id:32,n:'Ácidos Verdes',e:'💚',cell:'D2',active:true,allowMultiple:true},{id:33,n:'Trozos Coco',e:'🌴',cell:'D3',active:true,allowMultiple:true},{id:34,n:'Gomitas Planas',e:'🫳',cell:'D4',active:true,allowMultiple:true},{id:35,n:'Caramelo Leche',e:'🫙',cell:'D5',active:true,allowMultiple:true},{id:36,n:'Obleas',e:'🥞',cell:'D6',active:true,allowMultiple:true},{id:37,n:'Chicle Menta',e:'🌿',cell:'D7',active:true,allowMultiple:true},{id:38,n:'Kumis Goma',e:'🍶',cell:'D8',active:true,allowMultiple:true},{id:39,n:'Uvas Pasas',e:'🍇',cell:'D9',active:true,allowMultiple:true},{id:40,n:'Sorpresa Pixie',e:'✨',cell:'D10',active:true,allowMultiple:true}
+  ],
+  extras:{candyExtraPrice:3000,freeCandiesSmall:3,freeCandiesLarge:12,largeSizes:['nube','mundo'],extrasActive:false,extrasItems:[]},
+  tables:['🛋️ Sofá','Mesa 1','Mesa 2','Mesa 3','Mesa 4','Mesa 5','Mesa 6','Mesa 7','🥡 Para Llevar'],
+  payment:{autoSend:true}
+};
 var PINS={manager:'0000',promo:'0000'};
 
 // Load from Firebase
@@ -1024,7 +1049,7 @@ function saveNewPin(){
   PINS[_cpTarget]=a;
   db.ref('config/posPins').set(PINS);
   closeCpModal();
-  toast('PIN '+(target==='manager'?'Manager':'Promo')+' actualizado','ok');
+  toast('PIN '+(_cpTarget==='manager'?'Manager':'Promo')+' actualizado','ok');
 }
 
 // ── OPS SCREEN ───────────────────────────────────────────
