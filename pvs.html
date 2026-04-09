@@ -184,12 +184,6 @@ function updateClock(){
 }
 setInterval(updateClock,1000);updateClock();
 
-// Prevent double-tap zoom on all touches
-document.addEventListener('touchend',function(e){e.preventDefault();},{ passive:false });
-document.addEventListener('gesturestart',function(e){e.preventDefault();});
-document.addEventListener('gesturechange',function(e){e.preventDefault();});
-document.addEventListener('gestureend',function(e){e.preventDefault();});
-
 // ── FIREBASE LISTENER ─────────────────────────────────────
 db.ref('orders').on('value',function(snap){
   var data=snap.val()||{},fresh={};
