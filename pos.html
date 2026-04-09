@@ -621,10 +621,8 @@ function drinkPrice(d){
   var base=d.size?d.size.p:0;
   var large=CFG.extras.largeSizes||['nube','mundo'];
   var fr=large.indexOf(d.sizeId)>=0?(CFG.extras.freeCandiesLarge||12):(CFG.extras.freeCandiesSmall||3);
-  // totalCandies on saved drinks, countCandies() for current build
-  var tc=d.totalCandies!==undefined?d.totalCandies:countCandies();
-  var exCandy=Math.max(0,tc-fr)*(CFG.extras.candyExtraPrice||3000);
-  var exItems=(d.extras||[]).reduce(function(s,e){return s+(e.price||0);},0);
+  var exCandy=Math.max(0,(d.totalCandies||0)-fr)*(CFG.extras.candyExtraPrice||3000);
+  var exItems=(d.extras||[]).reduce(function(s,e){return s+e.price;},0);
   var total=base+exCandy+exItems;
   if(d.promo==='50')return Math.round(total*.5);
   if(d.promo==='25')return Math.round(total*.75);
