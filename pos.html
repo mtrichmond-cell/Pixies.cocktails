@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>PixiePOS v1.24</title>
+<title>PixiePOS v1.23</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -358,7 +358,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div class="pos-header">
     <div>
       <div class="pos-brand">PixiePOS</div>
-      <div class="pos-version">v1.24</div>
+      <div class="pos-version">v1.23</div>
     </div>
     <div class="header-center">
       <select id="tableSelect" class="table-select" onchange="state.table=this.value"></select>
@@ -406,7 +406,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <button class="btn btn-sm btn-surface" onclick="showScreen('mainScreen')">← Volver</button>
     <div style="text-align:center">
       <div class="ops-title">OPERACIONES</div>
-      <div class="ops-version">PixiePOS v1.24</div>
+      <div class="ops-version">PixiePOS v1.23</div>
     </div>
     <button class="btn btn-sm btn-pink" onclick="window.open('/rfm','_blank')">⚙ RFM</button>
   </div>
@@ -453,7 +453,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 <div id="managerMenu">
   <div class="manager-box">
     <div class="manager-title">MANAGER</div>
-    <div class="manager-version">PixiePOS v1.24 · 30s auto-lock</div>
+    <div class="manager-version">PixiePOS v1.23 · 30s auto-lock</div>
     <div class="manager-grid">
       <button class="manager-btn" onclick="openChangePinModal('manager')">
         <div class="mb-icon">🔐</div>Cambiar PIN Manager
@@ -523,6 +523,10 @@ if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
 var db=firebase.database();
 
 // ── ZOOM LOCK ────────────────────────────────────────────
+document.addEventListener('touchend',function(e){e.preventDefault();},{passive:false});
+document.addEventListener('gesturestart',function(e){e.preventDefault();});
+document.addEventListener('gesturechange',function(e){e.preventDefault();});
+document.addEventListener('gestureend',function(e){e.preventDefault();});
 
 // ── CONFIG ───────────────────────────────────────────────
 var CFG={
@@ -631,27 +635,73 @@ function orderTotal(){return drinks.reduce(function(s,d){return s+drinkPrice(d);
 // ── RENDER ORDER LIST ─────────────────────────────────────
 function renderOrder(){
   var h='';
-  drinks.forEach(function(d,i){
-    var isDone=true;
-    var price=drinkPrice(d);
-    h+='<div class="drink-item done" onclick="editDrink('+i+')">';
-    h+='<div class="di-header"><span>Bebida '+(i+1)+(d.promo?'  🎁':'')+'</span><span class="di-price">'+fmt(price)+'</span></div>';
-    h+='<div class="di-line done">'+d.size.e+' '+d.size.n+' · '+d.size.oz+'</div>';
-    var fn=d.flavors.map(function(f){return f.e+' '+f.n;}).join(' + ');
+
+  // ── CURRENT DRINK BEING BUILT ──
+  var buildingNum=drinks.length+1;
+  h+='<div class="drink-item active">';
+  h+='<div class="di-header"><span>Bebida '+buildingNum+'</span>';
+  if(cur.sizeId)h+='<span class="di-price">'+fmt(drinkPrice(cur))+'</span>';
+  h+='</div>';
+
+  // Size
+  if(cur.size){
+    h+='<div class="di-line done">'+cur.size.e+' '+cur.size.n+' · '+cur.size.oz+'</div>';
+  } else {
+    h+='<div class="di-line pending">— Tamaño</div>';
+  }
+
+  // Flavors
+  if(cur.flavors.length>0){
+    var fn=cur.flavors.map(function(f){return f.e+' '+f.n;}).join(' + ');
     h+='<div class="di-line done">'+fn+'</div>';
-    if(d.candies&&d.candies.length){
-      var cells=d.candies.map(function(c){return c.cell+(d.cdQty[c.id]>1?' ×'+d.cdQty[c.id]:'');}).join(' ');
-      h+='<div class="di-line done" style="font-family:var(--mono);font-size:10px">'+cells+'</div>';
-    }
-    if(d.extras&&d.extras.length){
-      h+='<div class="di-line done">'+d.extras.map(function(e){return e.e+' '+e.n;}).join(', ')+'</div>';
-    }
-    h+='</div>';
-    if(i<drinks.length-1)h+='<hr class="drink-divider"/>';
-  });
-  document.getElementById('orderList').innerHTML=h||'<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">Sin bebidas aún</div>';
+  } else {
+    h+='<div class="di-line pending">— Sabores</div>';
+  }
+
+  // Candies
+  var fr=getFree();var n=countCandies();
+  if(cur.candies.length>0){
+    var cells=cur.candies.map(function(cd){return cd.cell+(cur.cdQty[cd.id]>1?' ×'+cur.cdQty[cd.id]:'');}).join(' ');
+    var candyClass=n>=fr?'done':'pending';
+    h+='<div class="di-line '+candyClass+'" style="font-family:var(--mono);font-size:10px">'+cells+'</div>';
+  } else {
+    h+='<div class="di-line pending">— Dulces</div>';
+  }
+
+  // Extras
+  if(cur.extras.length>0){
+    h+='<div class="di-line done">'+cur.extras.map(function(e){return e.e+' '+e.n;}).join(', ')+'</div>';
+  } else if(cur.candies.length>0){
+    h+='<div class="di-line optional">— Extras (opcional)</div>';
+  }
+
+  h+='</div>';
+
+  // ── COMPLETED DRINKS ──
+  if(drinks.length>0){
+    h+='<hr class="drink-divider"/>';
+    drinks.forEach(function(d,i){
+      var price=drinkPrice(d);
+      h+='<div class="drink-item done" onclick="editDrink('+i+')">';
+      h+='<div class="di-header"><span>Bebida '+(i+1)+(d.promo?'  🎁':'')+'</span><span class="di-price">'+fmt(price)+'</span></div>';
+      h+='<div class="di-line done">'+d.size.e+' '+d.size.n+' · '+d.size.oz+'</div>';
+      var fn=d.flavors.map(function(f){return f.e+' '+f.n;}).join(' + ');
+      h+='<div class="di-line done">'+fn+'</div>';
+      if(d.candies&&d.candies.length){
+        var cells=d.candies.map(function(cd){return cd.cell+(d.cdQty[cd.id]>1?' ×'+d.cdQty[cd.id]:'');}).join(' ');
+        h+='<div class="di-line done" style="font-family:var(--mono);font-size:10px">'+cells+'</div>';
+      }
+      if(d.extras&&d.extras.length){
+        h+='<div class="di-line done">'+d.extras.map(function(e){return e.e+' '+e.n;}).join(', ')+'</div>';
+      }
+      h+='</div>';
+      if(i<drinks.length-1)h+='<hr class="drink-divider"/>';
+    });
+  }
+
+  document.getElementById('orderList').innerHTML=h;
   document.getElementById('posTotal').textContent=fmt(orderTotal());
-  document.getElementById('btnNext').disabled=(cur.step==='size'&&!cur.size);
+  document.getElementById('btnNext').disabled=!cur.sizeId;
 }
 
 // ── RENDER ACTION PANEL ───────────────────────────────────
