@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>PixiePOS v1.1</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --bg:#0a0012;--surface:#110820;--surface2:#1a0f2e;--surface3:#221440;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);
+  --pink:#ff2d8f;--purple:#8b00ff;--yellow:#d4ff00;--green:#00e676;
+  --red:#ff3b5c;--cyan:#00e5ff;--orange:#ff6b35;
+  --text:#f0e8ff;--muted:#6b5c80;--muted2:#9a88b0;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--display:'Bebas Neue',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);}
+
+/* ── SCREENS ── */
+.screen{display:none;width:100%;height:100%;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ── HEADER ── */
+.pos-header{
+  height:48px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;background:var(--surface);border-bottom:1px solid var(--border);
+  flex-shrink:0;gap:8px;
+}
+.pos-brand{font-family:var(--display);font-size:20px;letter-spacing:2px;color:var(--pink);}
+.pos-version{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:4px;}
+.header-center{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;}
+.table-select{
+  background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+  color:var(--text);font-family:var(--font);font-size:13px;font-weight:600;
+  padding:6px 10px;outline:none;cursor:pointer;
+}
+.header-btns{display:flex;gap:6px;}
+
+/* ── BUTTON BASE ── */
+.btn{
+  border:none;border-radius:8px;cursor:pointer;
+  font-family:var(--font);font-weight:700;letter-spacing:.3px;
+  transition:all .1s;display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.btn:active{transform:scale(.95);opacity:.85;}
+.btn-sm{padding:6px 12px;font-size:11px;}
+.btn-md{padding:9px 16px;font-size:13px;}
+.btn-lg{padding:12px 20px;font-size:15px;}
+.btn-xl{padding:14px;font-size:16px;font-weight:800;width:100%;}
+
+.btn-pink{background:var(--pink);color:white;}
+.btn-purple{background:var(--purple);color:white;}
+.btn-surface{background:var(--surface2);border:1px solid var(--border2);color:var(--text);}
+.btn-surface:active{background:var(--surface3);}
+.btn-yellow{background:rgba(212,255,0,.15);border:1px solid rgba(212,255,0,.4);color:var(--yellow);}
+.btn-red{background:rgba(255,59,92,.15);border:1px solid rgba(255,59,92,.4);color:var(--red);}
+.btn-green{background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.4);color:var(--green);}
+.btn-cyan{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--cyan);}
+.btn-muted{background:var(--surface2);border:1px solid var(--border);color:var(--muted2);}
+.btn-selected{background:rgba(255,45,143,.2);border:2px solid var(--pink);color:var(--pink);}
+
+/* ── MAIN POS LAYOUT ── */
+#posMain{flex:1;display:flex;overflow:hidden;gap:0;}
+
+/* LEFT — ORDER PANEL */
+#orderPanel{
+  width:320px;flex-shrink:0;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+}
+#orderList{flex:1;overflow-y:auto;padding:8px;}
+#orderList::-webkit-scrollbar{width:3px;}
+#orderList::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.order-footer{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0;}
+.total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.total-label{font-size:12px;color:var(--muted2);font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.total-amount{font-family:var(--display);font-size:28px;color:var(--pink);letter-spacing:1px;}
+.order-actions{display:flex;gap:6px;}
+
+/* DRINK ITEM in order list */
+.drink-item{
+  border-radius:10px;padding:8px 10px;margin-bottom:6px;
+  border:1px solid var(--border);background:var(--surface2);
+  cursor:pointer;transition:border-color .15s;
+}
+.drink-item.active{border-color:rgba(212,255,0,.4);background:rgba(212,255,0,.04);}
+.drink-item.done{border-color:rgba(0,230,118,.3);background:rgba(0,230,118,.04);}
+.drink-item.done .di-header{color:var(--green);}
+.drink-divider{border:none;border-top:1px dashed var(--muted);margin:6px 0;opacity:.3;}
+.di-header{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:4px;}
+.di-line{font-size:11px;color:var(--muted2);margin-bottom:2px;display:flex;align-items:center;gap:4px;}
+.di-line.pending{color:var(--red);}
+.di-line.done{color:var(--text);}
+.di-line.optional{color:var(--yellow);}
+.di-price{font-family:var(--mono);font-size:11px;color:var(--pink);}
+
+/* RIGHT — ACTION PANEL */
+#actionPanel{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--bg);
+}
+#actionContent{flex:1;overflow-y:auto;padding:10px 12px;}
+#actionContent::-webkit-scrollbar{width:3px;}
+#actionContent::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.action-footer{padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:6px;flex-shrink:0;background:var(--surface);}
+
+/* SECTION HEADERS */
+.section-hdr{
+  font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  padding:6px 0 8px;display:flex;align-items:center;gap:6px;
+}
+.section-hdr.red{color:var(--red);}
+.section-hdr.white{color:var(--text);}
+.section-hdr.yellow{color:var(--yellow);}
+.section-hdr.green{color:var(--green);}
+
+/* SIZE BUTTONS */
+.size-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.size-btn{
+  flex:1;min-width:80px;padding:10px 8px;border-radius:10px;
+  border:1px solid var(--border2);background:var(--surface2);
+  cursor:pointer;text-align:center;transition:all .12s;
+}
+.size-btn:active{transform:scale(.95);}
+.size-btn.sel{border-color:var(--pink);background:rgba(255,45,143,.12);}
+.size-btn-name{font-family:var(--display);font-size:16px;letter-spacing:1px;color:var(--text);}
+.size-btn.sel .size-btn-name{color:var(--pink);}
+.size-btn-oz{font-size:10px;color:var(--muted2);margin-top:1px;}
+.size-btn-price{font-family:var(--mono);font-size:11px;color:var(--yellow);margin-top:2px;}
+
+/* FLAVOR BUTTONS */
+.flavor-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.flavor-btn{
+  padding:8px 12px;border-radius:8px;
+  border:1px solid var(--border2);background:var(--surface2);
+  cursor:pointer;display:flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:700;transition:all .12s;
+}
+.flavor-btn:active{transform:scale(.95);}
+.flavor-btn.sel{border-width:2px;}
+.flavor-btn .fe{font-size:16px;}
+.multi-btn{
+  padding:8px 16px;border-radius:8px;border:1px dashed var(--cyan);
+  background:rgba(0,229,255,.06);color:var(--cyan);
+  font-size:12px;font-weight:700;cursor:pointer;margin-bottom:10px;
+}
+.multi-btn.active{background:rgba(0,229,255,.15);border-style:solid;}
+
+/* CANDY GRID */
+.candy-grid-wrap{margin-bottom:8px;}
+.candy-row{display:flex;gap:4px;margin-bottom:4px;}
+.candy-btn{
+  flex:1;padding:6px 2px;border-radius:6px;
+  border:1px solid var(--border);background:var(--surface2);
+  cursor:pointer;text-align:center;font-size:10px;font-weight:600;
+  color:var(--muted2);transition:all .1s;min-width:0;
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+}
+.candy-btn:active{transform:scale(.9);}
+.candy-btn.sel{border-color:var(--pink);background:rgba(255,45,143,.12);color:var(--text);}
+.candy-btn.sel.extra{border-color:var(--yellow);background:rgba(212,255,0,.1);color:var(--yellow);}
+.candy-btn.inactive{opacity:.25;pointer-events:none;}
+.candy-btn .ce{font-size:14px;line-height:1;}
+.candy-btn .cn{font-size:8px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
+.candy-btn .cc{font-size:7px;color:var(--muted);font-family:var(--mono);}
+.candy-count{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-family:var(--mono);padding:4px 10px;
+  border-radius:6px;margin-bottom:8px;
+}
+.candy-count.free{background:rgba(255,45,143,.1);border:1px solid rgba(255,45,143,.3);color:var(--pink);}
+.candy-count.paid{background:rgba(212,255,0,.1);border:1px solid rgba(212,255,0,.3);color:var(--yellow);}
+.candy-count.done{background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);}
+
+/* EXTRAS GRID */
+.extras-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.extra-btn{
+  padding:7px 12px;border-radius:8px;
+  border:1px solid var(--border2);background:var(--surface2);
+  cursor:pointer;display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:700;transition:all .12s;color:var(--muted2);
+}
+.extra-btn.sel{border-color:var(--yellow);background:rgba(212,255,0,.08);color:var(--yellow);}
+.extra-btn:active{transform:scale(.95);}
+
+/* DIVIDER */
+.pos-divider{border:none;border-top:1px solid var(--border);margin:10px 0;}
+
+/* ── MANAGER / PROMO MODAL ── */
+.pin-modal{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;
+}
+.pin-modal.open{display:flex;}
+.pin-box{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:20px;padding:28px;width:320px;
+  animation:popIn .2s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+.pin-title{font-family:var(--display);font-size:24px;letter-spacing:2px;margin-bottom:4px;}
+.pin-sub{font-size:11px;color:var(--muted2);font-family:var(--mono);margin-bottom:16px;}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin-bottom:16px;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--muted);transition:all .15s;}
+.pin-dot.filled{background:var(--pink);border-color:var(--pink);box-shadow:0 0 8px rgba(255,45,143,.5);}
+.pin-dot.error{background:var(--red);border-color:var(--red);}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.pin-key{
+  height:48px;border-radius:10px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);font-size:18px;
+  font-family:var(--font);font-weight:700;cursor:pointer;transition:all .1s;
+}
+.pin-key:active{background:var(--surface3);transform:scale(.93);}
+.pin-key.del{font-size:14px;color:var(--muted2);}
+.pin-key.empty{pointer-events:none;opacity:0;}
+.pin-error{font-size:11px;font-family:var(--mono);color:var(--red);text-align:center;min-height:14px;margin-bottom:8px;}
+
+/* ── MANAGER MENU ── */
+#managerMenu{
+  display:none;position:fixed;inset:0;z-index:180;
+  background:rgba(0,0,0,.8);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+#managerMenu.open{display:flex;}
+.manager-box{
+  background:var(--surface);border:1px solid rgba(255,45,143,.3);
+  border-radius:20px;padding:24px;width:380px;
+  animation:popIn .2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.manager-title{font-family:var(--display);font-size:22px;letter-spacing:2px;color:var(--pink);margin-bottom:4px;}
+.manager-version{font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:18px;}
+.manager-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.manager-btn{
+  padding:14px 10px;border-radius:12px;border:1px solid var(--border2);
+  background:var(--surface2);color:var(--text);font-family:var(--font);
+  font-size:13px;font-weight:700;cursor:pointer;text-align:center;
+  transition:all .12s;
+}
+.manager-btn:active{background:var(--surface3);transform:scale(.96);}
+.manager-btn .mb-icon{font-size:22px;margin-bottom:5px;}
+.manager-btn.full{grid-column:span 2;}
+
+/* ── CHANGE PIN MODAL ── */
+#changePinModal{
+  display:none;position:fixed;inset:0;z-index:250;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;
+}
+#changePinModal.open{display:flex;}
+.change-pin-box{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:20px;padding:24px;width:340px;
+  animation:popIn .2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.cp-title{font-family:var(--display);font-size:20px;letter-spacing:2px;margin-bottom:4px;}
+.cp-sub{font-size:11px;color:var(--muted2);font-family:var(--mono);margin-bottom:14px;}
+.cp-input{
+  width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;
+  color:var(--text);font-family:var(--mono);font-size:18px;letter-spacing:4px;
+  padding:10px;outline:none;text-align:center;margin-bottom:10px;
+}
+.cp-input:focus{border-color:rgba(255,45,143,.4);}
+
+/* ── PROMO MODAL ── */
+#promoPanel{
+  display:none;position:fixed;inset:0;z-index:220;
+  background:rgba(0,0,0,.82);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+#promoPanel.open{display:flex;}
+.promo-box{
+  background:var(--surface);border:1px solid rgba(212,255,0,.3);
+  border-radius:20px;padding:24px;width:360px;
+  animation:popIn .2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.promo-title{font-family:var(--display);font-size:22px;letter-spacing:2px;color:var(--yellow);margin-bottom:4px;}
+.promo-sub{font-size:11px;color:var(--muted2);font-family:var(--mono);margin-bottom:16px;}
+.promo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.promo-btn{
+  padding:14px 8px;border-radius:12px;border:1px solid rgba(212,255,0,.3);
+  background:rgba(212,255,0,.06);color:var(--yellow);font-family:var(--font);
+  font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .12s;
+}
+.promo-btn:active{background:rgba(212,255,0,.15);transform:scale(.96);}
+.promo-btn .pb-icon{font-size:20px;margin-bottom:4px;}
+
+/* ── OPS SCREEN ── */
+#opsScreen{background:var(--bg);}
+.ops-header{
+  height:48px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;background:var(--surface);border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.ops-title{font-family:var(--display);font-size:20px;letter-spacing:2px;color:var(--pink);}
+.ops-version{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.ops-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.ops-tab{
+  padding:10px 16px;font-size:12px;font-weight:700;letter-spacing:.5px;
+  color:var(--muted2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;
+}
+.ops-tab.active{color:var(--text);border-bottom-color:var(--pink);}
+.ops-content{flex:1;overflow-y:auto;padding:16px;}
+.ops-content::-webkit-scrollbar{width:4px;}
+.ops-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* OPS CARDS */
+.ops-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+.ops-card-title{font-size:12px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;}
+.ops-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.ops-stat{background:var(--surface2);border-radius:10px;padding:12px;text-align:center;}
+.ops-stat-val{font-family:var(--display);font-size:22px;letter-spacing:1px;color:var(--pink);}
+.ops-stat-lbl{font-size:10px;color:var(--muted2);margin-top:2px;font-family:var(--mono);}
+.ops-date-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ops-date-input{
+  background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+  color:var(--text);font-family:var(--mono);font-size:12px;
+  padding:7px 12px;outline:none;
+}
+.ops-date-input:focus{border-color:rgba(255,45,143,.4);}
+.exp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.exp-label{font-size:12px;font-weight:600;color:var(--muted2);width:120px;flex-shrink:0;}
+.exp-input{
+  flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--mono);font-size:13px;
+  padding:7px 10px;outline:none;text-align:right;
+}
+.exp-input:focus{border-color:rgba(255,45,143,.4);}
+.pl-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.pl-row:last-child{border-bottom:none;}
+.pl-row.total{font-weight:800;font-size:15px;padding-top:12px;}
+.pl-row.positive .pl-val{color:var(--green);}
+.pl-row.negative .pl-val{color:var(--red);}
+.pl-val{font-family:var(--mono);font-weight:700;}
+
+/* ── TOAST ── */
+#posToast{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:var(--surface2);border:1px solid var(--border2);border-radius:10px;
+  padding:10px 18px;font-size:12px;font-family:var(--mono);
+  z-index:300;transition:transform .3s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;
+}
+#posToast.show{transform:translateX(-50%) translateY(0);}
+#posToast.ok{border-color:rgba(0,230,118,.4);color:var(--green);}
+#posToast.err{border-color:rgba(255,59,92,.4);color:var(--red);}
+#posToast.warn{border-color:rgba(212,255,0,.4);color:var(--yellow);}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════ MAIN POS SCREEN ══════════════════════ -->
+<div id="mainScreen" class="screen active">
+
+  <!-- Header -->
+  <div class="pos-header">
+    <div>
+      <div class="pos-brand">PixiePOS</div>
+      <div class="pos-version">v1.1</div>
+    </div>
+    <div class="header-center">
+      <select id="tableSelect" class="table-select" onchange="state.table=this.value"></select>
+    </div>
+    <div class="header-btns">
+      <button class="btn btn-sm btn-yellow" onclick="promoPrompt()">🎁 Promo</button>
+      <button class="btn btn-sm btn-surface" onclick="openManager()">🔐 Manager</button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div id="posMain">
+
+    <!-- LEFT: Order Panel -->
+    <div id="orderPanel">
+      <div id="orderList"></div>
+      <div class="order-footer">
+        <div class="total-row">
+          <span class="total-label">Total</span>
+          <span class="total-amount" id="posTotal">$0</span>
+        </div>
+        <div class="order-actions">
+          <button class="btn btn-md btn-red" style="flex:1" onclick="voidOrder()">🗑 Void Orden</button>
+          <button class="btn btn-md btn-green" style="flex:2" onclick="sendToPVS()">✓ Enviar a PVS</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Action Panel -->
+    <div id="actionPanel">
+      <div id="actionContent"></div>
+      <div class="action-footer" id="actionFooter">
+        <button class="btn btn-md btn-surface" id="btnBack" onclick="goBack()" style="display:none">← Volver</button>
+        <button class="btn btn-md btn-red" style="flex:1" onclick="voidCurrentDrink()">✕ Void Bebida</button>
+        <button class="btn btn-md btn-surface" style="flex:1" onclick="startNextDrink()" id="btnNext" disabled>+ Sig. Bebida</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════ OPS SCREEN ══════════════════════ -->
+<div id="opsScreen" class="screen">
+  <div class="ops-header">
+    <button class="btn btn-sm btn-surface" onclick="showScreen('mainScreen')">← Volver</button>
+    <div style="text-align:center">
+      <div class="ops-title">OPERACIONES</div>
+      <div class="ops-version">PixiePOS v1.1</div>
+    </div>
+    <button class="btn btn-sm btn-pink" onclick="window.open('/rfm','_blank')">⚙ RFM</button>
+  </div>
+  <div class="ops-tabs">
+    <div class="ops-tab active" onclick="switchOpsTab('reports')" id="otab-reports">📊 Reportes</div>
+    <div class="ops-tab" onclick="switchOpsTab('expenses')" id="otab-expenses">💸 Gastos</div>
+    <div class="ops-tab" onclick="switchOpsTab('pl')" id="otab-pl">📈 P&amp;L</div>
+    <div class="ops-tab" onclick="switchOpsTab('settings')" id="otab-settings">⚙ Config</div>
+  </div>
+  <div class="ops-content" id="opsContent"></div>
+</div>
+
+<!-- ══════════════════════ MODALS ══════════════════════ -->
+
+<!-- PIN Modal (shared) -->
+<div class="pin-modal" id="pinModal">
+  <div class="pin-box">
+    <div class="pin-title" id="pinTitle">PIN</div>
+    <div class="pin-sub" id="pinSub">Ingresa tu PIN</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key empty"></button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <button class="btn btn-md btn-surface" style="width:100%" onclick="closePinModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Manager Menu -->
+<div id="managerMenu">
+  <div class="manager-box">
+    <div class="manager-title">MANAGER</div>
+    <div class="manager-version">PixiePOS v1.1 · 30s auto-lock</div>
+    <div class="manager-grid">
+      <button class="manager-btn" onclick="openChangePinModal('manager')">
+        <div class="mb-icon">🔐</div>Cambiar PIN Manager
+      </button>
+      <button class="manager-btn" onclick="openChangePinModal('promo')">
+        <div class="mb-icon">🎁</div>Cambiar PIN Promo
+      </button>
+      <button class="manager-btn" onclick="openPromoManager()">
+        <div class="mb-icon">✨</div>Aplicar Promo
+      </button>
+      <button class="manager-btn" onclick="goToOps()">
+        <div class="mb-icon">📊</div>Operaciones
+      </button>
+      <button class="manager-btn full" onclick="window.open('/rfm','_blank');closeManager()">
+        <div class="mb-icon">⚙️</div>Abrir RFM
+      </button>
+    </div>
+    <button class="btn btn-md btn-surface" style="width:100%;margin-top:4px" onclick="closeManager()">Cerrar</button>
+  </div>
+</div>
+
+<!-- Change PIN Modal -->
+<div id="changePinModal">
+  <div class="change-pin-box">
+    <div class="cp-title" id="cpTitle">CAMBIAR PIN</div>
+    <div class="cp-sub" id="cpSub">Ingresa el nuevo PIN de 4 dígitos</div>
+    <input class="cp-input" id="cpInput" type="password" maxlength="4" inputmode="numeric" placeholder="••••" oninput="this.value=this.value.replace(/\D/g,'')"/>
+    <input class="cp-input" id="cpConfirm" type="password" maxlength="4" inputmode="numeric" placeholder="Confirmar ••••" oninput="this.value=this.value.replace(/\D/g,'')"/>
+    <div class="pin-error" id="cpError"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-md btn-surface" style="flex:1" onclick="closeCpModal()">Cancelar</button>
+      <button class="btn btn-md btn-pink" style="flex:1" onclick="saveNewPin()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Promo Panel -->
+<div id="promoPanel">
+  <div class="promo-box">
+    <div class="promo-title">PROMO</div>
+    <div class="promo-sub">Aplicar descuento o promoción a la bebida actual</div>
+    <div class="promo-grid">
+      <button class="promo-btn" onclick="applyPromo('free')">
+        <div class="pb-icon">🆓</div>Bebida Gratis
+      </button>
+      <button class="promo-btn" onclick="applyPromo('50')">
+        <div class="pb-icon">50%</div>50% Descuento
+      </button>
+      <button class="promo-btn" onclick="applyPromo('25')">
+        <div class="pb-icon">25%</div>25% Descuento
+      </button>
+      <button class="promo-btn" onclick="applyPromo('custom')">
+        <div class="pb-icon">✏️</div>Precio Manual
+      </button>
+    </div>
+    <button class="btn btn-md btn-surface" style="width:100%;margin-top:4px" onclick="closePromo()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="posToast"></div>
+
+<script>
+// ── FIREBASE ──────────────────────────────────────────────
+var FIREBASE_CONFIG={apiKey:"AIzaSyDE0SAPuxvu0G1Ylfo0VG5rY1UDrJHEA9c",authDomain:"pixies-cocktails.firebaseapp.com",databaseURL:"https://pixies-cocktails-default-rtdb.firebaseio.com",projectId:"pixies-cocktails",storageBucket:"pixies-cocktails.firebasestorage.app",messagingSenderId:"154370181028",appId:"1:154370181028:web:a2c94706ec0e61206a2331"};
+if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+var db=firebase.database();
+
+// ── ZOOM LOCK ────────────────────────────────────────────
+document.addEventListener('touchend',function(e){e.preventDefault();},{passive:false});
+document.addEventListener('gesturestart',function(e){e.preventDefault();});
+document.addEventListener('gesturechange',function(e){e.preventDefault();});
+document.addEventListener('gestureend',function(e){e.preventDefault();});
+
+// ── CONFIG ───────────────────────────────────────────────
+var CFG={
+  flavors:[
+    {id:1,n:'Fresa',e:'🍓',c:'#ff2d8f',bg:'rgba(255,45,143,0.08)',liq:true,active:true},
+    {id:2,n:'Mango',e:'🥭',c:'#ff9500',bg:'rgba(255,149,0,0.08)',liq:true,active:true},
+    {id:3,n:'Uva',e:'🍇',c:'#bf00ff',bg:'rgba(191,0,255,0.08)',liq:true,active:true},
+    {id:4,n:'Limón',e:'🍋',c:'#d4ff00',bg:'rgba(212,255,0,0.06)',liq:true,active:true},
+    {id:5,n:'Tamarindo',e:'🫙',c:'#ff6b35',bg:'rgba(255,107,53,0.08)',liq:true,active:true},
+    {id:6,n:'Mora',e:'🫐',c:'#a855f7',bg:'rgba(168,85,247,0.08)',liq:false,active:true}
+  ],
+  sizes:[
+    {id:'deseo',n:'Deseo',e:'✨',oz:'16 oz',p:12000,active:true},
+    {id:'varita',n:'Varita',e:'🪄',oz:'20 oz',p:15000,active:true},
+    {id:'hada',n:'Hada',e:'🌟',oz:'1 litro',p:22000,active:true},
+    {id:'nube',n:'Nube',e:'🐠',oz:'2 litros',p:54000,active:true},
+    {id:'mundo',n:'Mundo Mágico',e:'🧊',oz:'3 litros',p:74000,active:true}
+  ],
+  candies:[
+    {id:1,n:'Gomitas Ositos',e:'🐻',cell:'A1',active:true,allowMultiple:true},{id:2,n:'Skittles',e:'🌈',cell:'A2',active:true,allowMultiple:true},{id:3,n:'Maní Japonés',e:'🥜',cell:'A3',active:true,allowMultiple:true},{id:4,n:'Paleta Chamoy',e:'🍭',cell:'A4',active:true,allowMultiple:true},{id:5,n:'Chicles Globo',e:'🎏',cell:'A5',active:true,allowMultiple:true},{id:6,n:'Toffee',e:'🍬',cell:'A6',active:true,allowMultiple:true},{id:7,n:'Pulparindo',e:'🌶',cell:'A7',active:true,allowMultiple:true},{id:8,n:'Trolli Gusanos',e:'🐛',cell:'A8',active:true,allowMultiple:true},{id:9,n:'Jelly Beans',e:'😮',cell:'A9',active:true,allowMultiple:true},{id:10,n:'Conejitos',e:'🐇',cell:'A10',active:true,allowMultiple:true},
+    {id:11,n:'Mazapán',e:'🌸',cell:'B1',active:true,allowMultiple:true},{id:12,n:'Sour Patch',e:'😝',cell:'B2',active:true,allowMultiple:true},{id:13,n:'M&Ms',e:'🟤',cell:'B3',active:true,allowMultiple:true},{id:14,n:'Regaliz Rojo',e:'❤️',cell:'B4',active:true,allowMultiple:true},{id:15,n:'Coco Rallado',e:'🥥',cell:'B5',active:true,allowMultiple:true},{id:16,n:'Chupeta Pica',e:'🍡',cell:'B6',active:true,allowMultiple:true},{id:17,n:'Nucita',e:'🍫',cell:'B7',active:true,allowMultiple:true},{id:18,n:'Bon Bon Bum',e:'🎈',cell:'B8',active:true,allowMultiple:true},{id:19,n:'Frunas',e:'🍊',cell:'B9',active:true,allowMultiple:true},{id:20,n:'Mentitas',e:'🟢',cell:'B10',active:true,allowMultiple:true},
+    {id:21,n:'Choco Krispis',e:'🌾',cell:'C1',active:true,allowMultiple:true},{id:22,n:'Piruleta',e:'🍭',cell:'C2',active:true,allowMultiple:true},{id:23,n:'Choco Jet',e:'✈️',cell:'C3',active:true,allowMultiple:true},{id:24,n:'Gomitas Cola',e:'🦅',cell:'C4',active:true,allowMultiple:true},{id:25,n:'Caramelo Duro',e:'⭐',cell:'C5',active:true,allowMultiple:true},{id:26,n:'Perlas Choco',e:'💜',cell:'C6',active:true,allowMultiple:true},{id:27,n:'Yogur Cubierto',e:'🫐',cell:'C7',active:true,allowMultiple:true},{id:28,n:'Masmelos',e:'⛅',cell:'C8',active:true,allowMultiple:true},{id:29,n:'Wafer Vainilla',e:'🍦',cell:'C9',active:true,allowMultiple:true},{id:30,n:'Chitos',e:'🧡',cell:'C10',active:true,allowMultiple:true},
+    {id:31,n:'Chupa Sandía',e:'🍉',cell:'D1',active:true,allowMultiple:true},{id:32,n:'Ácidos Verdes',e:'💚',cell:'D2',active:true,allowMultiple:true},{id:33,n:'Trozos Coco',e:'🌴',cell:'D3',active:true,allowMultiple:true},{id:34,n:'Gomitas Planas',e:'🫳',cell:'D4',active:true,allowMultiple:true},{id:35,n:'Caramelo Leche',e:'🫙',cell:'D5',active:true,allowMultiple:true},{id:36,n:'Obleas',e:'🥞',cell:'D6',active:true,allowMultiple:true},{id:37,n:'Chicle Menta',e:'🌿',cell:'D7',active:true,allowMultiple:true},{id:38,n:'Kumis Goma',e:'🍶',cell:'D8',active:true,allowMultiple:true},{id:39,n:'Uvas Pasas',e:'🍇',cell:'D9',active:true,allowMultiple:true},{id:40,n:'Sorpresa Pixie',e:'✨',cell:'D10',active:true,allowMultiple:true}
+  ],
+  extras:{candyExtraPrice:3000,freeCandiesSmall:3,freeCandiesLarge:12,largeSizes:['nube','mundo'],extrasActive:false,extrasItems:[]},
+  tables:['🛋️ Sofá','Mesa 1','Mesa 2','Mesa 3','Mesa 4','Mesa 5','Mesa 6','Mesa 7','🥡 Para Llevar'],
+  payment:{autoSend:true}
+};
+var PINS={manager:'0000',promo:'0000'};
+
+// Load from Firebase
+db.ref('config').once('value',function(snap){
+  var d=snap.val()||{};
+  if(d.flavors)CFG.flavors=d.flavors;
+  if(d.sizes)CFG.sizes=d.sizes;
+  if(d.candies)CFG.candies=d.candies;
+  if(d.extras)CFG.extras=d.extras;
+  if(d.tables)CFG.tables=d.tables;
+  if(d.payment)CFG.payment=d.payment;
+  if(d.posPins)PINS=d.posPins;
+  buildTableSelect();
+  renderAction();
+});
+
+// ── ORDER STATE ───────────────────────────────────────────
+var drinks=[];   // completed drinks
+var cur={        // drink being built
+  step:'size',   // size|flavor|candy|extras
+  size:null,sizeId:null,
+  flavors:[],multiMode:false,
+  candies:[],cdQty:{},
+  extras:[],
+  promo:null
+};
+var editingIdx=-1; // index of drink being edited, -1 = new
+
+function resetCur(){
+  cur={step:'size',size:null,sizeId:null,flavors:[],multiMode:false,candies:[],cdQty:{},extras:[],promo:null};
+  editingIdx=-1;
+}
+
+// ── SCREEN MANAGEMENT ────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+// ── TABLE SELECT ─────────────────────────────────────────
+var state={table:'Mesa 1'};
+function buildTableSelect(){
+  var sel=document.getElementById('tableSelect');
+  sel.innerHTML=CFG.tables.map(function(t){return'<option value="'+t+'">'+t+'</option>';}).join('');
+  sel.value=state.table;
+}
+
+// ── FORMAT ───────────────────────────────────────────────
+function fmt(n){if(!n)return'$0';return'$'+Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+
+// ── FREE CANDY COUNT ─────────────────────────────────────
+function getFree(){
+  if(!cur.sizeId)return CFG.extras.freeCandiesSmall||3;
+  var large=CFG.extras.largeSizes||['nube','mundo'];
+  return large.indexOf(cur.sizeId)>=0?(CFG.extras.freeCandiesLarge||12):(CFG.extras.freeCandiesSmall||3);
+}
+function countCandies(){var t=0;Object.values(cur.cdQty).forEach(function(q){t+=q;});return t;}
+
+// ── DRINK PRICE ──────────────────────────────────────────
+function drinkPrice(d){
+  if(d.promo==='free')return 0;
+  var base=d.size?d.size.p:0;
+  var large=CFG.extras.largeSizes||['nube','mundo'];
+  var fr=large.indexOf(d.sizeId)>=0?(CFG.extras.freeCandiesLarge||12):(CFG.extras.freeCandiesSmall||3);
+  var exCandy=Math.max(0,(d.totalCandies||0)-fr)*(CFG.extras.candyExtraPrice||3000);
+  var exItems=(d.extras||[]).reduce(function(s,e){return s+e.price;},0);
+  var total=base+exCandy+exItems;
+  if(d.promo==='50')return Math.round(total*.5);
+  if(d.promo==='25')return Math.round(total*.75);
+  if(d.promo&&d.promo.custom)return d.promo.custom;
+  return total;
+}
+
+function orderTotal(){return drinks.reduce(function(s,d){return s+drinkPrice(d);},0);}
+
+// ── RENDER ORDER LIST ─────────────────────────────────────
+function renderOrder(){
+  var h='';
+  drinks.forEach(function(d,i){
+    var isDone=true;
+    var price=drinkPrice(d);
+    h+='<div class="drink-item done" onclick="editDrink('+i+')">';
+    h+='<div class="di-header"><span>Bebida '+(i+1)+(d.promo?'  🎁':'')+'</span><span class="di-price">'+fmt(price)+'</span></div>';
+    h+='<div class="di-line done">'+d.size.e+' '+d.size.n+' · '+d.size.oz+'</div>';
+    var fn=d.flavors.map(function(f){return f.e+' '+f.n;}).join(' + ');
+    h+='<div class="di-line done">'+fn+'</div>';
+    if(d.candies&&d.candies.length){
+      var cells=d.candies.map(function(c){return c.cell+(d.cdQty[c.id]>1?' ×'+d.cdQty[c.id]:'');}).join(' ');
+      h+='<div class="di-line done" style="font-family:var(--mono);font-size:10px">'+cells+'</div>';
+    }
+    if(d.extras&&d.extras.length){
+      h+='<div class="di-line done">'+d.extras.map(function(e){return e.e+' '+e.n;}).join(', ')+'</div>';
+    }
+    h+='</div>';
+    if(i<drinks.length-1)h+='<hr class="drink-divider"/>';
+  });
+  document.getElementById('orderList').innerHTML=h||'<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">Sin bebidas aún</div>';
+  document.getElementById('posTotal').textContent=fmt(orderTotal());
+  document.getElementById('btnNext').disabled=(cur.step==='size'&&!cur.size);
+}
+
+// ── RENDER ACTION PANEL ───────────────────────────────────
+function renderAction(){
+  var h='';
+  var activeFlavors=CFG.flavors.filter(function(f){return f.active;});
+  var activeSizes=CFG.sizes.filter(function(s){return s.active;});
+  var activeCandies=CFG.candies.filter(function(c){return c.active;});
+  var activeExtras=(CFG.extras.extrasItems||[]).filter(function(e){return e.active;});
+
+  // ── SIZES ──
+  h+='<div class="section-hdr white">✦ Tamaño</div>';
+  h+='<div class="size-grid">';
+  activeSizes.forEach(function(s){
+    var sel=cur.sizeId===s.id;
+    h+='<div class="size-btn'+(sel?' sel':'')+'" onclick="selSize(\''+s.id+'\')">';
+    h+='<div class="size-btn-name">'+s.e+' '+s.n+'</div>';
+    h+='<div class="size-btn-oz">'+s.oz+'</div>';
+    h+='<div class="size-btn-price">'+fmt(s.p)+'</div>';
+    h+='</div>';
+  });
+  h+='</div><hr class="pos-divider"/>';
+
+  // ── FLAVORS ──
+  var flavorDone=cur.flavors.length>0;
+  h+='<div class="section-hdr '+(cur.sizeId?(flavorDone?'green':'red'):'muted')+'">';
+  h+=(flavorDone?'✓':'–')+' Sabores'+(flavorDone?' ('+cur.flavors.map(function(f){return f.n;}).join(' + ')+')':'');
+  h+='</div>';
+  if(cur.sizeId){
+    h+='<div class="flavor-grid">';
+    activeFlavors.forEach(function(f){
+      var sel=cur.flavors.some(function(x){return x.id===f.id;});
+      h+='<div class="flavor-btn'+(sel?' sel':'')+'" style="'+(sel?'border-color:'+f.c+';background:'+f.bg+';color:'+f.c:'')+'\" onclick="selFlavor('+f.id+')">';
+      h+='<span class="fe">'+f.e+'</span>'+f.n;
+      h+='</div>';
+    });
+    h+='</div>';
+    h+='<button class="multi-btn'+(cur.multiMode?' active':'')+'" onclick="toggleMulti()">';
+    h+=(cur.multiMode?'✓ Modo Múltiple ACTIVO':'+ Múltiple — toca para mezclar sabores');
+    h+='</button>';
+  }
+  h+='<hr class="pos-divider"/>';
+
+  // ── CANDIES ──
+  var fr=getFree();
+  var n=countCandies();
+  var candyDone=n>=fr;
+  h+='<div class="section-hdr '+(cur.flavors.length>0?(candyDone?'green':'red'):'muted')+'">';
+  h+=(candyDone?'✓':'–')+' Dulces';
+  h+='</div>';
+  if(cur.flavors.length>0){
+    // Counter
+    var cClass=n===0?'free':n<fr?'free':n===fr?'done':'paid';
+    var cText=n<fr?(n+'/'+fr+' gratis'):(n===fr?fr+'/'+fr+' ✓'):(fr+' + '+(n-fr)+' extra');
+    h+='<div class="candy-count '+cClass+'">'+cText+'</div>';
+    // 4×10 grid
+    h+='<div class="candy-grid-wrap">';
+    var rows=['A','B','C','D'];
+    rows.forEach(function(row){
+      h+='<div class="candy-row">';
+      for(var col=1;col<=10;col++){
+        var cell=row+col;
+        var candy=CFG.candies.find(function(c){return c.cell===cell;});
+        if(candy&&candy.active){
+          var qty=cur.cdQty[candy.id]||0;
+          var sel=cur.candies.some(function(x){return x.id===candy.id;});
+          var isExtra=sel&&(countCandies()-qty+qty>fr); // simplified
+          h+='<div class="candy-btn'+(sel?' sel':'')+(isExtra?' extra':'')+'" onclick="selCandy('+candy.id+')">';
+          h+='<div class="ce">'+candy.e+'</div>';
+          h+='<div class="cn">'+candy.n+(qty>1?' ×'+qty:'')+'</div>';
+          h+='<div class="cc">'+cell+'</div>';
+          h+='</div>';
+        } else {
+          h+='<div class="candy-btn inactive"><div class="ce">—</div><div class="cc">'+cell+'</div></div>';
+        }
+      }
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+  h+='<hr class="pos-divider"/>';
+
+  // ── EXTRAS ──
+  var extDone=cur.extras.length>0;
+  h+='<div class="section-hdr '+(candyDone?(extDone?'green':'yellow'):'muted')+'">';
+  h+=(extDone?'✓':'–')+' Extras <span style="font-size:10px;opacity:.6">(opcional)</span>';
+  h+='</div>';
+  if(candyDone&&activeExtras.length>0){
+    h+='<div class="extras-grid">';
+    activeExtras.forEach(function(x){
+      var sel=cur.extras.some(function(e){return e.id===x.id;});
+      h+='<div class="extra-btn'+(sel?' sel':'')+'" onclick="selExtra('+x.id+')">';
+      h+=x.e+' '+x.n+' <span style="font-family:var(--mono);font-size:10px">+'+fmt(x.price)+'</span>';
+      h+='</div>';
+    });
+    h+='</div>';
+  } else if(candyDone&&activeExtras.length===0){
+    h+='<div style="font-size:11px;color:var(--muted);padding:4px 0">Sin extras configurados en RFM</div>';
+  }
+
+  document.getElementById('actionContent').innerHTML=h;
+
+  // Update footer buttons
+  var hasSize=!!cur.sizeId;
+  document.getElementById('btnNext').disabled=!hasSize;
+  document.getElementById('btnBack').style.display=editingIdx>=0?'block':'none';
+
+  renderOrder();
+}
+
+// ── SIZE SELECTION ────────────────────────────────────────
+function selSize(id){
+  var s=CFG.sizes.find(function(x){return x.id===id;});
+  if(!s)return;
+  cur.size=s;cur.sizeId=id;
+  cur.step='flavor';
+  renderAction();
+  toast('Tamaño: '+s.n,'ok');
+}
+
+// ── FLAVOR SELECTION ─────────────────────────────────────
+function selFlavor(id){
+  var f=CFG.flavors.find(function(x){return x.id===id;});
+  if(!f)return;
+  if(!cur.multiMode){
+    cur.flavors=[f];
+  } else {
+    var idx=cur.flavors.findIndex(function(x){return x.id===id;});
+    if(idx>=0)cur.flavors.splice(idx,1);
+    else cur.flavors.push(f);
+  }
+  cur.step='candy';
+  renderAction();
+}
+
+function toggleMulti(){
+  cur.multiMode=!cur.multiMode;
+  renderAction();
+}
+
+// ── CANDY SELECTION ───────────────────────────────────────
+function selCandy(id){
+  var candy=CFG.candies.find(function(c){return c.id===id;});
+  if(!candy)return;
+  var existing=cur.candies.findIndex(function(c){return c.id===id;});
+  if(existing>=0){
+    if(candy.allowMultiple&&(cur.cdQty[id]||1)<5){
+      cur.cdQty[id]=(cur.cdQty[id]||1)+1;
+    } else {
+      cur.candies.splice(existing,1);
+      delete cur.cdQty[id];
+    }
+  } else {
+    cur.candies.push(candy);
+    cur.cdQty[id]=1;
+  }
+  renderAction();
+}
+
+// ── EXTRA SELECTION ───────────────────────────────────────
+function selExtra(id){
+  var x=(CFG.extras.extrasItems||[]).find(function(e){return e.id===id;});
+  if(!x)return;
+  var idx=cur.extras.findIndex(function(e){return e.id===id;});
+  if(idx>=0)cur.extras.splice(idx,1);
+  else cur.extras.push(x);
+  renderAction();
+}
+
+// ── NEXT DRINK ────────────────────────────────────────────
+function startNextDrink(){
+  if(!cur.sizeId){toast('Selecciona un tamaño primero','err');return;}
+  if(cur.flavors.length===0){toast('Selecciona al menos un sabor','err');return;}
+  var fr=getFree();
+  var n=countCandies();
+  if(n<fr){toast('Faltan '+(fr-n)+' dulces','err');return;}
+
+  var machines=[];
+  cur.flavors.forEach(function(fl){
+    var idx=CFG.flavors.findIndex(function(x){return x.id===fl.id;});
+    if(idx>=0)machines.push(idx+1);
+  });
+  var candyCells=cur.candies.map(function(c){return{id:c.id,cell:c.cell,qty:cur.cdQty[c.id]||1};});
+  var drink={
+    size:cur.size,sizeId:cur.sizeId,
+    flavors:cur.flavors,machines:machines,
+    candies:cur.candies.slice(),cdQty:JSON.parse(JSON.stringify(cur.cdQty)),
+    candyCells:candyCells,
+    totalCandies:n,
+    extras:cur.extras.slice(),promo:cur.promo,
+    fn:cur.flavors.map(function(f){return f.n;}).join(' + '),
+    fe:cur.flavors.map(function(f){return f.e;}).join(''),
+    fc:cur.flavors[0]?cur.flavors[0].c:'#ff2d8f'
+  };
+
+  if(editingIdx>=0){
+    drinks[editingIdx]=drink;
+    editingIdx=-1;
+  } else {
+    drinks.push(drink);
+  }
+  resetCur();
+  renderAction();
+  toast('Bebida agregada ✓','ok');
+}
+
+// ── EDIT DRINK ────────────────────────────────────────────
+function editDrink(i){
+  var d=drinks[i];
+  cur.size=d.size;cur.sizeId=d.sizeId;
+  cur.flavors=d.flavors.slice();cur.multiMode=d.flavors.length>1;
+  cur.candies=d.candies.slice();cur.cdQty=JSON.parse(JSON.stringify(d.cdQty));
+  cur.extras=d.extras.slice();cur.promo=d.promo;
+  editingIdx=i;
+  renderAction();
+  toast('Modificando Bebida '+(i+1),'warn');
+}
+
+function goBack(){
+  resetCur();
+  renderAction();
+}
+
+// ── VOID ─────────────────────────────────────────────────
+function voidCurrentDrink(){
+  if(editingIdx>=0){drinks.splice(editingIdx,1);resetCur();}
+  else resetCur();
+  renderAction();
+  toast('Bebida eliminada','warn');
+}
+
+function voidOrder(){
+  if(drinks.length===0&&!cur.sizeId){toast('No hay orden activa','err');return;}
+  drinks=[];resetCur();renderAction();
+  toast('Orden cancelada','warn');
+}
+
+// ── SEND TO PVS ───────────────────────────────────────────
+function sendToPVS(){
+  if(drinks.length===0){toast('Agrega al menos una bebida','err');return;}
+  var tot=orderTotal();
+  var today=new Date();
+  var dk=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+  db.ref('orderCount/'+dk).transaction(function(c){return(c||0)+1;},function(err,ok,snap){
+    var num=ok?snap.val():Math.floor(10+Math.random()*90);
+    var isDelivery=false;
+    var items=drinks.map(function(d){
+      return{
+        fn:d.fn,fe:d.fe,fc:d.fc,
+        machines:d.machines||[],
+        sn:d.size.n,se:d.size.e,soz:d.size.oz,bp:d.size.p,
+        candyCells:d.candyCells||[],
+        ex:Math.max(0,d.totalCandies-(CFG.extras.largeSizes.indexOf(d.sizeId)>=0?CFG.extras.freeCandiesLarge:CFG.extras.freeCandiesSmall)),
+        selExtras:d.extras||[],
+        price:drinkPrice(d),
+        promo:d.promo||null
+      };
+    });
+    db.ref('orders').push({
+      num:num,table:state.table||'Sin mesa',
+      isDelivery:isDelivery,
+      timestamp:firebase.database.ServerValue.TIMESTAMP,
+      status:'pending',items:items,total:tot,payMethod:'POS',
+      source:'pos'
+    });
+    drinks=[];resetCur();renderAction();
+    toast('#'+num+' enviado a PVS ✓','ok');
+  });
+}
+
+// ── PROMO ─────────────────────────────────────────────────
+var _promoCallback=null;
+var _pinCallback=null;
+
+function promoPrompt(){
+  openPinModal('PROMO','Ingresa el PIN de promoción',function(ok){
+    if(ok)document.getElementById('promoPanel').classList.add('open');
+  },PINS.promo);
+}
+
+function openPromoManager(){
+  closeManager();
+  document.getElementById('promoPanel').classList.add('open');
+}
+
+function applyPromo(type){
+  if(type==='custom'){
+    var val=prompt('Ingresa el precio final (COP):');
+    if(val&&!isNaN(val)){cur.promo={custom:parseInt(val)};toast('Precio especial: '+fmt(parseInt(val)),'ok');}
+  } else {
+    cur.promo=type;
+    toast(type==='free'?'Bebida gratis aplicada':'Descuento '+type+'% aplicado','ok');
+  }
+  closePromo();
+  renderAction();
+}
+
+function closePromo(){document.getElementById('promoPanel').classList.remove('open');}
+
+// ── PIN MODAL ─────────────────────────────────────────────
+var _pinBuf='';
+var _pinExpected='';
+var _pinCb=null;
+
+function openPinModal(title,sub,cb,expected){
+  _pinBuf='';_pinExpected=expected;_pinCb=cb;
+  document.getElementById('pinTitle').textContent=title;
+  document.getElementById('pinSub').textContent=sub;
+  document.getElementById('pinError').textContent='';
+  updatePinDots('');
+  document.getElementById('pinModal').classList.add('open');
+}
+
+function closePinModal(){document.getElementById('pinModal').classList.remove('open');_pinBuf='';_pinCb=null;}
+
+function pinKey(d){
+  if(_pinBuf.length>=4)return;
+  _pinBuf+=d;updatePinDots(_pinBuf);
+  if(_pinBuf.length===4)setTimeout(checkPin,100);
+}
+
+function pinDel(){if(!_pinBuf.length)return;_pinBuf=_pinBuf.slice(0,-1);updatePinDots(_pinBuf);}
+
+function updatePinDots(buf,cls){
+  for(var i=0;i<4;i++){
+    var el=document.getElementById('pd'+i);
+    el.className='pin-dot'+(i<buf.length?(cls?' '+cls:' filled'):'');
+  }
+}
+
+function checkPin(){
+  if(_pinBuf===_pinExpected){
+    document.getElementById('pinModal').classList.remove('open');
+    if(_pinCb)_pinCb(true);
+  } else {
+    updatePinDots(_pinBuf,'error');
+    document.getElementById('pinError').textContent='PIN incorrecto';
+    setTimeout(function(){_pinBuf='';updatePinDots('');document.getElementById('pinError').textContent='';},800);
+  }
+}
+
+// ── MANAGER ───────────────────────────────────────────────
+var _managerTimer=null;
+
+function openManager(){
+  openPinModal('MANAGER','PIN de administrador',function(ok){
+    if(ok){
+      document.getElementById('managerMenu').classList.add('open');
+      resetManagerTimer();
+    }
+  },PINS.manager);
+}
+
+function closeManager(){
+  document.getElementById('managerMenu').classList.remove('open');
+  clearTimeout(_managerTimer);
+}
+
+function resetManagerTimer(){
+  clearTimeout(_managerTimer);
+  _managerTimer=setTimeout(function(){closeManager();toast('Manager: sesión expirada','warn');},30000);
+}
+
+// Reset timer on any touch while manager is open
+document.getElementById('managerMenu').addEventListener('touchstart',function(){resetManagerTimer();},{passive:true});
+
+function goToOps(){
+  closeManager();
+  showScreen('opsScreen');
+  switchOpsTab('reports');
+}
+
+// ── CHANGE PIN ────────────────────────────────────────────
+var _cpTarget='';
+
+function openChangePinModal(target){
+  _cpTarget=target;
+  document.getElementById('cpTitle').textContent='CAMBIAR PIN '+(target==='manager'?'MANAGER':'PROMO');
+  document.getElementById('cpSub').textContent='Ingresa el nuevo PIN de 4 dígitos';
+  document.getElementById('cpInput').value='';
+  document.getElementById('cpConfirm').value='';
+  document.getElementById('cpError').textContent='';
+  document.getElementById('changePinModal').classList.add('open');
+}
+
+function closeCpModal(){document.getElementById('changePinModal').classList.remove('open');}
+
+function saveNewPin(){
+  var a=document.getElementById('cpInput').value;
+  var b=document.getElementById('cpConfirm').value;
+  if(a.length!==4||!/^\d+$/.test(a)){document.getElementById('cpError').textContent='PIN debe ser 4 dígitos';return;}
+  if(a!==b){document.getElementById('cpError').textContent='Los PINs no coinciden';return;}
+  PINS[_cpTarget]=a;
+  db.ref('config/posPins').set(PINS);
+  closeCpModal();
+  toast('PIN '+(_cpTarget==='manager'?'Manager':'Promo')+' actualizado','ok');
+}
+
+// ── OPS SCREEN ───────────────────────────────────────────
+var _opsTab='reports';
+var _opsExpenses={arriendo:0,nomina:0,internet:0,electricidad:0,compras:0,otros:0};
+var _opsDate='';
+var _opsSalesData={orders:0,revenue:0};
+
+function switchOpsTab(tab){
+  _opsTab=tab;
+  document.querySelectorAll('.ops-tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('otab-'+tab).classList.add('active');
+  renderOps();
+}
+
+function getDateStr(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function renderOps(){
+  var h='';
+  if(_opsTab==='reports'){
+    h+=renderReports();
+  } else if(_opsTab==='expenses'){
+    h+=renderExpenses();
+  } else if(_opsTab==='pl'){
+    h+=renderPL();
+  } else if(_opsTab==='settings'){
+    h+=renderOpsSettings();
+  }
+  document.getElementById('opsContent').innerHTML=h;
+}
+
+function renderReports(){
+  // Build last 60 days
+  var options='';
+  for(var i=0;i<60;i++){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var ds=getDateStr(d);
+    var label=i===0?'Hoy — '+ds:i===1?'Ayer — '+ds:ds;
+    options+='<option value="'+ds+'"'+(ds===_opsDate?' selected':'')+'>'+label+'</option>';
+  }
+  if(!_opsDate){var today=new Date();_opsDate=getDateStr(today);}
+
+  var h='<div class="ops-card">';
+  h+='<div class="ops-card-title">Fecha de negocio</div>';
+  h+='<div class="ops-date-row">';
+  h+='<select class="ops-date-input" onchange="_opsDate=this.value;loadDayReport()" style="width:100%">'+options+'</select>';
+  h+='</div>';
+  h+='<div class="ops-stat-grid">';
+  h+='<div class="ops-stat"><div class="ops-stat-val" id="rOrders">—</div><div class="ops-stat-lbl">Órdenes</div></div>';
+  h+='<div class="ops-stat"><div class="ops-stat-val" id="rRevenue">—</div><div class="ops-stat-lbl">Ventas</div></div>';
+  h+='<div class="ops-stat"><div class="ops-stat-val" id="rAvg">—</div><div class="ops-stat-lbl">Ticket Prom.</div></div>';
+  h+='<div class="ops-stat"><div class="ops-stat-val" id="rDrinks">—</div><div class="ops-stat-lbl">Bebidas</div></div>';
+  h+='</div>';
+  h+='<div id="rOrderList" style="margin-top:8px"></div>';
+  h+='</div>';
+  return h;
+}
+
+function loadDayReport(){
+  // Load orders for selected date from Firebase
+  var dk=_opsDate.replace(/-/g,'-');
+  db.ref('orders').orderByChild('businessDate').equalTo(dk).once('value',function(snap){
+    var data=snap.val()||{};
+    var orders=Object.values(data);
+    var revenue=orders.reduce(function(s,o){return s+(o.total||0);},0);
+    var drinks=orders.reduce(function(s,o){return s+((o.items||[]).length);},0);
+    document.getElementById('rOrders').textContent=orders.length;
+    document.getElementById('rRevenue').textContent=fmt(revenue);
+    document.getElementById('rAvg').textContent=orders.length?fmt(Math.round(revenue/orders.length)):'$0';
+    document.getElementById('rDrinks').textContent=drinks;
+  });
+  // Also check orderCount
+  db.ref('orderCount/'+_opsDate).once('value',function(snap){
+    if(snap.val())document.getElementById('rOrders').textContent=snap.val();
+  });
+}
+
+function renderExpenses(){
+  // Load saved expenses
+  db.ref('expenses/'+(_opsDate||getDateStr(new Date()))).once('value',function(snap){
+    var d=snap.val()||{};
+    Object.keys(_opsExpenses).forEach(function(k){if(d[k]!==undefined)_opsExpenses[k]=d[k];});
+    document.querySelectorAll('.exp-input').forEach(function(el){
+      if(el.dataset.key)el.value=_opsExpenses[el.dataset.key]||'';
+    });
+  });
+
+  var cats=[
+    {key:'arriendo',label:'Arriendo'},
+    {key:'nomina',label:'Nómina'},
+    {key:'internet',label:'Internet'},
+    {key:'electricidad',label:'Electricidad'},
+    {key:'compras',label:'Compras'},
+    {key:'otros',label:'Otros'},
+  ];
+  var h='<div class="ops-card">';
+  h+='<div class="ops-card-title">Gastos — '+(_opsDate||'Hoy')+'</div>';
+  cats.forEach(function(c){
+    h+='<div class="exp-row">';
+    h+='<div class="exp-label">'+c.label+'</div>';
+    h+='<input class="exp-input" type="number" data-key="'+c.key+'" value="'+(_opsExpenses[c.key]||'')+'" placeholder="0" onchange="saveExpense(\''+c.key+'\',this.value)"/>';
+    h+='</div>';
+  });
+  h+='<div style="margin-top:12px;text-align:right">';
+  h+='<button class="btn btn-md btn-pink" onclick="saveAllExpenses()">Guardar Gastos</button>';
+  h+='</div>';
+  h+='</div>';
+  return h;
+}
+
+function saveExpense(key,val){_opsExpenses[key]=parseFloat(val)||0;}
+
+function saveAllExpenses(){
+  var date=_opsDate||getDateStr(new Date());
+  db.ref('expenses/'+date).set(_opsExpenses);
+  toast('Gastos guardados','ok');
+}
+
+function renderPL(){
+  var totalExp=Object.values(_opsExpenses).reduce(function(s,v){return s+v;},0);
+  var revenue=_opsSalesData.revenue||0;
+  var profit=revenue-totalExp;
+  var h='<div class="ops-card">';
+  h+='<div class="ops-card-title">P&L — Resumen del Mes</div>';
+  h+='<div class="pl-row positive"><span>Ventas totales</span><span class="pl-val">'+fmt(revenue)+'</span></div>';
+  ['arriendo','nomina','internet','electricidad','compras','otros'].forEach(function(k){
+    if(_opsExpenses[k]){
+      h+='<div class="pl-row negative"><span>'+k.charAt(0).toUpperCase()+k.slice(1)+'</span><span class="pl-val">-'+fmt(_opsExpenses[k])+'</span></div>';
+    }
+  });
+  h+='<div class="pl-row negative"><span>Total gastos</span><span class="pl-val">-'+fmt(totalExp)+'</span></div>';
+  h+='<div class="pl-row total '+(profit>=0?'positive':'negative')+'"><span>Utilidad neta</span><span class="pl-val">'+fmt(profit)+'</span></div>';
+  h+='</div>';
+  return h;
+}
+
+function renderOpsSettings(){
+  var h='<div class="ops-card">';
+  h+='<div class="ops-card-title">Accesos rápidos</div>';
+  h+='<div style="display:flex;flex-direction:column;gap:8px">';
+  h+='<button class="btn btn-lg btn-surface" onclick="window.open(\'/rfm\',\'_blank\')">⚙ Abrir RFM</button>';
+  h+='<button class="btn btn-lg btn-surface" onclick="window.open(\'/pvs\',\'_blank\')">📺 Abrir PVS</button>';
+  h+='</div></div>';
+  return h;
+}
+
+// ── TOAST ─────────────────────────────────────────────────
+function toast(msg,type){
+  var t=document.getElementById('posToast');
+  t.textContent=msg;t.className='show '+(type||'ok');
+  clearTimeout(t._t);t._t=setTimeout(function(){t.className='';},2500);
+}
+
+// ── INIT ─────────────────────────────────────────────────
+buildTableSelect();
+renderAction();
+</script>
+</body>
+</html>
