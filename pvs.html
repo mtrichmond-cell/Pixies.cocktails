@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>Pixies · Magia v1.4</title>
+<title>Pixies · Magia v1.5</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
@@ -20,10 +20,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#060010;color:#f0e8f
 #orderCountBadge{padding:5px 12px;border-radius:8px;background:rgba(255,255,255,.05);color:#7a6b8a;font-family:'Space Mono',monospace;font-size:10px;border:1px solid rgba(255,255,255,.07);}
 
 /* ── GRID — 4×2 = 8 slots ── */
-#pvsGrid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:6px;padding:6px;height:calc(100vh - 48px - 56px);}
+#pvsGrid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,calc((100vh - 48px - 56px - 18px) / 2));gap:6px;padding:6px;height:calc(100vh - 48px - 56px);}
 
 /* ── ORDER CARD ── */
-.order-card{border-radius:12px;border:2px solid;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .12s,box-shadow .12s;position:relative;background:#08001a;}
+.order-card{border-radius:12px;border:2px solid;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .12s,box-shadow .12s;position:relative;background:#08001a;min-height:0;}
 .order-card.highlighted{transform:scale(1.012);z-index:5;}
 .order-card.span2{grid-column:span 2;}
 .order-card.span3{grid-column:span 3;}
@@ -57,7 +57,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#060010;color:#f0e8f
 .warn-badge.show{opacity:1;}
 
 /* ── BODY ── */
-.oc-body{flex:1;overflow:hidden;padding:2px 8px 4px;display:flex;flex-direction:column;gap:3px;}
+.oc-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 8px 4px;display:flex;flex-direction:column;gap:3px;scrollbar-width:none;}
 
 /* ── DRINK COLUMN — compact ── */
 .drink-col{min-width:0;border-top:1px solid rgba(255,255,255,.06);padding-top:3px;}
@@ -127,7 +127,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#060010;color:#f0e8f
 
 <!-- HEADER -->
 <div id="pvsHeader">
-  <div class="pvs-brand"><span>MAGIA</span> <span style="font-size:9px;color:#7a6b8a;">v1.4</span></div>
+  <div class="pvs-brand"><span>MAGIA</span> <span style="font-size:9px;color:#7a6b8a;">v1.5</span></div>
   <div id="pvsClock">00:00:00</div>
   <div class="pvs-header-right">
     <div id="orderCountBadge">0 órdenes</div>
