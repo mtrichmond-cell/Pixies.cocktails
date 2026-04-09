@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>Pixies RFM</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -27,7 +27,7 @@ firebase.initializeApp({
   --text:#f0e8ff;--muted:#7a6b8a;
   --font-head:'Syne',sans-serif;--font-mono:'Space Mono',monospace;
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-head);overflow:hidden;}
 #pinScreen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;}
 .pin-logo{font-size:13px;font-family:var(--font-mono);color:var(--muted);letter-spacing:3px;text-transform:uppercase;}
@@ -240,6 +240,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 <script>
 var CLOUD_NAME='deeloaqth',UPLOAD_PRESET='pixies_upload';
 var ADMIN_PIN='0000',DEPLOY_PIN='9999';
+// Prevent double-tap zoom
+document.addEventListener('touchend',function(e){e.preventDefault();},{passive:false});
+document.addEventListener('gesturestart',function(e){e.preventDefault();});
+document.addEventListener('gesturechange',function(e){e.preventDefault();});
+document.addEventListener('gestureend',function(e){e.preventDefault();});
+
 var currentTab='flavors',unsaved=false,openForms={},pendingUpload=null,confirmCallback=null;
 var CFG={
   store:{name:'Pixies Cocktails',slogan:'Somos Pixies \u00bfy t\u00fa?',address:'Cra 4 #44A, Ibagu\u00e9',hours:'16:00 \u2013 23:59',phone:'+57 324 201 0008',instagram:'pixies_cocktails'},
