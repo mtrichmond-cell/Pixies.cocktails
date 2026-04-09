@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>Pixies · Magia v1.2</title>
+<title>Pixies · Magia v1.3</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
@@ -39,6 +39,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#060010;color:#f0e8f
 .apurate-tag{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;padding:1px 6px;border-radius:4px;background:linear-gradient(90deg,#ff2d8f,#bf00ff,#00e5ff,#d4ff00,#ff2d8f);background-size:200% auto;animation:rainbowShift 1.5s linear infinite,apurateGlow 1s ease-in-out infinite;color:white;flex-shrink:0;display:none;}
 .apurate-tag.show{display:inline-block;}
 @keyframes apurateGlow{0%,100%{box-shadow:0 0 8px rgba(255,45,143,.7);}50%{box-shadow:0 0 16px rgba(255,45,143,.3);}}
+.apurate-bar{position:absolute;bottom:0;left:0;right:0;height:22px;display:none;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:4px;font-style:italic;border-radius:0 0 12px 12px;animation:apurateColors 1.2s linear infinite,apurateBarFlash .6s ease-in-out infinite;}
+.apurate-bar.show{display:flex;}
+@keyframes apurateColors{0%{background:rgba(255,45,143,.3);color:#ff2d8f;}25%{background:rgba(212,255,0,.25);color:#d4ff00;}50%{background:rgba(0,229,255,.25);color:#00e5ff;}75%{background:rgba(191,0,255,.25);color:#df88ff;}100%{background:rgba(255,45,143,.3);color:#ff2d8f;}}
+@keyframes apurateBarFlash{0%,100%{opacity:1;}50%{opacity:.35;}}
 
 /* ── CARD HEADER ── */
 .oc-header{padding:5px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:6px;}
@@ -53,13 +57,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#060010;color:#f0e8f
 .warn-badge.show{opacity:1;}
 
 /* ── BODY ── */
-.oc-body{flex:1;overflow:hidden;padding:3px 8px 6px;display:flex;gap:6px;}
+.oc-body{flex:1;overflow:hidden;padding:3px 8px 6px;display:flex;flex-direction:column;gap:4px;}
 
 /* ── DRINK COLUMN — compact ── */
-.drink-col{flex:1;min-width:0;border-left:1px solid rgba(255,255,255,.07);padding-left:6px;}
-.drink-col:first-child{border-left:none;padding-left:0;}
+.drink-col{min-width:0;border-top:1px solid rgba(255,255,255,.06);padding-top:4px;}
+.drink-col:first-child{border-top:none;padding-top:0;}
 .drink-label{font-size:8px;font-family:'Space Mono',monospace;color:#7a6b8a;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
-.drink-sabor{font-size:12px;font-weight:800;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
+.drink-sabor{font-size:12px;font-weight:800;margin-bottom:1px;line-height:1.2;display:inline;}
 .drink-size{font-size:10px;color:#d4ff00;font-weight:700;margin-bottom:3px;line-height:1.2;}
 .drink-candies{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:3px;}
 .candy-cell{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:1px 4px;border-radius:3px;background:rgba(255,45,143,.12);border:1px solid rgba(255,45,143,.25);color:#ff9de8;line-height:1.4;}
@@ -123,7 +127,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#060010;color:#f0e8f
 
 <!-- HEADER -->
 <div id="pvsHeader">
-  <div class="pvs-brand"><span>MAGIA</span> <span style="font-size:9px;color:#7a6b8a;">v1.2</span></div>
+  <div class="pvs-brand"><span>MAGIA</span> <span style="font-size:9px;color:#7a6b8a;">v1.3</span></div>
   <div id="pvsClock">00:00:00</div>
   <div class="pvs-header-right">
     <div id="orderCountBadge">0 órdenes</div>
@@ -277,6 +281,7 @@ function renderCard(key,order){
 
   // Warn badge (3 min)
   h+='<div class="warn-badge'+(el.mins>=3&&el.mins<5?' show':'')+'" id="wb-'+key+'">⚠️</div>';
+  h+='<div class="apurate-bar'+(el.mins>=5?' show':'')+'" id="ab-'+key+'">¡APÚRATE!</div>';
 
   h+='</div>';
   return h;
@@ -311,6 +316,8 @@ setInterval(function(){
     // Apúrate tag (5+ min)
     var apt=document.getElementById('apt-'+key);
     if(apt)apt.className='apurate-tag'+(e.mins>=5?' show':'');
+    var ab=document.getElementById('ab-'+key);
+    if(ab)ab.className='apurate-bar'+(e.mins>=5?' show':'');
   });
 },1000);
 
