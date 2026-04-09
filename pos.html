@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>PixiePOS v1.2</title>
+<title>PixiePOS v1.21</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -358,7 +358,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div class="pos-header">
     <div>
       <div class="pos-brand">PixiePOS</div>
-      <div class="pos-version">v1.2</div>
+      <div class="pos-version">v1.21</div>
     </div>
     <div class="header-center">
       <select id="tableSelect" class="table-select" onchange="state.table=this.value"></select>
@@ -406,7 +406,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <button class="btn btn-sm btn-surface" onclick="showScreen('mainScreen')">← Volver</button>
     <div style="text-align:center">
       <div class="ops-title">OPERACIONES</div>
-      <div class="ops-version">PixiePOS v1.2</div>
+      <div class="ops-version">PixiePOS v1.21</div>
     </div>
     <button class="btn btn-sm btn-pink" onclick="window.open('/rfm','_blank')">⚙ RFM</button>
   </div>
@@ -453,7 +453,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 <div id="managerMenu">
   <div class="manager-box">
     <div class="manager-title">MANAGER</div>
-    <div class="manager-version">PixiePOS v1.2 · 30s auto-lock</div>
+    <div class="manager-version">PixiePOS v1.21 · 30s auto-lock</div>
     <div class="manager-grid">
       <button class="manager-btn" onclick="openChangePinModal('manager')">
         <div class="mb-icon">🔐</div>Cambiar PIN Manager
@@ -688,7 +688,7 @@ function renderAction(){
     h+='<div class="flavor-grid">';
     activeFlavors.forEach(function(f){
       var sel=cur.flavors.some(function(x){return x.id===f.id;});
-      h+='<div class="flavor-btn'+(sel?' sel':'')+'" style="'+(sel?'border-color:'+f.c+';background:'+f.bg+';color:'+f.c:'')+'\" onclick="selFlavor('+f.id+')">';
+      h+='<div class="flavor-btn'+(sel?' sel':'')+'" id="fb'+f.id+'" onclick="selFlavor('+f.id+')">';
       h+='<span class="fe">'+f.e+'</span>'+f.n;
       h+='</div>';
     });
@@ -757,6 +757,14 @@ function renderAction(){
   }
 
   document.getElementById('actionContent').innerHTML=h;
+  // Apply flavor colors post-render
+  var _af=CFG.flavors.filter(function(f){return f.active;});
+  _af.forEach(function(f){
+    var el=document.getElementById('fb'+f.id);
+    if(!el)return;
+    var isSel=cur.flavors.some(function(x){return x.id===f.id;});
+    if(isSel){el.style.borderColor=f.c;el.style.background=f.bg;el.style.color=f.c;}
+  });
 
   // Update footer buttons
   var hasSize=!!cur.sizeId;
