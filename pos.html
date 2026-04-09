@@ -557,19 +557,25 @@ var CFG={
 };
 var PINS={manager:'0000',promo:'0000'};
 
-// Load from Firebase
-db.ref('config').once('value',function(snap){
-  var d=snap.val()||{};
-  if(d.flavors)CFG.flavors=d.flavors;
-  if(d.sizes)CFG.sizes=d.sizes;
-  if(d.candies)CFG.candies=d.candies;
-  if(d.extras)CFG.extras=d.extras;
-  if(d.tables)CFG.tables=d.tables;
-  if(d.payment)CFG.payment=d.payment;
-  if(d.posPins)PINS=d.posPins;
-  buildTableSelect();
-  renderAction();
-});
+// Render immediately with hardcoded data
+buildTableSelect();
+renderAction();
+
+// Then try to load from Firebase and refresh
+try{
+  db.ref('config').once('value',function(snap){
+    var d=snap.val()||{};
+    if(d.flavors&&d.flavors.length)CFG.flavors=d.flavors;
+    if(d.sizes&&d.sizes.length)CFG.sizes=d.sizes;
+    if(d.candies&&d.candies.length)CFG.candies=d.candies;
+    if(d.extras)CFG.extras=d.extras;
+    if(d.tables&&d.tables.length)CFG.tables=d.tables;
+    if(d.payment)CFG.payment=d.payment;
+    if(d.posPins)PINS=d.posPins;
+    buildTableSelect();
+    renderAction();
+  });
+}catch(e){console.log('Firebase config load failed:',e);}
 
 // ── ORDER STATE ───────────────────────────────────────────
 var drinks=[];   // completed drinks
@@ -1205,9 +1211,7 @@ function toast(msg,type){
   clearTimeout(t._t);t._t=setTimeout(function(){t.className='';},2500);
 }
 
-// ── INIT ─────────────────────────────────────────────────
-buildTableSelect();
-renderAction();
+// ── INIT already called above before Firebase ────────────
 </script>
 </body>
 </html>
