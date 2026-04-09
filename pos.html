@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>PixiePOS v1.1</title>
+<title>PixiePOS v1.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -358,7 +358,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div class="pos-header">
     <div>
       <div class="pos-brand">PixiePOS</div>
-      <div class="pos-version">v1.1</div>
+      <div class="pos-version">v1.2</div>
     </div>
     <div class="header-center">
       <select id="tableSelect" class="table-select" onchange="state.table=this.value"></select>
@@ -406,7 +406,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <button class="btn btn-sm btn-surface" onclick="showScreen('mainScreen')">← Volver</button>
     <div style="text-align:center">
       <div class="ops-title">OPERACIONES</div>
-      <div class="ops-version">PixiePOS v1.1</div>
+      <div class="ops-version">PixiePOS v1.2</div>
     </div>
     <button class="btn btn-sm btn-pink" onclick="window.open('/rfm','_blank')">⚙ RFM</button>
   </div>
@@ -453,7 +453,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 <div id="managerMenu">
   <div class="manager-box">
     <div class="manager-title">MANAGER</div>
-    <div class="manager-version">PixiePOS v1.1 · 30s auto-lock</div>
+    <div class="manager-version">PixiePOS v1.2 · 30s auto-lock</div>
     <div class="manager-grid">
       <button class="manager-btn" onclick="openChangePinModal('manager')">
         <div class="mb-icon">🔐</div>Cambiar PIN Manager
@@ -556,10 +556,6 @@ var CFG={
   payment:{autoSend:true}
 };
 var PINS={manager:'0000',promo:'0000'};
-
-// Render immediately with hardcoded data
-buildTableSelect();
-renderAction();
 
 // Then try to load from Firebase and refresh
 try{
@@ -1211,7 +1207,9 @@ function toast(msg,type){
   clearTimeout(t._t);t._t=setTimeout(function(){t.className='';},2500);
 }
 
-// ── INIT already called above before Firebase ────────────
+// ── INIT ─────────────────────────────────────────────────
+buildTableSelect();
+renderAction();
 </script>
 </body>
 </html>
